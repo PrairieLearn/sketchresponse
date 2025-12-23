@@ -1,6 +1,10 @@
 # Sketch Tool
+
 #### A configurable Javascript front-end drawing tool with plugin components.
 
+This version of [SketchResponse](https://sketchresponse.github.io) has been updated to be compatible with more recent versions of its dependencies and WebPack. It has also been modified for compatibility with the [PrairieLearn](https://www.prairielearn.com) platform, for example by supporting more than one SketchResponse canvas on the same web page and adding support for new customizations.
+
+Only the Sketch Tool itself has been updated, as all remaining contents of the repository (e.g., grading libraries) were re-written and replaced with PrairieLearn-specific grading mechanisms. These re-written graders are not stored in this repository, but will be published separately, as part of an open-source element for PrairieLearn.
 
 ### Prerequisites
 

@@ -1,8 +1,8 @@
 {
-  "name": "@sketchresponse/sketch-tool",
-  "version": "1.0.0",
-  "description": "A configurable JavaScript front-end drawing tool with plugin components",
-  "private": true,
+  "name": "@nritschel/sketch-tool-pl",
+  "version": "1.1.0",
+  "description": "A configurable JavaScript front-end drawing tool with plugin components - adapted for use in PrairieLearn",
+  "private": false,
   "license": "LGPL-2.1",
   "dependencies": {
     "buffer": "^6.0.3",
