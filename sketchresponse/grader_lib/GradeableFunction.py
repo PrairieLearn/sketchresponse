@@ -155,20 +155,20 @@ class GradeableFunction(MultipleSplinesFunction):  # noqa: PLR0904
                 d, _ = self.closest_point_to_point(point, squared=True)
                 if d >= dtol:
                     self.points.append(point)
-        # # Tag support
-        #     if 'tag' in submission_data[i]:
-        #         tag = submission_data[i]['tag']
-        #         if len(self.functions) > 0:
-        #             self.functions[-1].set_tag(tag)
-        #         elif len(self.points) > 0:
-        #             self.points[-1].set_tag(tag)
+            # Tag support
+            if "tag" in submission_data[i]:
+                tag = submission_data[i]["tag"]
+                if len(self.functions) > 0:
+                    self.functions[-1].set_tag(tag)
+                elif len(self.points) > 0:
+                    self.points[-1].set_tag(tag)
 
-        # # set the gradeable object list to the tagable list
-        # self.set_tagables(None)
-        # if len(self.functions) > 0:
-        #     self.set_tagables(self.functions)
-        # if len(self.points) > 0:
-        #     self.set_tagables(self.points)
+        # set the gradeable object list to the tagable list
+        self.set_tagables(None)
+        if len(self.functions) > 0:
+            self.set_tagables(self.functions)
+        if len(self.points) > 0:
+            self.set_tagables(self.points)
 
     # Grader Functions ##
     def has_point_at(self, x, y, distTolerance, point=None):

@@ -79,6 +79,8 @@ class MultipleSplinesFunction(MultiFunction):  # noqa: PLR0904
                     self.grader,
                     self.current_tool,
                 )
+                if "tag" in submission_data[i]:
+                    spline.set_tag(submission_data[i]["tag"])
                 self.functions.append(spline)
                 xvals += spline.get_domain()
 
