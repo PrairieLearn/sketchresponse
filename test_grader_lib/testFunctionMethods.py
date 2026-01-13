@@ -1,10 +1,10 @@
 from __future__ import absolute_import
 import unittest
 #from ..csv_to_data_new import load_csv_data
-from grader_lib import GradeableFunction
+from sketchresponse.grader_lib import GradeableFunction
 #from ..sketchinput import GradeableCollection
 import json
-from . import TestData
+from test_grader_lib import TestData
 
 
 class TestFunctionMethods(TestData.TestData):

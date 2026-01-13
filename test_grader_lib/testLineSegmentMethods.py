@@ -1,8 +1,8 @@
 from __future__ import absolute_import
 from __future__ import division
 import unittest
-from . import TestData
-from grader_lib import LineSegment
+from test_grader_lib import TestData
+from sketchresponse.grader_lib import LineSegment
 import math
 
 

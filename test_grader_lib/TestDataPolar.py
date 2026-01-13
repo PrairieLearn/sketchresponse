@@ -2,8 +2,8 @@ from __future__ import absolute_import
 import copy
 import unittest
 import json
-from .GradeableCollection import GradeableCollection
-from .csv_to_data_new import load_csv_data
+from test_grader_lib.GradeableCollection import GradeableCollection
+from test_grader_lib.csv_to_data_new import load_csv_data
 
 class TestDataPolar(unittest.TestCase):
     # extracted ## examples of correct/incorrect data from the following csv files

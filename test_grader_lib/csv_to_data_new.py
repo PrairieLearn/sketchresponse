@@ -4,10 +4,10 @@ import pandas, json, re
 def load_csv_data(filename, xrange, yrange, width=800, height=480):
     data = pandas.read_csv(filename)
 
-    id_ = data.ix[:,0].name  # Save ids for later
+    id_ = data.iloc[:,0].name  # Save ids for later
     ids = []
     ids.append(id_)
-    data = data.ix[:,1].name  # Isolate the column with the actual data
+    data = data.iloc[:,1].name  # Isolate the column with the actual data
 #    print(data)
     d = json.loads(data) #[json.loads(d) for d in data]
     data = []

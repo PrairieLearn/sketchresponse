@@ -1,25 +1,26 @@
 """Grader library for SketchResponse."""
 
-from .GradeableFunction import GradeableFunction
-from .Asymptote import Asymptote, Asymptotes, VerticalAsymptotes, HorizontalAsymptotes
-from .LineSegment import LineSegment, LineSegments
-from .PolyLine import PolyLines
-from .Polygon import Polygon, Polygons
-from .Point import Point
-from .Tag import Tag, Tagables
-from .Gradeable import Gradeable
-from .Axis import Axis
-from .PolarTransform import PolarTransform
+# Import modules (not classes) to preserve `Module.ClassName` access pattern
+from . import Asymptote
+from . import Axis
+from . import Gradeable
+from . import GradeableFunction
+from . import LineSegment
+from . import Point
+from . import PolyLine
+from . import Polygon
+from . import PolarTransform
+from . import Tag
 
 __all__ = [
-    "GradeableFunction",
-    "Asymptote", "Asymptotes", "VerticalAsymptotes", "HorizontalAsymptotes",
-    "LineSegment", "LineSegments",
-    "PolyLines",
-    "Polygon", "Polygons",
-    "Point",
-    "Tag", "Tagables",
-    "Gradeable",
+    "Asymptote",
     "Axis",
+    "Gradeable",
+    "GradeableFunction",
+    "LineSegment",
+    "Point",
+    "PolyLine",
+    "Polygon",
     "PolarTransform",
+    "Tag",
 ]

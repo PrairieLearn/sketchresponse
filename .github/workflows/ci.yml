@@ -48,7 +48,7 @@ jobs:
         run: uv sync --all-extras
 
       - name: Run tests
-        run: uv run pytest test_grader_lib/ -v
+        run: uv run python -m unittest discover -s test_grader_lib -p "test*.py" -v
 
   build:
     runs-on: ubuntu-latest

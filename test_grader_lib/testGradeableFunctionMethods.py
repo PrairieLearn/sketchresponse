@@ -1,8 +1,8 @@
 from __future__ import absolute_import
 import unittest
-from . import TestData
-from grader_lib import GradeableFunction
-from grader_lib import Point
+from test_grader_lib import TestData
+from sketchresponse.grader_lib import GradeableFunction
+from sketchresponse.grader_lib import Point
 
 
 class TestGradeableFunctionMethods(TestData.TestData):
