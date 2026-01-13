@@ -1,6 +1,4 @@
-from builtins import object
-class Tag(object):
-
+class Tag:
     def __init__(self):
         self.tag = ""
 
@@ -37,8 +35,7 @@ class Tag(object):
         return tag1 == tag2
 
 
-class Tagables(object):
-
+class Tagable:
     def __init__(self):
         self.tags = None
 
@@ -57,7 +54,7 @@ class Tagables(object):
             The first Tag object with a tag value of to_compare, if there
             are no matching tags, returns None.
         """
-        if not self.tags is None:
+        if self.tags is not None:
             for tag in self.tags:
                 if tag.tag_equals(to_compare, ignore_case=ignore_case):
                     return tag
