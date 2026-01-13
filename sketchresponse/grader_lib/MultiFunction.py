@@ -1,78 +1,72 @@
-from __future__ import absolute_import
-from __future__ import division
-from . import datalayer
 import numpy as np
-import math
-#from . import MultipleSplinesFunction
-#from . import GradeableFunction
+
+from .Function import Function
 
 # "interface" for Functions that are composed of multiple Functions
 # i.e. MultipleSplinesFunction is composed of multiple SplineFunctions
 
-class MultiFunction(datalayer.Function):
+
+class MultiFunction(Function):
     """MultiFunction."""
+
     # only provide path_info or functions, not both
     # will use functions if they exist
-    def __init__(self, xaxis, yaxis, path_info=[], functions=[], tolerance = dict()):
-        datalayer.Function.__init__(self, xaxis, yaxis, path_info, tolerance)
-        self.set_default_tolerance('straight_line', 0.1) # threshold for straight lines
+    def __init__(
+        self,
+        xaxis,
+        yaxis,
+        path_info,
+        grader,
+        current_tool,
+        functions=[],
+        tolerance=dict(),
+    ):
+        super().__init__(xaxis, yaxis, path_info, grader, current_tool, tolerance)
+        self.set_default_tolerance("straight_line", 0.1)  # threshold for straight lines
         if functions:
             self.functions = functions
 
-    def create_from_path_info(self, path_info):
-        abstractMethod(self)
-
     def is_defined_at(self, xval):
-        for function in self.functions:
-            if function.is_defined_at(xval):
-                return True
+        return any(function.is_defined_at(xval) for function in self.functions)
 
-        return False
-
-## Function finders ##
+    # Function finders ##
 
     def find_function(self, xval):
 
-        functionsList = []
-        for function in self.functions:
-            if function.is_defined_at(xval):
-                functionsList.append(function)
+        functionsList = [
+            function for function in self.functions if function.is_defined_at(xval)
+        ]
 
         return functionsList
 
-
     def find_functions_between(self, xmin, xmax):
-        betweenFunctions = []
-        for function in self.functions:
-            if function.is_between(xmin, xmax):
-                betweenFunctions.append(function)
+        betweenFunctions = [
+            function for function in self.functions if function.is_between(xmin, xmax)
+        ]
 
         return betweenFunctions
 
-## "get" methods ##
+    # "get" methods ##
 
     def get_value_at(self, xval):
         for function in self.functions:
             v = function.get_value_at(xval)
-            if v is not False:
+            if v is not None:
                 return v
-
-        return False
+        return None
 
     def get_angle_at(self, xval):
         for function in self.functions:
             v = function.get_angle_at(xval)
-            if v is not False:
+            if v is not None:
                 return v
-
-        return False
+        return None
 
     def get_domain(self):
         xvals = []
         for function in self.functions:
             xvals += function.get_domain()
-
-        return [np.min(xvals), np.max(xvals)]
+        return self.collapse_ranges(xvals)
 
     def get_min_value_between(self, xmin, xmax):
         """Return the minimum value of the function in the domain [xmin, xmax].
@@ -80,6 +74,7 @@ class MultiFunction(datalayer.Function):
         Args:
             xmin: the minimum x-axis value.
             xmax: the maximum x-axis value.
+
         Returns:
             [float|bool]:
             the minimum function value in the domain [xmin, xmax], or False if
@@ -89,13 +84,13 @@ class MultiFunction(datalayer.Function):
         minVals = []
         for function in functions:
             v = function.get_min_value_between(xmin, xmax)
-            if v is not False:
+            if v is not None and self.within_y_range(v):
                 minVals.append(v)
 
-        if len(minVals):
+        if minVals:
             return np.min(minVals)
         else:
-            return False
+            return None
 
     def get_max_value_between(self, xmin, xmax):
         """Return the maximum value of the function in the domain [xmin, xmax].
@@ -103,6 +98,7 @@ class MultiFunction(datalayer.Function):
         Args:
             xmin: the minimum x-axis value.
             xmax: the maximum x-axis value.
+
         Returns:
             [float|bool]:
             the maximum function value in the domain [xmin, xmax], or False if
@@ -111,27 +107,28 @@ class MultiFunction(datalayer.Function):
         functions = self.find_functions_between(xmin, xmax)
         maxVals = []
         for function in functions:
-            maxVals.append(function.get_max_value_between(xmin, xmax))
+            v = function.get_max_value_between(xmin, xmax)
+            if v is not None and self.within_y_range(v):
+                maxVals.append(v)
 
-        if len(maxVals):
+        if maxVals:
             return np.max(maxVals)
         else:
-            return False
+            return None
 
     def get_horizontal_line_crossings(self, yval):
         """Return a list of the values where the function crosses the horizontal line y=yval.
 
         Args:
             yval: the y-axis value of the horizontal line.
+
         Returns:
             [float]:
             the list of values where the function crosses the line y=yval.
         """
         xvals = []
         for function in self.functions:
-            function_xvals = function.get_horizontal_line_crossings(yval)
-            for function_xval in function_xvals:
-                xvals.append(function_xval)
+            xvals += function.get_horizontal_line_crossings(yval)
 
         return xvals
 
@@ -140,20 +137,18 @@ class MultiFunction(datalayer.Function):
 
         Args:
             xval: the x-axis value of the vertical line.
+
         Returns:
             [float]:
             the list of values where the function crosses the line x=xval.
         """
         yvals = []
         for function in self.functions:
-            function_yvals = function.get_vertical_line_crossings(xval)
-            for function_yval in function_yvals:
-                yvals.append(function_yval)
+            yvals += function.get_vertical_line_crossings(xval)
 
         return yvals
 
-
-### Grader functions ###
+    # Grader functions ###
 
     def is_straight(self):
         """Return whether the function is straight over its entire domain.
@@ -164,7 +159,7 @@ class MultiFunction(datalayer.Function):
             domain, otherwise false.
         """
         domain = self.get_domain()
-        return self.is_straight_between(domain[0], domain[1])
+        return all(self.is_straight_between(d[0], d[1]) for d in domain)
 
     def is_straight_between(self, xmin, xmax):
         """Return whether the function is straight within the range xmin to xmax. An alternate approximate implementation until we sort out some issues above
@@ -172,28 +167,55 @@ class MultiFunction(datalayer.Function):
         Args:
             xmin: the minimum x-axis value of the range to check.
             xmax: the maximum x-axis value of the range to check.
+
         Returns:
             bool:
             true if the function is straight within tolerances between xmin and xmax,
             otherwise false
         """
-        if self.does_not_exist_between(xmin, xmax):
+        if self.does_not_exist_between(xmin, xmax, 0):
             return False
 
         # Apply tolerances at boundaries:
-        xmin = self.px_to_xval(self.xval_to_px(xmin) + self.tolerance['point_distance'])
-        xmax = self.px_to_xval(self.xval_to_px(xmax) - self.tolerance['point_distance'])
+        xmin = self._px_to_xval(
+            self._xval_to_px(xmin) + self.tolerance["point_distance"]
+        )
+        xmax = self._px_to_xval(
+            self._xval_to_px(xmax) - self.tolerance["point_distance"]
+        )
 
         # Sample between boundaries and convert to pixels:
         xvals, yvals, _ = self.get_sample_points(25, xmin, xmax)
-        xvals = [self.xval_to_px(xval) for xval in xvals]
-        yvals = [self.yval_to_px(yval) for yval in yvals]
+        xvals = [self._xval_to_px(xval) for xval in xvals]
+        yvals = [self._yval_to_px(yval) for yval in yvals]
 
         # Fit a straight line and find the maximum perpendicular distance from it:
         m, b = np.polyfit(xvals, yvals, 1)
-        max_dist = np.max(np.abs(m*np.array(xvals) - np.array(yvals) + b) / np.sqrt(m**2 + 1))
+        max_dist = np.max(
+            np.abs(m * np.array(xvals) - np.array(yvals) + b) / np.sqrt(m**2 + 1)
+        )
 
         # Approximate the "length" of the line by taking the distance between first/last points:
-        length = np.sqrt((xvals[-1] - xvals[0])**2 + (yvals[-1] - yvals[0])**2)
+        length = np.sqrt((xvals[-1] - xvals[0]) ** 2 + (yvals[-1] - yvals[0]) ** 2)
 
-        return bool(max_dist < 0.4*self.tolerance['straight_line']*length)
+        return bool(max_dist < 0.4 * self.tolerance["straight_line"] * length)
+
+    def collapse_ranges(self, ranges: list[list[float]]) -> list[list[float]]:
+        all_ranges = ranges
+        if len(ranges) == 1:
+            return ranges
+        sorted_ranges = sorted(all_ranges, key=lambda x: x[0], reverse=False)
+        xrange = []
+        highest_end = None
+        for i in range(len(sorted_ranges)):
+            if highest_end is None:
+                xrange.append(sorted_ranges[i][0])
+                highest_end = sorted_ranges[i][1]
+            elif highest_end < sorted_ranges[i][0]:
+                xrange.extend((highest_end, sorted_ranges[i][0]))
+                highest_end = sorted_ranges[i][1]
+            elif highest_end < sorted_ranges[i][1]:
+                highest_end = sorted_ranges[i][1]
+        xrange.append(highest_end)
+        ls = [[xrange[i], xrange[i + 1]] for i in range(0, len(xrange) - 1, 2)]
+        return ls

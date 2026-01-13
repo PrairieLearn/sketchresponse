@@ -1,37 +1,19 @@
-# """Contains functions and classes for processing function data"""
-from __future__ import division
-from __future__ import absolute_import
-import numpy as np
-from .Tag import Tag, Tagables
-
-DEGREES = (3.142/180)
-
-import sys
-from . import Gradeable
+from .Debugger import Debugger
+from .Tag import Tag, Tagable
 
 
-
-# helper methods for interface-like class
-def _functionId(obj, nFramesUp):
-    """ Create a string naming the function n frames up on the stack. """
-    fr = sys._getframe(nFramesUp+1)
-    co = fr.f_code
-    return "%s.%s" % (obj.__class__, co.co_name)
-
-def abstractMethod(obj=None):
-    """ Use this instead of 'pass' for the body of abstract methods. """
-    raise Exception("Unimplemented abstract method: %s" % _functionId(obj, 1))
-
-
-# Function "interface"
-class Function(Tag, Tagables, object):
+# Function interface
+class Function(Tag, Tagable):  # noqa: PLR0904
     """Base class for Functions."""
+
     # create the Function
     # establishes the axes, the size (from the axes), and the tolerance, with default tolerance of 20 pixels
     # Function info will be stored in terms of the function itself, not the pixel information
     # the actual path is yet to be specified
-    def __init__(self, xaxis, yaxis, path_info = [], tolerance = dict()):
-        super(Function, self).__init__()
+    def __init__(self, xaxis, yaxis, path_info, grader, current_tool, tolerance=dict()):
+        super().__init__()
+        self.grader = grader
+        self.current_tool = current_tool
         self.xaxis = xaxis
         self.yaxis = yaxis
         self.width = xaxis.pixels
@@ -40,14 +22,17 @@ class Function(Tag, Tagables, object):
         self.yscale = 1.0 * self.height / (yaxis.domain[0] - yaxis.domain[1])
 
         self.tolerance = tolerance
-        self.set_default_tolerance('pixel', 20)
-        self.set_default_tolerance('comparison', 20)
+        self.set_default_tolerance("pixel", 20)
+        self.set_default_tolerance("comparison", 20)
+        self.debug = grader["debug"]
+        if self.debug:
+            self.debugger = Debugger(grader["type"], current_tool, grader["tolerance"])
 
         self.create_from_path_info(path_info)
 
         # check if it is a function, and do something it is not
 
-# helper methods for constructor
+    # helper methods for constructor
 
     def set_default_tolerance(self, key, default_value):
         if key not in self.tolerance:
@@ -58,81 +43,113 @@ class Function(Tag, Tagables, object):
 
     # sets the variables related to the path, and finds the domain
     def create_from_path_info(self, path_info):
-        abstractMethod(self)
         self.domain = []
 
-## methods to handle pixel <-> math conversions
+    # methods to handle pixel <-> math conversions
 
-    def xval_to_px(self, xval):
+    def _xval_to_px(self, xval):
         return self.xaxis.coord_to_pixel(xval)
 
-    def px_to_xval(self, px):
+    def _px_to_xval(self, px):
         return self.xaxis.pixel_to_coord(px)
 
-    def yval_to_px(self, yval):
+    def _yval_to_px(self, yval):
         return self.yaxis.coord_to_pixel(yval)
 
-    def px_to_yval(self, px):
+    def _px_to_yval(self, px):
         return self.yaxis.pixel_to_coord(px)
 
-## methods for getting various properties of the function at certain locations
-# done in math space, not pixel space
+    # methods for getting various properties of the function at certain locations
+    # done in math space, not pixel space
 
     def is_between(self, xmin, xmax):
-        [xleft, xright] = self.domain
-        if xleft > xmax or xright < xmin:
-            return False
-        else:
-            return True
+        dom = self.domain
+        dom_start = dom[0]
+        dom_end = dom[-1]
+        xleft = dom_start[0]
+        xright = dom_end[-1]
+        return not (xleft > xmax or xright < xmin)
 
-    def between_vals(self, xmin, xmax):
-        xleft = max(xmin, self.domain[0])
-        xright = min(xmax, self.domain[1])
-        # print 'bv', xmin, xmax, xleft, xright
-        return xleft, xright
+    def within_y_range(self, y_val, negative_tolerance=0, positive_tolerance=0):
+        if y_val is None:
+            return False
+        yrange = self.yaxis.domain
+        height = self.yaxis.pixels
+        scale = abs(yrange[0] - yrange[1]) / height
+        g_neg_t = negative_tolerance * scale
+        g_pos_t = positive_tolerance * scale
+        return y_val <= (yrange[0] - g_neg_t + g_pos_t) and y_val >= (
+            yrange[1] + g_neg_t - g_pos_t
+        )
+
+    def within_x_range(self, x_val, negative_tolerance=0, positive_tolerance=0):
+        if x_val is None:
+            return False
+        xrange = self.xaxis.domain
+        width = self.xaxis.pixels
+        scale = abs(xrange[1] - xrange[0]) / width
+        g_neg_t = negative_tolerance * scale
+        g_pos_t = positive_tolerance * scale
+        return x_val >= (xrange[0] + g_neg_t - g_pos_t) and x_val <= (
+            xrange[1] - g_neg_t + g_pos_t
+        )
 
     def get_value_at(self, xval):
-        abstractMethod(self)
+        raise NotImplementedError(
+            "The get_value_at method is not implemented by this class."
+        )
 
     def get_angle_at(self, xval):
-        abstractMethod(self)
+        raise NotImplementedError(
+            "The get_angle_at method is not implemented by this class."
+        )
 
     def get_slope_at(self, xval):
-        abstractMethod(self)
-
-    # def get_mean_value_between(self, xmin, xmax):
-    #     abstractMethod(self)
+        raise NotImplementedError(
+            "The get_slope_at method is not implemented by this class."
+        )
 
     def get_min_value_between(self, xmin, xmax):
-        abstractMethod(self)
+        raise NotImplementedError(
+            "The get_min_value_between method is not implemented by this class."
+        )
 
     def get_max_value_between(self, xmin, xmax):
-        abstractMethod(self)
-
-    def get_mean_angle_between(self, xmin, xmax):
-        # angle = np.arctan2(self.get_value_at(xmax) - self.get_value_at(xmin), xmax - xmin)
-        # return angle
-        abstractMethod(self)
-
-    def get_min_angle_between(self, xmin, xmax):
-        abstractMethod(self)
-
-    def get_max_angle_between(self, xmin, xmax):
-        abstractMethod(self)
+        raise NotImplementedError(
+            "The get_max_value_between method is not implemented by this class."
+        )
 
     def get_horizontal_line_crossings(self, yval):
-        abstractMethod(self)
+        raise NotImplementedError(
+            "The get_horizontal_line_crossings method is not implemented by this class."
+        )
 
     def get_vertical_line_crossing(self, xval):
-        abstractMethod(self)
+        raise NotImplementedError(
+            "The get_vertical_line_crossing method is not implemented by this class."
+        )
 
     def get_domain(self):
-        abstractMethod(self)
+        raise NotImplementedError(
+            "The get_domain method is not implemented by this class."
+        )
 
-### Grader functions ###
+    def does_not_exist_between(self, x1, x2, tolerance):
+        raise NotImplementedError(
+            "The does_not_exist_between method is not implemented by this class."
+        )
+
+    def get_sample_points(self, num, xmin, xmax):
+        raise NotImplementedError(
+            "The get_sample_points method is not implemented by this class."
+        )
+
+    # Grader functions ###
 
     def is_a_function(self):
-        abstractMethod(self)
+        raise NotImplementedError(
+            "The is_a_function method is not implemented by this class."
+        )
 
     def has_value_y_at_x(self, y, x, yTolerance=None, xTolerance=None):
         """Return whether the function has the value y at x.
@@ -144,33 +161,51 @@ class Function(Tag, Tagables, object):
                                        the function value is accepted.
             xTolerance(default:None): the x-axis pixel distance within which
                                        the function value is accepted.
+
         Returns:
             bool:
             true if the function value at x is y within tolerances, otherwise
             false
         """
         if yTolerance is None:
-            yTolerance = self.tolerance['pixel'] / self.yscale
+            y_tolerance = self.tolerance["pixel"] / self.yscale
         else:
-            yTolerance /= self.yscale
+            y_tolerance = yTolerance / self.yscale
         if xTolerance is None:
-            xTolerance = self.tolerance['pixel'] / self.xscale
+            x_tolerance = self.tolerance["pixel"] / self.xscale
         else:
-            xTolerance /= self.xscale
+            x_tolerance = xTolerance / self.xscale
 
         # if the min value of the function around the desired x is higher than the desired y
         # or if the max value of the function around the desired x is lower
         # then it fails
         # note that if the function is defined above and below the function, no matter how far apart, this will allow it
 
-        # print 'y, x', y, x
-        ymax = self.get_max_value_between(x - xTolerance, x + xTolerance)
-        ymin = self.get_min_value_between(x - xTolerance, x + xTolerance)
+        ymax = self.get_max_value_between(x - x_tolerance, x + x_tolerance)
+        ymin = self.get_min_value_between(x - x_tolerance, x + x_tolerance)
 
-
-        if ymax is not False and ymin is not False:
-            return (ymax > y - yTolerance) and (ymin < y + yTolerance)
+        if ymax is not None and ymin is not None:
+            if (ymax > y - y_tolerance) and (ymin < y + y_tolerance):
+                return True
+            else:
+                if self.debug:
+                    if y > ymax:
+                        self.debugger.add(
+                            f"Function is {abs(y - ymax) * self.yscale} pixels away from expected point."
+                        )
+                    if y < ymin:
+                        self.debugger.add(
+                            f"Function is {abs(y - ymin) * self.yscale} pixels away from expected point."
+                        )
+                    self.debugger.add(
+                        f"Max allowed is {y_tolerance * self.yscale} pixels."
+                    )
+                return False
         else:
+            if self.debug:
+                self.debugger.add(
+                    f"Function is not defined within {x_tolerance * self.xscale} pixels from x = {x}."
+                )
             return False
 
     def is_zero_at_x_equals_zero(self, yTolerance=None, xTolerance=None):
@@ -181,13 +216,13 @@ class Function(Tag, Tagables, object):
                                        the function value is accepted.
             xTolerance(default:None): the x-axis pixel distance within which
                                        the function value is accepted.
+
         Returns:
             bool:
             true if the function value at x equals zero is zero within
             tolerances, otherwise false
         """
-        return self.has_value_y_at_x(0, 0, yTolerance=yTolerance,
-                                     xTolerance=xTolerance)
+        return self.has_value_y_at_x(0, 0, yTolerance=yTolerance, xTolerance=xTolerance)
 
     def is_greater_than_y_between(self, y, xmin, xmax, tolerance=None):
         """Return whether function is always greater than y in the range xmin to xmax.
@@ -198,17 +233,29 @@ class Function(Tag, Tagables, object):
             xmax: the maximum x range value.
             tolerance(default:None): pixel distance tolerance. If None given uses
                                      default constant 'comparison'.
+
         Returns:
             bool:
             true if the minimum value of the function in the range (xmin,xmax)
             is greater than y within tolerances, otherwise false.
         """
         if tolerance is None:
-            tolerance = self.tolerance['comparison'] / self.yscale
+            tolerance = self.tolerance["comparison"] / self.yscale
         else:
             tolerance /= self.yscale
-
-        return self.get_min_value_between(xmin, xmax) > y - tolerance
+        min_val = self.get_min_value_between(xmin, xmax)
+        if min_val is None:
+            if self.debug:
+                self.debugger.add("Function (min val) does not exist.")
+            return "ndef"
+        else:
+            if min_val > y - tolerance:
+                return True
+            if self.debug:
+                self.debugger.add(
+                    f"Min value {min_val} is {(y - min_val) * self.yscale} pixels below y = {y}."
+                )
+                self.debugger.add(f"Max allowed is {tolerance * self.yscale} pixels.")
 
     def is_less_than_y_between(self, y, xmin, xmax, tolerance=None):
         """Return whether function is always less than y in the range xmin to xmax.
@@ -219,14 +266,27 @@ class Function(Tag, Tagables, object):
             xmax: the maximum x range value.
             tolerance(default:None): pixel distance tolerance. If None given uses
                                      default constant 'comparison'.
+
         Returns:
             bool:
             true if the maximum value of the function in the range (xmin,xmax)
             is less than y within tolerances, otherwise false.
         """
         if tolerance is None:
-            tolerance = self.tolerance['comparison'] / self.yscale
+            tolerance = self.tolerance["comparison"] / self.yscale
         else:
             tolerance /= self.yscale
 
-        return self.get_max_value_between(xmin, xmax) < y + tolerance
+        max_val = self.get_max_value_between(xmin, xmax)
+        if max_val is None:
+            if self.debug:
+                self.debugger.add("Function (max val) does not exist.")
+            return "ndef"
+        else:
+            if max_val < y + tolerance:
+                return True
+            if self.debug:
+                self.debugger.add(
+                    f"Max value {max_val} is {(max_val - y) * self.yscale} pixels above y = {y}."
+                )
+                self.debugger.add(f"Max allowed is {tolerance * self.yscale} pixels.")
