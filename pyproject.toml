@@ -1,0 +1,81 @@
+[build-system]
+requires = ["hatchling", "hatch-vcs"]
+build-backend = "hatchling.build"
+
+[project]
+name = "sketchresponse"
+dynamic = ["version"]
+description = "A tool for drawing and evaluating mathematical functions"
+readme = "README.md"
+license = "LGPL-2.1-or-later"
+requires-python = ">=3.8"
+authors = [{ name = "Massachusetts Institute of Technology" }]
+keywords = ["education", "grading", "mathematics", "edx", "prairielearn"]
+classifiers = [
+    "Development Status :: 4 - Beta",
+    "Intended Audience :: Education",
+    "License :: OSI Approved :: GNU Lesser General Public License v2 or later (LGPLv2+)",
+    "Programming Language :: Python :: 3",
+    "Programming Language :: Python :: 3.8",
+    "Programming Language :: Python :: 3.9",
+    "Programming Language :: Python :: 3.10",
+    "Programming Language :: Python :: 3.11",
+    "Programming Language :: Python :: 3.12",
+    "Programming Language :: Python :: 3.13",
+]
+dependencies = [
+    "numpy>=1.20.0",
+    "sympy>=1.9",
+    "future>=0.18.0",
+]
+
+[project.optional-dependencies]
+server = ["flask>=2.0.0"]
+dev = ["pytest>=7.0.0", "ruff>=0.8.0"]
+
+[project.urls]
+Repository = "https://github.com/PrairieLearn/sketchresponse"
+
+[tool.hatch.version]
+source = "vcs"
+
+[tool.hatch.build.hooks.vcs]
+version-file = "sketchresponse/_version.py"
+
+[tool.hatch.build.targets.wheel]
+packages = ["sketchresponse"]
+
+[tool.hatch.build.targets.sdist]
+include = [
+    "sketchresponse/",
+    "LICENSE",
+    "README.md",
+    "pyproject.toml",
+]
+
+[tool.ruff]
+target-version = "py38"
+line-length = 100
+
+[tool.ruff.lint]
+select = ["E", "F", "W", "I"]
+ignore = [
+    "E401",  # multiple-imports-on-one-line
+    "E402",  # module-import-not-at-top-of-file
+    "E501",  # line-too-long
+    "E701",  # multiple-statements-on-one-line-colon
+    "E711",  # none-comparison
+    "E712",  # true-false-comparison
+    "E714",  # not-is-test
+    "E721",  # type-comparison
+    "F401",  # unused-import
+    "F403",  # undefined-local-with-import-star
+    "F405",  # undefined-local-with-import-star-usage
+    "F811",  # redefined-while-unused
+    "F821",  # undefined-name
+    "F841",  # unused-variable
+    "I001",  # unsorted-imports
+    "W291",  # trailing-whitespace
+    "W292",  # missing-newline-at-end-of-file
+    "W293",  # blank-line-with-whitespace
+]
