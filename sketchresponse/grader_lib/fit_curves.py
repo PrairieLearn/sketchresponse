@@ -15,9 +15,7 @@ def fitCurve(rawPoints, maxError):
     left_tangent = normalize(points[1] - points[0])
     right_tangent = normalize(points[-2] - points[-1])
     fit = fitCubic(points, left_tangent, right_tangent, maxError)
-    return [fit[0][0].tolist()] + [
-        point.tolist() for curve in fit for point in curve[1:]
-    ]
+    return [fit[0][0].tolist()] + [point.tolist() for curve in fit for point in curve[1:]]
 
 
 def q(ctrlPoly, t):

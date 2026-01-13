@@ -32,10 +32,7 @@ class MultiFunction(Function):
     # Function finders ##
 
     def find_function(self, xval):
-
-        functionsList = [
-            function for function in self.functions if function.is_defined_at(xval)
-        ]
+        functionsList = [function for function in self.functions if function.is_defined_at(xval)]
 
         return functionsList
 
@@ -177,12 +174,8 @@ class MultiFunction(Function):
             return False
 
         # Apply tolerances at boundaries:
-        xmin = self._px_to_xval(
-            self._xval_to_px(xmin) + self.tolerance["point_distance"]
-        )
-        xmax = self._px_to_xval(
-            self._xval_to_px(xmax) - self.tolerance["point_distance"]
-        )
+        xmin = self._px_to_xval(self._xval_to_px(xmin) + self.tolerance["point_distance"])
+        xmax = self._px_to_xval(self._xval_to_px(xmax) - self.tolerance["point_distance"])
 
         # Sample between boundaries and convert to pixels:
         xvals, yvals, _ = self.get_sample_points(25, xmin, xmax)
@@ -191,9 +184,7 @@ class MultiFunction(Function):
 
         # Fit a straight line and find the maximum perpendicular distance from it:
         m, b = np.polyfit(xvals, yvals, 1)
-        max_dist = np.max(
-            np.abs(m * np.array(xvals) - np.array(yvals) + b) / np.sqrt(m**2 + 1)
-        )
+        max_dist = np.max(np.abs(m * np.array(xvals) - np.array(yvals) + b) / np.sqrt(m**2 + 1))
 
         # Approximate the "length" of the line by taking the distance between first/last points:
         length = np.sqrt((xvals[-1] - xvals[0]) ** 2 + (yvals[-1] - yvals[0]) ** 2)

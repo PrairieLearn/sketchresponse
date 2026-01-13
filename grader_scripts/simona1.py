@@ -4,40 +4,75 @@ from ..grader_lib import LineSegment
 from ..grader_lib import PolyLine
 from ..grader_lib import Point
 
-problemconfig = sketchresponse.config({
-    'width': 750,
-    'height': 420,
-    'xrange': [-4, 4],
-    'yrange': [-2.5, 2.5],
-    'xscale': 'linear',
-    'yscale': 'linear',
-    'plugins': [
-        {'name': 'axes'},
-        {'name': 'polyline', 'id': 'pl', 'label': 'Beam', 'closed': False, 'color': 'lightblue'},
-        {'name': 'point', 'id': 'pt', 'label': 'Point', 'color': 'red', 'size': 5, 'hollow': False, 'readonly': True},
-        {'name': 'stamp', 'id': 'h', 'label': 'Hinge', 'src': '/static/simona_stamps/hinge.png'},
-        {'name': 'stamp', 'id': 'r', 'label': 'Roller', 'src': '/static/simona_stamps/roller.png'},
-        {'name': 'line-segment', 'id': 'ls', 'label': 'Force', 'color': 'green', 'dashStyle': 'solid', 'lengthContraint': 50, 'arrowHead': {'length': 10, 'base': 7}},
-        {'name': 'stamp', 'id': 'cwm', 'label': 'CWM', 'scale': 0.5, 'src': '/static/simona_stamps/cw_moment.png'},
-        {'name': 'stamp', 'id': 'ccwm', 'label': 'CCWM', 'scale': 0.5, 'src': '/static/simona_stamps/ccw_moment.png'}
-    ],
-    'initialstate': {
-  "pt": [
+problemconfig = sketchresponse.config(
     {
-      "x": 93,
-      "y": 41
-    },
-    {
-      "x": 563,
-      "y": 293
+        "width": 750,
+        "height": 420,
+        "xrange": [-4, 4],
+        "yrange": [-2.5, 2.5],
+        "xscale": "linear",
+        "yscale": "linear",
+        "plugins": [
+            {"name": "axes"},
+            {
+                "name": "polyline",
+                "id": "pl",
+                "label": "Beam",
+                "closed": False,
+                "color": "lightblue",
+            },
+            {
+                "name": "point",
+                "id": "pt",
+                "label": "Point",
+                "color": "red",
+                "size": 5,
+                "hollow": False,
+                "readonly": True,
+            },
+            {
+                "name": "stamp",
+                "id": "h",
+                "label": "Hinge",
+                "src": "/static/simona_stamps/hinge.png",
+            },
+            {
+                "name": "stamp",
+                "id": "r",
+                "label": "Roller",
+                "src": "/static/simona_stamps/roller.png",
+            },
+            {
+                "name": "line-segment",
+                "id": "ls",
+                "label": "Force",
+                "color": "green",
+                "dashStyle": "solid",
+                "lengthContraint": 50,
+                "arrowHead": {"length": 10, "base": 7},
+            },
+            {
+                "name": "stamp",
+                "id": "cwm",
+                "label": "CWM",
+                "scale": 0.5,
+                "src": "/static/simona_stamps/cw_moment.png",
+            },
+            {
+                "name": "stamp",
+                "id": "ccwm",
+                "label": "CCWM",
+                "scale": 0.5,
+                "src": "/static/simona_stamps/ccw_moment.png",
+            },
+        ],
+        "initialstate": {"pt": [{"x": 93, "y": 41}, {"x": 563, "y": 293}]},
     }
-  ]
-}
-})
+)
+
 
 @sketchresponse.grader
 def grader(pl, pt, h, r, ls, cwm, ccwm):
-
     pl = PolyLine.PolyLines(pl)
     pt = GradeableFunction.GradeableFunction(pt)
     h = GradeableFunction.GradeableFunction(h)
@@ -67,6 +102,5 @@ def grader(pl, pt, h, r, ls, cwm, ccwm):
         return False, "Check ccwm position"
 
     # TODO force position and direction checks
-
 
     return True, "Good job!"

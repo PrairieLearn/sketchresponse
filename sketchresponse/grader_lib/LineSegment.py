@@ -43,8 +43,7 @@ class LineSegments(Gradeable):  # noqa: PLR0904
             else:
                 # TODO - throw error if try to grade non line seg splines
                 raise ValueError(
-                    "This spline does not appear to be a line segment: "
-                    + str(spline["spline"])
+                    "This spline does not appear to be a line segment: " + str(spline["spline"])
                 )
 
         self.set_tagables(None)
@@ -200,9 +199,7 @@ class LineSegments(Gradeable):  # noqa: PLR0904
             return self.defined_at_y(y, tolerance)
         if y is None:
             return self.defined_at_x(x, tolerance)
-        return self.has_value_y_at_x(
-            y, x, yTolerance=tolerance, xTolerance=tolerance / 2
-        )
+        return self.has_value_y_at_x(y, x, yTolerance=tolerance, xTolerance=tolerance / 2)
 
     def defined_at_x(self, x, tolerance):
         endpoints = []
@@ -432,18 +429,14 @@ class LineSegments(Gradeable):  # noqa: PLR0904
             if distance <= tolerance:
                 return True
             if self.debug:
-                self.debugger.add(
-                    f"End point is {distance} pixels away from expected point."
-                )
+                self.debugger.add(f"End point is {distance} pixels away from expected point.")
                 self.debugger.add(f"Max allowed is {tolerance} pixels.")
         else:
             distance = end.get_euclidean_distance(point)
             if distance <= tolerance:
                 return True
             if self.debug:
-                self.debugger.add(
-                    f"End point is {distance} pixels away from expected point."
-                )
+                self.debugger.add(f"End point is {distance} pixels away from expected point.")
                 self.debugger.add(f"Max allowed is {tolerance} pixels.")
 
     def check_segment_startpoint(self, segment, point, tolerance=None, squared=False):
@@ -469,9 +462,7 @@ class LineSegments(Gradeable):  # noqa: PLR0904
             if distance <= tolerance:
                 return True
             if self.debug:
-                self.debugger.add(
-                    f"Start point is {distance} pixels away from expected point."
-                )
+                self.debugger.add(f"Start point is {distance} pixels away from expected point.")
                 self.debugger.add(f"Max allowed is {tolerance}.")
         else:
             distance = start.get_euclidean_distance(point)
@@ -502,9 +493,7 @@ class LineSegments(Gradeable):  # noqa: PLR0904
             total_length_px.append(self.get_segment_length(segment, pixel=True))
             total_length_graph.append(self.get_segment_length(segment, pixel=False))
         for i in range(len(total_length_px)):
-            expected_length_px = (
-                total_length_px[i] * expected_length
-            ) / total_length_graph[i]
+            expected_length_px = (total_length_px[i] * expected_length) / total_length_graph[i]
             if not abs(expected_length_px - total_length_px[i]) <= tolerance:
                 if self.debug:
                     self.debugger.add(
@@ -539,10 +528,7 @@ class LineSegments(Gradeable):  # noqa: PLR0904
         if not allow_flip:
             if all(
                 (abs(expected_angle - a) <= tolerance * math.radians(1))
-                or (
-                    (2 * math.pi - abs(expected_angle - a))
-                    <= tolerance * math.radians(1)
-                )
+                or ((2 * math.pi - abs(expected_angle - a)) <= tolerance * math.radians(1))
                 for a in all_angles
             ):
                 return True
@@ -551,14 +537,9 @@ class LineSegments(Gradeable):  # noqa: PLR0904
                     a / math.radians(1)
                     for a in all_angles
                     if not (abs(expected_angle - a) <= tolerance * math.radians(1))
-                    or (
-                        (2 * math.pi - abs(expected_angle - a))
-                        <= tolerance * math.radians(1)
-                    )
+                    or ((2 * math.pi - abs(expected_angle - a)) <= tolerance * math.radians(1))
                 ]
-                no_pass_diffs = [
-                    min(abs(angle - a), (360 - abs(angle - a))) for a in no_pass
-                ]
+                no_pass_diffs = [min(abs(angle - a), (360 - abs(angle - a))) for a in no_pass]
                 self.debugger.add(
                     f"Submitted angle {round(no_pass[0], 3)} degrees differs from the expected angle {angle} by {round(no_pass_diffs[0], 3)} degrees."
                 )
@@ -574,10 +555,7 @@ class LineSegments(Gradeable):  # noqa: PLR0904
                     (abs(expected_angle - a) <= tolerance * math.radians(1))
                     or
                     # case for if the expected angle is close to 360/0
-                    (
-                        (2 * math.pi - abs(expected_angle - a))
-                        <= tolerance * math.radians(1)
-                    )
+                    ((2 * math.pi - abs(expected_angle - a)) <= tolerance * math.radians(1))
                     or
                     # case for if the submitted is the same as the alt angle
                     (abs(alt_angle - a) <= tolerance * math.radians(1))
@@ -596,10 +574,7 @@ class LineSegments(Gradeable):  # noqa: PLR0904
                         (abs(expected_angle - a) <= tolerance * math.radians(1))
                         or
                         # case for if the expected angle is close to 360/0
-                        (
-                            (2 * math.pi - abs(expected_angle - a))
-                            <= tolerance * math.radians(1)
-                        )
+                        ((2 * math.pi - abs(expected_angle - a)) <= tolerance * math.radians(1))
                         or
                         # case for if the submitted is the same as the alt angle
                         (abs(alt_angle - a) <= tolerance * math.radians(1))
@@ -694,9 +669,7 @@ class LineSegments(Gradeable):  # noqa: PLR0904
         for segment in self.segments:
             if self.segment_within_y_range_between_x(segment, xmin, xmax, neg_tol=10):
                 overlap = self.get_overlap_length(segment, xmin, xmax)
-                overlap_percentage = self.get_percent_overlap_of_range(
-                    segment, xmin, xmax
-                )
+                overlap_percentage = self.get_percent_overlap_of_range(segment, xmin, xmax)
                 if overlap_percentage == 1:
                     return False
                 if overlap > overlap_tolerance:
@@ -808,9 +781,7 @@ class LineSegments(Gradeable):  # noqa: PLR0904
                     self.x_is_between(x0, xmin, xmax, tolerance)
                     and self.x_is_between(x1, xmin, xmax, tolerance)
                 )
-            ) and self.segment_within_y_range_between_x(
-                segment, xmin, xmax, neg_tol=10
-            ):
+            ) and self.segment_within_y_range_between_x(segment, xmin, xmax, neg_tol=10):
                 segmentsBetween.append(segment)
 
         return segmentsBetween
@@ -891,8 +862,7 @@ class LineSegments(Gradeable):  # noqa: PLR0904
         endpoints = self.swap_eps(segment.getStartPoint(), segment.getEndPoint())
         yvals = endpoints[0][1], endpoints[1][1]
         return bool(
-            self.within_y_range(yvals[0], neg_tol)
-            or self.within_y_range(yvals[1], neg_tol)
+            self.within_y_range(yvals[0], neg_tol) or self.within_y_range(yvals[1], neg_tol)
         )
 
     def segment_within_y_range_between_x(self, segment, x1, x2, neg_tol=0):
@@ -908,9 +878,7 @@ class LineSegments(Gradeable):  # noqa: PLR0904
         new_y2 = None
         # start x value
         if xrange_yvals[0] is not None:
-            if (
-                x1 > endpoints[0][0]
-            ):  # compare start x values, choose y value at higheset x value
+            if x1 > endpoints[0][0]:  # compare start x values, choose y value at higheset x value
                 new_y1 = xrange_yvals[0]
             else:
                 new_y1 = endpoint_yvals[0]
@@ -918,18 +886,15 @@ class LineSegments(Gradeable):  # noqa: PLR0904
             new_y1 = endpoint_yvals[0]
         # end x value
         if xrange_yvals[1] is not None:
-            if (
-                x2 < endpoints[1][0]
-            ):  # compare start x values, choose y value at lowest x value
+            if x2 < endpoints[1][0]:  # compare start x values, choose y value at lowest x value
                 new_y2 = xrange_yvals[1]
             else:
                 new_y2 = endpoint_yvals[1]
         else:
             new_y2 = endpoint_yvals[1]
 
-        return (
-            self.within_y_range(new_y1, negative_tolerance=neg_tol)
-            or self.within_y_range(new_y2, negative_tolerance=neg_tol)
+        return self.within_y_range(new_y1, negative_tolerance=neg_tol) or self.within_y_range(
+            new_y2, negative_tolerance=neg_tol
         )  # Hardcoded tolerance for how much it can be within the yrange to be considered outside
 
     # Minor Helper Functions ###
@@ -1101,9 +1066,7 @@ class LineSegments(Gradeable):  # noqa: PLR0904
         percentOfRangeWithValueY = 0.0
         for segment in segments:
             if self.segment_has_constant_value_y(segment, y):
-                percentOfRangeWithValueY += self.get_percent_overlap_of_range(
-                    segment, xmin, xmax
-                )
+                percentOfRangeWithValueY += self.get_percent_overlap_of_range(segment, xmin, xmax)
         return percentOfRangeWithValueY > 0.95
 
     def segment_has_constant_value_y(self, segment, y):
@@ -1270,10 +1233,7 @@ class LineSegments(Gradeable):  # noqa: PLR0904
             true if there is at least one line segment within tolerance of the
             given position, otherwise false.
         """
-        return (
-            self.get_segments_at(point, x, y, distTolerance, squareDistTolerance)
-            is not None
-        )
+        return self.get_segments_at(point, x, y, distTolerance, squareDistTolerance) is not None
 
     def check_both_segment_endpoints(self, segment, points, tolerance=None):
         """Return whether the segment's start and end points are both in

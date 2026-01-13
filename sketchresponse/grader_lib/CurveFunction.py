@@ -51,12 +51,12 @@ class CurveFunction(Function):
             + np.array([1, 0, 0]) * 3 * (self.p3[1] - self.p2[1])
         )
 
-        self.ddx = np.array([-1, 1]) * 6 * (
-            self.p2[0] - 2 * self.p1[0] + self.p0[0]
-        ) + np.array([1, 0]) * 6 * (self.p3[0] - 2 * self.p2[0] + self.p1[0])
-        self.ddy = np.array([-1, 1]) * 6 * (
-            self.p2[1] - 2 * self.p1[1] + self.p0[1]
-        ) + np.array([1, 0]) * 6 * (self.p3[1] - 2 * self.p2[1] + self.p1[1])
+        self.ddx = np.array([-1, 1]) * 6 * (self.p2[0] - 2 * self.p1[0] + self.p0[0]) + np.array(
+            [1, 0]
+        ) * 6 * (self.p3[0] - 2 * self.p2[0] + self.p1[0])
+        self.ddy = np.array([-1, 1]) * 6 * (self.p2[1] - 2 * self.p1[1] + self.p0[1]) + np.array(
+            [1, 0]
+        ) * 6 * (self.p3[1] - 2 * self.p2[1] + self.p1[1])
 
     def create_from_path_info(self, path_info):
         self.pixels = []

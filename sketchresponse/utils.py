@@ -138,9 +138,7 @@ def screen_to_graph_submission(
     return screen_to_graph(start, end, canvas_size, value)
 
 
-def get_gap_length_px(
-    rd: list[list[float]], x1: float, x2: float, submission: dict
-) -> float:
+def get_gap_length_px(rd: list[list[float]], x1: float, x2: float, submission: dict) -> float:
     if rd == []:
         return graph_to_screen_submission(submission, True, False, (x2 - x1))
     gap_total = 0
@@ -171,7 +169,6 @@ def get_coverage_length_px(
     x1: float,
     x2: float,
 ) -> float:
-
     if len(tools_to_check) == 0:
         return True
 
@@ -183,9 +180,7 @@ def get_coverage_length_px(
         if tool_used == "polygon":
             tool_grader = Polygon.Polygons(grader, submission, toolid)
         elif tool_used in gf_tools:
-            tool_grader = GradeableFunction.GradeableFunction(
-                grader, submission, toolid
-            )
+            tool_grader = GradeableFunction.GradeableFunction(grader, submission, toolid)
         elif tool_used == "horizontal-line":
             tool_grader = Asymptote.HorizontalAsymptotes(grader, submission, toolid)
         elif tool_used == "vertical-line":
@@ -220,9 +215,7 @@ def get_tools_to_check(
         if len(submission["gradeable"][tool["id"]]) != 0
         and not tool["helper"]
         and tool["name"] not in not_allowed
-        and not (
-            "polygon" in not_allowed and tool["name"] == "polyline" and tool["closed"]
-        )
+        and not ("polygon" in not_allowed and tool["name"] == "polyline" and tool["closed"])
     ]
     return tools_to_check
 
@@ -315,8 +308,7 @@ def flip_grader_data(submission: dict) -> dict:
         for i in range(len(submission_data[toolid])):
             if "spline" in submission_data[toolid][i]:
                 new_points = [
-                    flip_point(point, range_data)
-                    for point in submission_data[toolid][i]["spline"]
+                    flip_point(point, range_data) for point in submission_data[toolid][i]["spline"]
                 ]
                 submission_data[toolid][i]["spline"] = new_points
             if "point" in submission_data[toolid][i]:
@@ -441,9 +433,7 @@ def format_initials(
                     # Free-draw needs special handling since it is stored in a different data format on the client side
                     if tool["name"] == "freeform":
                         x_y_vals = fitCurve(x_y_vals, 5)
-                    formatted_x_y_vals = [
-                        {"x": val[0], "y": val[1]} for val in x_y_vals
-                    ]
+                    formatted_x_y_vals = [{"x": val[0], "y": val[1]} for val in x_y_vals]
                     new_format.append(formatted_x_y_vals)
                 else:
                     function = None
@@ -462,9 +452,7 @@ def format_initials(
                             # Free-draw needs special handling since it is stored in a different data format on the client side
                             if tool["name"] == "freeform":
                                 x_y_vals = fitCurve(x_y_vals, 5)
-                            formatted_x_y_vals = [
-                                {"x": val[0], "y": val[1]} for val in x_y_vals
-                            ]
+                            formatted_x_y_vals = [{"x": val[0], "y": val[1]} for val in x_y_vals]
                             new_format.append(formatted_x_y_vals)
                         if broken:
                             x1 = new_start

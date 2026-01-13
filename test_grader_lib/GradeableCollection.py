@@ -7,11 +7,9 @@ class GradeableCollection(list):
     @staticmethod
     def resolve_params_for_id(identifier, config):
         resolved = config.copy()
-        plugins = resolved.pop('plugins', [])  # Don't include plugins array
+        plugins = resolved.pop("plugins", [])  # Don't include plugins array
 
         for plugin_config in plugins:
-            resolved.update(GradeableCollection.resolve_params_for_id(
-                identifier, plugin_config))
+            resolved.update(GradeableCollection.resolve_params_for_id(identifier, plugin_config))
 
-        return resolved if resolved.get('id', None) == identifier else {}
-    
+        return resolved if resolved.get("id", None) == identifier else {}

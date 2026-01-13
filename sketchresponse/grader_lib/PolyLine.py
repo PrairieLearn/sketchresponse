@@ -15,6 +15,7 @@ class PolyLines(Gradeable.Gradeable):
     polyline data can be directly parsed with the GradeableFunction and
     LineSegments graders.
     """
+
     def __init__(self, info, tolerance=dict()):
         Gradeable.Gradeable.__init__(self, info, tolerance)
 
@@ -26,9 +27,9 @@ class PolyLines(Gradeable.Gradeable):
         for spline in info:
             if not spline is None:
                 self.polyline_count += 1
-                segmentSplines.append(self.convertToSplineSegments(spline['spline']))
-                if 'tag' in spline:
-                    tag.append(spline['tag'])
+                segmentSplines.append(self.convertToSplineSegments(spline["spline"]))
+                if "tag" in spline:
+                    tag.append(spline["tag"])
                 else:
                     tag.append("")
 
@@ -60,10 +61,10 @@ class PolyLines(Gradeable.Gradeable):
         for i, spline in enumerate(splines):
             for s in spline:
                 splineDict = {}
-                splineDict['spline'] = s
+                splineDict["spline"] = s
                 if len(tags) > i:
                     tag = tags[i]
-                    splineDict['tag'] = tag
+                    splineDict["tag"] = tag
 
                 newinfo.append(splineDict)
 

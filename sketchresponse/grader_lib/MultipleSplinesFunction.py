@@ -48,14 +48,10 @@ class MultipleSplinesFunction(MultiFunction):  # noqa: PLR0904
         tolerance=dict(),
     ):
         self.submission = submission
-        super().__init__(
-            xaxis, yaxis, path_info, grader, current_tool, functions, tolerance
-        )
+        super().__init__(xaxis, yaxis, path_info, grader, current_tool, functions, tolerance)
 
         self.set_default_tolerance("gap", 40)  # allow gaps up to x pixels in size
-        self.set_default_tolerance(
-            "angle", 10
-        )  # x degrees allowed for angle difference
+        self.set_default_tolerance("angle", 10)  # x degrees allowed for angle difference
         self.set_default_tolerance(
             "domain", grader["tolerance"]
         )  # allows x pixels outside of domains #25 default, used in range_empty
@@ -138,9 +134,7 @@ class MultipleSplinesFunction(MultiFunction):  # noqa: PLR0904
             self.debugger.var2 = []  # keep track of which iterations failed
             self.debugger.var3 = xvals  # for later reference
 
-        return self.always_comparer_at_points(
-            lesser_or_equal, yvals, delta, failureTolerance
-        )
+        return self.always_comparer_at_points(lesser_or_equal, yvals, delta, failureTolerance)
 
     def is_decreasing_between(self, xmin, xmax, numPoints=10, failureTolerance=None):
         """Return whether the function is decreasing in the range xmin to xmax.
@@ -182,13 +176,9 @@ class MultipleSplinesFunction(MultiFunction):  # noqa: PLR0904
             self.debugger.var2 = []  # keep track of which iterations failed
             self.debugger.var3 = xvals  # for later reference
 
-        return self.always_comparer_at_points(
-            greater_or_equal, yvals, delta, failureTolerance
-        )
+        return self.always_comparer_at_points(greater_or_equal, yvals, delta, failureTolerance)
 
-    def has_positive_curvature_between(
-        self, xmin, xmax, numSegments=5, failureTolerance=None
-    ):
+    def has_positive_curvature_between(self, xmin, xmax, numSegments=5, failureTolerance=None):
         """Return whether the function has positive curvature in the range xmin to xmax.
 
         Args:
@@ -219,9 +209,7 @@ class MultipleSplinesFunction(MultiFunction):  # noqa: PLR0904
             xmin, xmax, numSegments, failureTolerance, lesser_or_equal
         )
 
-    def has_negative_curvature_between(
-        self, xmin, xmax, numSegments=5, failureTolerance=None
-    ):
+    def has_negative_curvature_between(self, xmin, xmax, numSegments=5, failureTolerance=None):
         """Return whether the function has negative curvature in the range xmin to xmax.
 
         Args:
@@ -255,9 +243,7 @@ class MultipleSplinesFunction(MultiFunction):  # noqa: PLR0904
     # helper function for has_increasing_curvature_between and has_decreasing_curvature_between
     # does most of the work, but the comparer differs for the two functions
     # breaks the function up into some segments, and checks if the delta_y has appropriately higher or lower
-    def has_curvature_between(
-        self, xmin, xmax, numSegments, failureTolerance, comparer
-    ):
+    def has_curvature_between(self, xmin, xmax, numSegments, failureTolerance, comparer):
         [xleft, xright] = self.get_between_vals(xmin, xmax)
         if xleft > xright:
             if self.debug:
@@ -279,9 +265,7 @@ class MultipleSplinesFunction(MultiFunction):  # noqa: PLR0904
         if self.debug:
             self.debugger.var1 = 0  # keep track of index of point checked
             self.debugger.var2 = []  # keep track of indices where the value was incorrect
-            self.debugger.var3 = (
-                xvals  # store the x values for later reference when adding message
-            )
+            self.debugger.var3 = xvals  # store the x values for later reference when adding message
 
         return self.always_comparer_at_points(comparer, ydiffs, delta, failureTolerance)
 
@@ -324,9 +308,7 @@ class MultipleSplinesFunction(MultiFunction):  # noqa: PLR0904
             return self.defined_at_y(y, tolerance)
         if y is None:
             return self.defined_at_x(x, tolerance)
-        return self.has_value_y_at_x(
-            x=x, y=y, yTolerance=tolerance, xTolerance=tolerance
-        )
+        return self.has_value_y_at_x(x=x, y=y, yTolerance=tolerance, xTolerance=tolerance)
 
     # Helper Functions ###
 
@@ -366,12 +348,8 @@ class MultipleSplinesFunction(MultiFunction):  # noqa: PLR0904
         # gets start and end vals for each spline, then sorts them to the left and right
         yvals = []
         for function in self.functions:
-            min = function.get_min_value_between(
-                self.xaxis.domain[0], self.xaxis.domain[1]
-            )
-            max = function.get_max_value_between(
-                self.xaxis.domain[0], self.xaxis.domain[1]
-            )
+            min = function.get_min_value_between(self.xaxis.domain[0], self.xaxis.domain[1])
+            max = function.get_max_value_between(self.xaxis.domain[0], self.xaxis.domain[1])
             if yval >= min and yval <= max:
                 return [yval]
             yvals.append(min)
@@ -472,9 +450,7 @@ class MultipleSplinesFunction(MultiFunction):  # noqa: PLR0904
 
         ydiff = yright - yleft
 
-        return (xdiff < self.tolerance["gap"]), yleft + (
-            xval - xvals[0]
-        ) * 1.0 * ydiff / xdiff
+        return (xdiff < self.tolerance["gap"]), yleft + (xval - xvals[0]) * 1.0 * ydiff / xdiff
 
     # strict does not exist between. Will return false if anything is within the xmin xmax range
     def does_not_exist_between(self, xmin, xmax, tolerance=0):
@@ -576,9 +552,7 @@ class MultipleSplinesFunction(MultiFunction):  # noqa: PLR0904
             yright = 0
         ydiff = yright - yleft
 
-        return (xdiff < self.tolerance["gap"]), np.arctan2(
-            self.yscale * ydiff, self.xscale * xdiff
-        )
+        return (xdiff < self.tolerance["gap"]), np.arctan2(self.yscale * ydiff, self.xscale * xdiff)
 
     def comparer(self, x1, x2, leeway):
         if x1 == float("-inf"):

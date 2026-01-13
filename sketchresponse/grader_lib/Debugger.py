@@ -6,12 +6,7 @@ class Debugger:
 
     def __init__(self, grader_name: str, toolid: str, tolerance: int):
         self.message = (
-            "Grader : "
-            + grader_name
-            + " | Tool : "
-            + toolid
-            + " | Tolerance: "
-            + str(tolerance)
+            "Grader : " + grader_name + " | Tool : " + toolid + " | Tolerance: " + str(tolerance)
         )
         self.var1: Any = None
         self.var2: Any = None

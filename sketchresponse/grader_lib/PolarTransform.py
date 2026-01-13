@@ -15,22 +15,21 @@ import copy
 
 
 class PolarTransform(object):
-
     FIT_TOLERANCE = 5
     STEP = 0.02
 
     def __init__(self, functionData, gradeableFunction):
-#        print gradeable
-#        print gradeable.params
+        #        print gradeable
+        #        print gradeable.params
 
         # compute new axes for the [r, theta] space transform
         self.f = functionData
         self.g = gradeableFunction
-        absx = list(map(abs, self.f.params['xrange']))
-        absy = list(map(abs, self.f.params['yrange']))
+        absx = list(map(abs, self.f.params["xrange"]))
+        absy = list(map(abs, self.f.params["yrange"]))
         rmax = math.sqrt(max(absx) ** 2 + max(absy) ** 2)
-        self.raxis = Axis.Axis([0, rmax], self.f.params['height'])
-        self.thetaaxis = Axis.Axis([0, 2 * math.pi], self.f.params['width'])
+        self.raxis = Axis.Axis([0, rmax], self.f.params["height"])
+        self.thetaaxis = Axis.Axis([0, 2 * math.pi], self.f.params["width"])
 
         # transform any point objects into r, theta space
         transPoints = self.transformPoints()
@@ -77,8 +76,8 @@ class PolarTransform(object):
             # copy the curves so the full range of curve data spans [-2pi, 2pi]
             transSplines = self.duplicateCurvesToNeg2PI(transSplines)
 
-        #print transSplines
-        #self.transformedSplines = copy.deepcopy(transSplines)
+        # print transSplines
+        # self.transformedSplines = copy.deepcopy(transSplines)
 
         # update the function data object to contain the transformed data
         # and transformed space parameters
@@ -91,16 +90,16 @@ class PolarTransform(object):
         return self.transformedSplines
 
     def getTransformedAxes(self):
-        axes1 = self.f.params['xrange']
-        axes1.extend(self.f.params['yrange'])
-        axes2 = [0, self.f.params['width']]
-        axes2.extend([0, self.f.params['height']])
+        axes1 = self.f.params["xrange"]
+        axes1.extend(self.f.params["yrange"])
+        axes2 = [0, self.f.params["width"]]
+        axes2.extend([0, self.f.params["height"]])
         return [axes1, axes2]
 
     def transformPoints(self):
         points = self.g.points
         transPoints = []
-        width = self.f.params['width']
+        width = self.f.params["width"]
         for p in points:
             theta, r = self.polar_transform([p.x, p.y])
 
@@ -163,20 +162,20 @@ class PolarTransform(object):
         segmented_samples = []
         for ts in transformed_samples:
             minima = self.findMinima(ts)
-            #print minima
+            # print minima
             segments = []
             left = 0
             for m in minima:
                 segment = ts[left:m]
-#                if len(segment) > 10:
-#                    if segment[10][0] > segment[-10][0]:
-#                        segment.reverse()
+                #                if len(segment) > 10:
+                #                    if segment[10][0] > segment[-10][0]:
+                #                        segment.reverse()
                 segments.append(segment)
                 left = m
             segment = ts[left:]
-#            if len(segment) > 10:
-#                if segment[10][0] > segment[-10][0]:
-#                    segment.reverse()
+            #            if len(segment) > 10:
+            #                if segment[10][0] > segment[-10][0]:
+            #                    segment.reverse()
             segments.append(segment)
 
             segmented_samples.extend(segments)
@@ -186,7 +185,7 @@ class PolarTransform(object):
     def reorderSplines(self, transformed_samples):
         reordered = []
         for ts in transformed_samples:
-            #print ts
+            # print ts
             maxima = self.findMaxima(ts)
             if len(maxima) > 0:
                 for m in maxima:
@@ -204,7 +203,7 @@ class PolarTransform(object):
                             inc += 1
                         else:
                             dec += 1
-                #print 'reorder: ' + str(inc - dec)
+                # print 'reorder: ' + str(inc - dec)
                 if dec > inc:
                     ts.reverse()
                 reordered.append(ts)
@@ -215,9 +214,8 @@ class PolarTransform(object):
         return [ts for ts in transformed_samples if not len(ts) <= 10]
 
     def splitWrappingCurves(self, curves):
-
         # now segment any curves that wrap around theta=0/2pi boundary
-        width = self.f.params['width']
+        width = self.f.params["width"]
         minTen = width // 10
         maxTen = 9 * minTen
         center = width // 2
@@ -244,10 +242,10 @@ class PolarTransform(object):
         return wrap_segmented
 
     def removeCurveOverlaps(self, curves):
-#        return curves
+        #        return curves
         filtered = []
         for i, curve in enumerate(curves):
-            #curve = copy.deepcopy(curve)
+            # curve = copy.deepcopy(curve)
 
             for j, otherCurve in enumerate(curves):
                 if i == j:
@@ -279,25 +277,41 @@ class PolarTransform(object):
 
         overlapMin = None
         overlapMax = None
-        
+
         overlap = False
-        if (range1[0] <= range2[0] and range2[0] <= range2[1] and
-            range2[0] <= range1[1] and range1[1] <= range2[1]):
+        if (
+            range1[0] <= range2[0]
+            and range2[0] <= range2[1]
+            and range2[0] <= range1[1]
+            and range1[1] <= range2[1]
+        ):
             overlap = True
             overlapMin = range2[0]
             overlapMax = range1[1]
-        if (range2[0] <= range1[0] and range1[0] <= range2[1] and
-            range2[0] <= range1[1] and range1[1] <= range2[1]):
+        if (
+            range2[0] <= range1[0]
+            and range1[0] <= range2[1]
+            and range2[0] <= range1[1]
+            and range1[1] <= range2[1]
+        ):
             overlap = True
             overlapMin = range1[0]
             overlapMax = range1[1]
-        if (range2[0] <= range1[0] and range1[0] <= range2[1] and
-            range2[0] <= range2[1] and range2[1] <= range1[1]):
+        if (
+            range2[0] <= range1[0]
+            and range1[0] <= range2[1]
+            and range2[0] <= range2[1]
+            and range2[1] <= range1[1]
+        ):
             overlap = True
             overlapMin = range1[0]
             overlapMax = range2[1]
-        if (range1[0] <= range2[0] and range2[0] <= range1[1] and
-            range1[0] <= range2[1] and range2[1] <= range1[1]):
+        if (
+            range1[0] <= range2[0]
+            and range2[0] <= range1[1]
+            and range1[0] <= range2[1]
+            and range2[1] <= range1[1]
+        ):
             overlap = True
             overlapMin = range2[0]
             overlapMax = range2[1]
@@ -305,10 +319,10 @@ class PolarTransform(object):
         if not overlap:
             pre = curve1
         else:
-            #print 'Overlaps: '
-            #print range1
-            #print range2
-            #print [overlapMin, overlapMax]
+            # print 'Overlaps: '
+            # print range1
+            # print range2
+            # print [overlapMin, overlapMax]
 
             # segemnt curve1 into three sections preoverlap, overlap
             # and postoverlap
@@ -325,8 +339,8 @@ class PolarTransform(object):
                 if theta >= overlapMin and theta <= overlapMax:
                     overlap2.append([theta, r])
 
-            #print len(overlap1)
-            #print len(overlap2)
+            # print len(overlap1)
+            # print len(overlap2)
 
         return (pre, overlap1, post, overlap2)
 
@@ -347,8 +361,8 @@ class PolarTransform(object):
         return filtered
 
     def getThetaRange(self, curve):
-        minTheta = float('inf')
-        maxTheta = float('-inf')
+        minTheta = float("inf")
+        maxTheta = float("-inf")
 
         for theta, r in curve:
             if theta < minTheta:
@@ -359,10 +373,9 @@ class PolarTransform(object):
         return [minTheta, maxTheta]
 
     def filterSplines(self, transformed_samples, rmax):
-
         # 1. remove all sample points near the origin (define: near)
-        #transformed_samples = self.filterNearOrigin(transformed_samples, rmax)
-        
+        # transformed_samples = self.filterNearOrigin(transformed_samples, rmax)
+
         # 3. remove regions that are wrong directions
         transformed_samples = self.filterUnderCutRegions_projection(transformed_samples)
 
@@ -372,16 +385,16 @@ class PolarTransform(object):
         return transformed_samples
 
     def filterNearOrigin(self, points, max_value):
-        #print max_value
+        # print max_value
         filtered = []
         for ps in points:
-            #print self.findMinima(ps)
+            # print self.findMinima(ps)
             maxVal = self.findMaximumValue(ps)
             print(maxVal)
             subfiltered = []
             for theta, r in ps:
-                #print r
-                #print self.raxis.pixel_to_coord(r)
+                # print r
+                # print self.raxis.pixel_to_coord(r)
                 if r >= (maxVal * 0.5) and self.raxis.pixel_to_coord(r) >= (max_value * 0.25):
                     subfiltered.append([theta, r])
 
@@ -399,11 +412,11 @@ class PolarTransform(object):
                     rmean = (r + r_n) / 2
                     rdiff = r - r_n
                     tdiff = theta - theta_n
-                    #print rdiff / tdiff
+                    # print rdiff / tdiff
                     if not abs(rdiff / tdiff) > 60 * (1 + (rmean / rmax)):
                         subfiltered.append([theta, r])
-#                    else:
-#                        print 't = ' + str(theta) + " tn = " + str(theta_n)
+            #                    else:
+            #                        print 't = ' + str(theta) + " tn = " + str(theta_n)
 
             filtered.append(subfiltered)
 
@@ -416,7 +429,7 @@ class PolarTransform(object):
             subfiltered = []
 
             # check whether the curve was drawn left to right or right to left
-            #if ps[0][0] > ps[-1][0]:
+            # if ps[0][0] > ps[-1][0]:
             #    ps.reverse()
 
             for i, (theta, r) in enumerate(ps):
@@ -449,7 +462,7 @@ class PolarTransform(object):
 
             subfiltered.extend(self.filterUnderCutRegions_left(left))
             subfiltered.extend(self.filterUnderCutRegions_right(right))
-            
+
             filtered.append(subfiltered)
 
         return filtered
@@ -503,9 +516,9 @@ class PolarTransform(object):
                 refit_samples.append([points[1][0], points[1][1]])
                 refit_samples.append([points[2][0], points[2][1]])
                 refit_samples.append([points[3][0], points[3][1]])
-#            print refit_samples
-            #exp_curve_samples = []
-            #for i, v in enumerate(t):
+            #            print refit_samples
+            # exp_curve_samples = []
+            # for i, v in enumerate(t):
             #    if i < len(t) - 1:
             #        exp_curve_samples.append(v)
             #        x_delta = (t[i + 1][0] - v[0]) / 3
@@ -519,12 +532,12 @@ class PolarTransform(object):
 
             expanded_samples.append(refit_samples)  # exp_curve_samples)  #
 
-#        print self.transformedSplines
+        #        print self.transformedSplines
         return expanded_samples
 
     def duplicateCurvesToNeg2PI(self, curves):
         duped_curves = []
-        width = self.f.params['width']
+        width = self.f.params["width"]
         for curve in curves:
             shifted = []
             for theta, r in curve:
@@ -539,36 +552,34 @@ class PolarTransform(object):
         # replace the the transformed data in the gradeable data struct
         # this only works for freeform only inputs
         del self.f[:]
-#        for i in range(len(gradeable)):
-#            print i
-#            if 'spline' in gradeable[i]:
-#                del(gradeable[i])
+        #        for i in range(len(gradeable)):
+        #            print i
+        #            if 'spline' in gradeable[i]:
+        #                del(gradeable[i])
 
         # reverse the yrange because expecting data from canvas with inverted
         # y axis
-        self.f.params['width'] = self.f.params['width'] * 2
-        self.f.params['yrange'] = [rmax, 0] 
-        self.f.params['xrange'] = [-2 * math.pi, 2 * math.pi]
-        self.raxis = Axis.Axis([0, rmax], self.f.params['height'])
-        self.thetaaxis = Axis.Axis([-2 * math.pi, 2 * math.pi],
-                                   self.f.params['width'])
+        self.f.params["width"] = self.f.params["width"] * 2
+        self.f.params["yrange"] = [rmax, 0]
+        self.f.params["xrange"] = [-2 * math.pi, 2 * math.pi]
+        self.raxis = Axis.Axis([0, rmax], self.f.params["height"])
+        self.thetaaxis = Axis.Axis([-2 * math.pi, 2 * math.pi], self.f.params["width"])
 
-#        self.f.params['xscale'] = 'linear'
-#        self.f.params['yscale'] = 'linear'
-        
-        #json_format_samples = []
+        #        self.f.params['xscale'] = 'linear'
+        #        self.f.params['yscale'] = 'linear'
+
+        # json_format_samples = []
         for s in splines:
             splineDict = {}
-            splineDict['spline'] = s
+            splineDict["spline"] = s
             self.f.append(splineDict)
 
         for p in points:
             pointDict = {}
-            pointDict['point'] = p
+            pointDict["point"] = p
             self.f.append(pointDict)
-    
-    def sample_x_and_y(self, curve, step):
 
+    def sample_x_and_y(self, curve, step):
         samples = []
         x_t = curve.x
         y_t = curve.y
@@ -589,12 +600,11 @@ class PolarTransform(object):
         return [x, y]
 
     def polar_transform(self, coords):
-        
         r = np.linalg.norm(coords)
-        
+
         theta = np.arctan2(coords[1], coords[0])
         if theta < 0:
-            theta += 2*math.pi
+            theta += 2 * math.pi
 
         # convert back into pixel space
         r = self.raxis.coord_to_pixel(r)
@@ -621,7 +631,7 @@ class PolarTransform(object):
         return maxima
 
     def findMaximumValue(self, curve):
-        maximum = float('-inf')
+        maximum = float("-inf")
         for theta, r in curve:
             if r > maximum:
                 maximum = r

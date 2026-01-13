@@ -61,9 +61,7 @@ class Gradeable(Tagable):
         scale = abs(yrange[0] - yrange[1]) / height
         g_neg_t = negative_tolerance * scale
         g_pos_t = positive_tolerance * scale
-        return y_val <= (yrange[0] - g_neg_t + g_pos_t) and y_val >= (
-            yrange[1] + g_neg_t - g_pos_t
-        )
+        return y_val <= (yrange[0] - g_neg_t + g_pos_t) and y_val >= (yrange[1] + g_neg_t - g_pos_t)
 
     def within_x_range(self, x_val, negative_tolerance=0, positive_tolerance=0):
         if x_val is None:
@@ -73,9 +71,7 @@ class Gradeable(Tagable):
         scale = abs(xrange[1] - xrange[0]) / width
         g_neg_t = negative_tolerance * scale
         g_pos_t = positive_tolerance * scale
-        return x_val >= (xrange[0] + g_neg_t - g_pos_t) and x_val <= (
-            xrange[1] - g_neg_t + g_pos_t
-        )
+        return x_val >= (xrange[0] + g_neg_t - g_pos_t) and x_val <= (xrange[1] - g_neg_t + g_pos_t)
 
     def add_debug(self, str):
         self.debug_message += "\n"
@@ -169,9 +165,7 @@ class Gradeable(Tagable):
                     self.debugger.var2 = min(self.debugger.var2, d)
             except Exception as e:
                 if self.debug:
-                    self.debugger.add(
-                        f"Error calculating function at x = {point[0]}: {e}"
-                    )
+                    self.debugger.add(f"Error calculating function at x = {point[0]}: {e}")
                 continue
         np.seterr(invalid="warn")
         if self.debug:

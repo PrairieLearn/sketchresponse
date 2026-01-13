@@ -105,9 +105,7 @@ class Polygons(Gradeable):  # noqa: PLR0904
     def init_range_defined(self):
         all_ranges = []
         for polygon in self.polygons:
-            all_ranges += (
-                polygon.range_defined if polygon.range_defined is not None else []
-            )
+            all_ranges += polygon.range_defined if polygon.range_defined is not None else []
         rd = self.collapse_ranges(all_ranges)
         return rd
 
@@ -267,13 +265,13 @@ class Polygons(Gradeable):  # noqa: PLR0904
         rd = self.range_defined if self.range_defined is not None else []
         if len(rd) == 0:
             return True
-        rud = [
-            [rd[i][1] + tolerance, rd[i + 1][0] - tolerance] for i in range(len(rd) - 1)
-        ]
-        rud.extend((
-            [self.xaxis.domain[0], rd[0][0] - tolerance],
-            [rd[-1][1] + tolerance, self.xaxis.domain[1] - tolerance],
-        ))
+        rud = [[rd[i][1] + tolerance, rd[i + 1][0] - tolerance] for i in range(len(rd) - 1)]
+        rud.extend(
+            (
+                [self.xaxis.domain[0], rd[0][0] - tolerance],
+                [rd[-1][1] + tolerance, self.xaxis.domain[1] - tolerance],
+            )
+        )
         for r in rd:
             # both within defined range
             if xmin >= r[0] and xmin <= r[1] and xmax >= r[0] and xmax <= r[1]:
@@ -366,9 +364,7 @@ class Polygons(Gradeable):  # noqa: PLR0904
                             self.debugger.var1, abs((x - point[0]) * self.xscale)
                         )
         if self.debug:
-            self.debugger.add(
-                f"Polygon is {self.debugger.var1} pixels away from x = {x}."
-            )
+            self.debugger.add(f"Polygon is {self.debugger.var1} pixels away from x = {x}.")
             self.debugger.add(f"Max allowed is {tolerance} pixels.")
         return False
 
@@ -396,9 +392,7 @@ class Polygons(Gradeable):  # noqa: PLR0904
                             self.debugger.var1, abs((y - point[1]) * self.yscale)
                         )
         if self.debug:
-            self.debugger.add(
-                f"Polygon is {self.debugger.var1} pixels away from y = {y}."
-            )
+            self.debugger.add(f"Polygon is {self.debugger.var1} pixels away from y = {y}.")
             self.debugger.add(f"Max allowed is {tolerance} pixels.")
 
         return False
@@ -553,9 +547,7 @@ class Polygons(Gradeable):  # noqa: PLR0904
 
         poly = SymPyPolygon(*polygon)
         isInside = poly.encloses_point(Point(*point))
-        onBoundary = self.point_is_on_polygon_boundary(
-            polygon, point, tolerance=tolerance
-        )
+        onBoundary = self.point_is_on_polygon_boundary(polygon, point, tolerance=tolerance)
 
         return isInside or onBoundary
 
@@ -577,9 +569,7 @@ class Polygons(Gradeable):  # noqa: PLR0904
         for p in self.polygons:
             contains = True
             for point in polygon:
-                contains = contains and self.polygon_contains_point(
-                    p, point, tolerance=tolerance
-                )
+                contains = contains and self.polygon_contains_point(p, point, tolerance=tolerance)
 
             if contains:
                 return p
@@ -699,9 +689,7 @@ class Polygons(Gradeable):  # noqa: PLR0904
             self.debugger.add(
                 f"Polygon is roughly {self.debugger.var1.evalf()} pixels away from point ({point[0]},{point[1]})."
             )
-            self.debugger.add(
-                f"Max allowed distance is {tolerance * self.xscale} pixels."
-            )
+            self.debugger.add(f"Max allowed distance is {tolerance * self.xscale} pixels.")
 
         return False
 
@@ -747,9 +735,7 @@ class Polygons(Gradeable):  # noqa: PLR0904
 
         return intersections
 
-    def get_intersections_with_polygon_boundary(
-        self, polygon, line_segment, tolerance=None
-    ):
+    def get_intersections_with_polygon_boundary(self, polygon, line_segment, tolerance=None):
         """Return a list of intersection points of the given line segment
            with the given polygon.
 
@@ -795,9 +781,7 @@ class Polygons(Gradeable):  # noqa: PLR0904
     def get_polygons_within_range(self, xmin, xmax):
         polygons = []
         for polygon in self.polygons:
-            range_defined = (
-                polygon.range_defined if polygon.range_defined is not None else []
-            )
+            range_defined = polygon.range_defined if polygon.range_defined is not None else []
             range_detected = False
             for r in range_defined:
                 if not ((r[0] < xmin and r[1] < xmin) or (r[0] > xmax and r[1] > xmax)):

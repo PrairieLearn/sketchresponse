@@ -207,6 +207,4 @@ class SplineFunction(MultiFunction):
         return all(curve.is_a_function() for curve in self.functions)
 
     def is_straight(self):
-        return self.is_straight_between(
-            self.functions[0].p0[0], self.functions[-1].p3[0]
-        )
+        return self.is_straight_between(self.functions[0].p0[0], self.functions[-1].p3[0])

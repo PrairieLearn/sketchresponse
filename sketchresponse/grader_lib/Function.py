@@ -78,9 +78,7 @@ class Function(Tag, Tagable):  # noqa: PLR0904
         scale = abs(yrange[0] - yrange[1]) / height
         g_neg_t = negative_tolerance * scale
         g_pos_t = positive_tolerance * scale
-        return y_val <= (yrange[0] - g_neg_t + g_pos_t) and y_val >= (
-            yrange[1] + g_neg_t - g_pos_t
-        )
+        return y_val <= (yrange[0] - g_neg_t + g_pos_t) and y_val >= (yrange[1] + g_neg_t - g_pos_t)
 
     def within_x_range(self, x_val, negative_tolerance=0, positive_tolerance=0):
         if x_val is None:
@@ -90,24 +88,16 @@ class Function(Tag, Tagable):  # noqa: PLR0904
         scale = abs(xrange[1] - xrange[0]) / width
         g_neg_t = negative_tolerance * scale
         g_pos_t = positive_tolerance * scale
-        return x_val >= (xrange[0] + g_neg_t - g_pos_t) and x_val <= (
-            xrange[1] - g_neg_t + g_pos_t
-        )
+        return x_val >= (xrange[0] + g_neg_t - g_pos_t) and x_val <= (xrange[1] - g_neg_t + g_pos_t)
 
     def get_value_at(self, xval):
-        raise NotImplementedError(
-            "The get_value_at method is not implemented by this class."
-        )
+        raise NotImplementedError("The get_value_at method is not implemented by this class.")
 
     def get_angle_at(self, xval):
-        raise NotImplementedError(
-            "The get_angle_at method is not implemented by this class."
-        )
+        raise NotImplementedError("The get_angle_at method is not implemented by this class.")
 
     def get_slope_at(self, xval):
-        raise NotImplementedError(
-            "The get_slope_at method is not implemented by this class."
-        )
+        raise NotImplementedError("The get_slope_at method is not implemented by this class.")
 
     def get_min_value_between(self, xmin, xmax):
         raise NotImplementedError(
@@ -130,9 +120,7 @@ class Function(Tag, Tagable):  # noqa: PLR0904
         )
 
     def get_domain(self):
-        raise NotImplementedError(
-            "The get_domain method is not implemented by this class."
-        )
+        raise NotImplementedError("The get_domain method is not implemented by this class.")
 
     def does_not_exist_between(self, x1, x2, tolerance):
         raise NotImplementedError(
@@ -140,16 +128,12 @@ class Function(Tag, Tagable):  # noqa: PLR0904
         )
 
     def get_sample_points(self, num, xmin, xmax):
-        raise NotImplementedError(
-            "The get_sample_points method is not implemented by this class."
-        )
+        raise NotImplementedError("The get_sample_points method is not implemented by this class.")
 
     # Grader functions ###
 
     def is_a_function(self):
-        raise NotImplementedError(
-            "The is_a_function method is not implemented by this class."
-        )
+        raise NotImplementedError("The is_a_function method is not implemented by this class.")
 
     def has_value_y_at_x(self, y, x, yTolerance=None, xTolerance=None):
         """Return whether the function has the value y at x.
@@ -197,9 +181,7 @@ class Function(Tag, Tagable):  # noqa: PLR0904
                         self.debugger.add(
                             f"Function is {abs(y - ymin) * self.yscale} pixels away from expected point."
                         )
-                    self.debugger.add(
-                        f"Max allowed is {y_tolerance * self.yscale} pixels."
-                    )
+                    self.debugger.add(f"Max allowed is {y_tolerance * self.yscale} pixels.")
                 return False
         else:
             if self.debug:

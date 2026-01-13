@@ -97,9 +97,7 @@ class Asymptotes(Gradeable):
         if d < tolerance:
             return asym
         if self.debug:
-            self.debugger.add(
-                f"Closest asymptote is {d * self.scale} pixels away from expected."
-            )
+            self.debugger.add(f"Closest asymptote is {d * self.scale} pixels away from expected.")
             self.debugger.add(f"Max allowed is {tolerance * self.scale} pixels.")
 
         return None
@@ -167,9 +165,7 @@ class Asymptotes(Gradeable):
             try:
                 broke = False
                 for asy in asyms:
-                    if not self.point_ltgt_function(
-                        (x, asy.value), func, greater, tolerance
-                    ):
+                    if not self.point_ltgt_function((x, asy.value), func, greater, tolerance):
                         broke = True
                         break
                 if not broke:
@@ -244,9 +240,7 @@ class HorizontalAsymptotes(Asymptotes):
                     self.debugger.add(
                         f"Line higher than y = {y} by {(asym.value - y) * self.yscale} pixels."
                     )
-                    self.debugger.add(
-                        f"Max allowed is {tolerance * self.scale} pixels."
-                    )
+                    self.debugger.add(f"Max allowed is {tolerance * self.scale} pixels.")
                 return False
         return True
 
@@ -261,9 +255,7 @@ class HorizontalAsymptotes(Asymptotes):
                     self.debugger.add(
                         f"Line lower than y = {y} by {(y - asym.value) * self.yscale} pixels."
                     )
-                    self.debugger.add(
-                        f"Max allowed is {tolerance * self.scale} pixels."
-                    )
+                    self.debugger.add(f"Max allowed is {tolerance * self.scale} pixels.")
 
                 return False
         return True

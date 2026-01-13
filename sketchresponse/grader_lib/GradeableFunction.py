@@ -74,9 +74,7 @@ class GradeableFunction(MultipleSplinesFunction):  # noqa: PLR0904
         }
         values = []
         while True:  # handle function breaks
-            x_y_vals, broken, new_start = function_to_spline(
-                func, xmin, xmax, range_data
-            )
+            x_y_vals, broken, new_start = function_to_spline(func, xmin, xmax, range_data)
             if len(x_y_vals) > 0:
                 x_y_vals = fitCurve(x_y_vals, 5)
                 values.append(x_y_vals)
@@ -113,7 +111,6 @@ class GradeableFunction(MultipleSplinesFunction):  # noqa: PLR0904
         return spline_samples
 
     def sample_x_and_y(self, curve, step):
-
         samples = []
         x_t = curve.x
         y_t = curve.y
@@ -219,10 +216,7 @@ class GradeableFunction(MultipleSplinesFunction):  # noqa: PLR0904
                 )
                 self.debugger.add(f"Max allowed is {distTolerance} pixels.")
             return False
-        return (
-            self.get_point_at(point=point, x=x, y=y, distTolerance=distTolerance)
-            is not None
-        )
+        return self.get_point_at(point=point, x=x, y=y, distTolerance=distTolerance) is not None
 
     def points_less_than_y(self, y, x1, x2, tolerance):
         """Returns whether all the points in range x1, x2 are below the line f(x)=y"""
@@ -293,9 +287,7 @@ class GradeableFunction(MultipleSplinesFunction):  # noqa: PLR0904
                             x1 - (tolerance / self.xscale),
                             x2 + (tolerance / self.xscale),
                         )
-                    if not self.point_on_function_x_compare(
-                        (p[0], p[1]), splines, tolerance
-                    ):
+                    if not self.point_on_function_x_compare((p[0], p[1]), splines, tolerance):
                         count_incorrect += 1
                 elif not self.point_on_function((p[0], p[1]), func, tolerance):
                     count_incorrect += 1
@@ -333,7 +325,9 @@ class GradeableFunction(MultipleSplinesFunction):  # noqa: PLR0904
             if count_incorrect > max_incorrect:
                 return False
             if not self.point_ltgt_function((p[0], p[1]), func, greater, tolerance):
-                count_incorrect += 1  # see if we want to do a nicer tolerance for how many points can be off.
+                count_incorrect += (
+                    1  # see if we want to do a nicer tolerance for how many points can be off.
+                )
         return count_incorrect <= max_incorrect
 
     # Helper Functions ##
@@ -555,9 +549,7 @@ class GradeableFunction(MultipleSplinesFunction):  # noqa: PLR0904
                     self.debugger.var2 = min(self.debugger.var2, d)
             except Exception as e:
                 if self.debug:
-                    self.debugger.add(
-                        f"Error calculating function at x = {point[0]}: {e}"
-                    )
+                    self.debugger.add(f"Error calculating function at x = {point[0]}: {e}")
                 continue
         np.seterr(invalid="warn")
         if self.debug:
@@ -598,9 +590,7 @@ class GradeableFunction(MultipleSplinesFunction):  # noqa: PLR0904
                                     return True
                                 if self.debug:
                                     self.debugger.var1 = (
-                                        [x, y]
-                                        if d < self.debugger.var2
-                                        else self.debugger.var1
+                                        [x, y] if d < self.debugger.var2 else self.debugger.var1
                                     )
                                     self.debugger.var2 = min(self.debugger.var2, d)
                     except Exception:
@@ -668,9 +658,7 @@ def function_to_spline(
 
     # TODO: Compare different rates and potentially make a parameter?
     sampling_rate = 102
-    for i in range(
-        1, sampling_rate
-    ):  # exclude the edges to avoid asymptote-related errors
+    for i in range(1, sampling_rate):  # exclude the edges to avoid asymptote-related errors
         x = x_min + ((x_max - x_min) / sampling_rate) * i
         try:
             x_screen = (x - x_start) * width / (x_end - x_start)

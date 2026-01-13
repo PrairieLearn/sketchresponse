@@ -4,89 +4,91 @@ from ..grader_lib import LineSegment
 from ..grader_lib import PolyLine
 from ..grader_lib import Polygon
 
-problemconfig = sketchresponse.config({
-    'width': 750,
-    'height': 420,
-    'xrange': [-4, 4],
-    'yrange': [-2.5, 2.5],
-    'xscale': 'linear',
-    'yscale': 'linear',
-    'plugins': [
-        {'name': 'axes'},
-        {'name': 'polyline', 'id': 'pl', 'label': 'Beam', 'closed': False, 'color': 'lightblue', 'readonly': True},
-        {'name': 'polyline', 'id': 'pg', 'label': 'Isolation bubble', 'closed': True, 'color': 'gray', 'fillColor': 'lightblue'},
-        {'name': 'point', 'id': 'pt', 'label': 'Point', 'color': 'red', 'size': 5, 'hollow': False, 'readonly': True},
-        {'name': 'line-segment', 'id': 'ls', 'label': 'Force', 'color': 'green', 'dashStyle': 'solid', 'lengthContraint': 50, 'arrowHead': {'length': 10, 'base': 7}, 'readonly': True},
-        {'name': 'line-segment', 'id': 'c', 'label': 'Segment', 'color': 'black', 'dashStyle': 'dashdotted', 'lengthContraint': 20, 'readonly': True},
-        {'name': 'stamp', 'id': 'cwm', 'label': 'CWM', 'scale': 0.5, 'src': '/static/simona_stamps/cw_moment.png', 'readonly': True},
-        {'name': 'stamp', 'id': 'ccwm', 'label': 'CCWM', 'scale': 0.5, 'src': '/static/simona_stamps/ccw_moment.png', 'readonly': True}
-    ],
-    'initialstate': {
-  "pl": [
-    [
-      {
-        "y": 41,
-        "x": 93
-      },
-      {
-        "y": 293,
-        "x": 94
-      },
-      {
-        "y": 293,
-        "x": 563
-      }
-    ],
-    []
-  ],
-  "pt": [
+problemconfig = sketchresponse.config(
     {
-      "y": 41,
-      "x": 93
-    },
-    {
-      "y": 293,
-      "x": 563
+        "width": 750,
+        "height": 420,
+        "xrange": [-4, 4],
+        "yrange": [-2.5, 2.5],
+        "xscale": "linear",
+        "yscale": "linear",
+        "plugins": [
+            {"name": "axes"},
+            {
+                "name": "polyline",
+                "id": "pl",
+                "label": "Beam",
+                "closed": False,
+                "color": "lightblue",
+                "readonly": True,
+            },
+            {
+                "name": "polyline",
+                "id": "pg",
+                "label": "Isolation bubble",
+                "closed": True,
+                "color": "gray",
+                "fillColor": "lightblue",
+            },
+            {
+                "name": "point",
+                "id": "pt",
+                "label": "Point",
+                "color": "red",
+                "size": 5,
+                "hollow": False,
+                "readonly": True,
+            },
+            {
+                "name": "line-segment",
+                "id": "ls",
+                "label": "Force",
+                "color": "green",
+                "dashStyle": "solid",
+                "lengthContraint": 50,
+                "arrowHead": {"length": 10, "base": 7},
+                "readonly": True,
+            },
+            {
+                "name": "line-segment",
+                "id": "c",
+                "label": "Segment",
+                "color": "black",
+                "dashStyle": "dashdotted",
+                "lengthContraint": 20,
+                "readonly": True,
+            },
+            {
+                "name": "stamp",
+                "id": "cwm",
+                "label": "CWM",
+                "scale": 0.5,
+                "src": "/static/simona_stamps/cw_moment.png",
+                "readonly": True,
+            },
+            {
+                "name": "stamp",
+                "id": "ccwm",
+                "label": "CCWM",
+                "scale": 0.5,
+                "src": "/static/simona_stamps/ccw_moment.png",
+                "readonly": True,
+            },
+        ],
+        "initialstate": {
+            "pl": [[{"y": 41, "x": 93}, {"y": 293, "x": 94}, {"y": 293, "x": 563}], []],
+            "pt": [{"y": 41, "x": 93}, {"y": 293, "x": 563}],
+            "ls": [{"y": 344, "x": 468}, {"y": 296, "x": 468}],
+            "c": [{"x": 187, "y": 256}, {"x": 187, "y": 345}],
+            "cwm": [{"y": 126, "x": 93}],
+            "ccwm": [{"y": 293, "x": 280}],
+        },
     }
-  ],
-  "ls": [
-    {
-      "y": 344,
-      "x": 468
-    },
-    {
-      "y": 296,
-      "x": 468
-    }
-  ],
-  "c": [
-    {
-      "x": 187,
-      "y": 256
-    },
-    {
-      "x": 187,
-      "y": 345
-    }
-  ],
-  "cwm": [
-    {
-      "y": 126,
-      "x": 93
-    }
-  ],
-  "ccwm": [
-    {
-      "y": 293,
-      "x": 280
-    }
-  ]
-}
-})
+)
+
 
 @sketchresponse.grader
 def grader(pl, pg, pt, ls, c, cwm, ccwm):
-
     pl = PolyLine.PolyLines(pl)
     pg = Polygon.Polygons(pg)
     cls = LineSegment.LineSegments(c)
