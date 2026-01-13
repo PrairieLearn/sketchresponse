@@ -18,6 +18,9 @@ jobs:
       - name: Check lockfile is up to date
         run: uv lock --check
 
+      - name: Install dev dependencies
+        run: uv sync --extra dev
+
       - name: Run ruff check
         run: uv run ruff check .
 
