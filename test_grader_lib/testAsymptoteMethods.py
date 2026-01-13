@@ -11,7 +11,8 @@ class TestAsymptoteMethods(TestData.TestData):
         # test using data from the app2-7-1 csv
         data = self.load_as_gradeable_collections("app_2-tab7-problem1.anon.csv")
         for d in data:
-            va = Asymptote.VerticalAsymptotes(d["va"])
+            args = d["va"]
+            va = Asymptote.VerticalAsymptotes(args.grader, args.submission, args.tool_id)
             dist, v = va.closest_asym_to_value(-1)
             self.assertLess(dist, 1)
             self.assertIsNotNone(v)
@@ -20,7 +21,8 @@ class TestAsymptoteMethods(TestData.TestData):
         # test using data from the hw4A-8-1 csv
         data = self.load_as_gradeable_collections("hw4A-tab8-problem1.anon.csv")
         for d in data:
-            va = Asymptote.VerticalAsymptotes(d["va"])
+            args = d["va"]
+            va = Asymptote.VerticalAsymptotes(args.grader, args.submission, args.tool_id)
             v = va.get_asym_at_value(-7)
             self.assertIsNotNone(v)
 
@@ -28,7 +30,8 @@ class TestAsymptoteMethods(TestData.TestData):
         # test using data from the hw4A-8-1 csv
         data = self.load_as_gradeable_collections("hw4A-tab8-problem1.anon.csv")
         for d in data:
-            va = Asymptote.VerticalAsymptotes(d["va"])
+            args = d["va"]
+            va = Asymptote.VerticalAsymptotes(args.grader, args.submission, args.tool_id)
             v = va.get_asym_at_value(-5)
             self.assertIsNone(v)
 
@@ -36,21 +39,24 @@ class TestAsymptoteMethods(TestData.TestData):
         # test using data from the hw4A-8-1 csv
         data = self.load_as_gradeable_collections("hw4A-tab8-problem1.anon.csv")
         for d in data:
-            va = Asymptote.VerticalAsymptotes(d["va"])
+            args = d["va"]
+            va = Asymptote.VerticalAsymptotes(args.grader, args.submission, args.tool_id)
             self.assertTrue(va.has_asym_at_value(-7))
 
     def test_false_has_asym_at_value(self):
         # test using data from the hw4A-8-1 csv
         data = self.load_as_gradeable_collections("hw4A-tab8-problem1.anon.csv")
         for d in data:
-            va = Asymptote.VerticalAsymptotes(d["va"])
+            args = d["va"]
+            va = Asymptote.VerticalAsymptotes(args.grader, args.submission, args.tool_id)
             self.assertFalse(va.has_asym_at_value(-5))
 
     def test_get_number_of_asyms(self):
         # test using data from the hw4A-8-1 csv
         data = self.load_as_gradeable_collections("hw4A-tab8-problem1.anon.csv")
         for d in data:
-            va = Asymptote.VerticalAsymptotes(d["va"])
+            args = d["va"]
+            va = Asymptote.VerticalAsymptotes(args.grader, args.submission, args.tool_id)
             self.assertEqual(va.get_number_of_asyms(), 3)
 
 

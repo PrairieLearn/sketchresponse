@@ -4,6 +4,7 @@ import unittest
 import json
 from test_grader_lib.GradeableCollection import GradeableCollection
 from test_grader_lib.csv_to_data_new import load_csv_data
+from test_grader_lib.TestData import TestFixture
 
 
 class TestDataPolar(unittest.TestCase):
@@ -29,16 +30,14 @@ class TestDataPolar(unittest.TestCase):
     def load_as_gradeable_collections(self, source):
         # answers = self.get_data(source)
         source["meta"]["config"]["coordinates"] = "polar"
-        answers = [source]
-        # answers = self.data[source]
-        list_of_gradeables = []
-        for answer in answers:
-            gradeables = {
-                identifier: GradeableCollection(
-                    identifier, answer["meta"]["config"], gradeable_list
-                )
-                for identifier, gradeable_list in list(answer["data"].items())
-            }
-            list_of_gradeables.append(gradeables)
-
-        return list_of_gradeables[0]
+        answer = source
+        submission = {
+            "meta": answer["meta"],
+            "gradeable": answer["data"],
+        }
+        default_grader = {
+            "debug": False,
+            "type": "test",
+            "tolerance": 10,
+        }
+        return TestFixture(submission, default_grader)

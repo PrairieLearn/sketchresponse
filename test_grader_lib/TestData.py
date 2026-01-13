@@ -7404,15 +7404,50 @@ class TestData(unittest.TestCase):
         # answers = self.data[source]
         list_of_gradeables = []
         for answer in answers:
-            gradeables = {
-                identifier: GradeableCollection(
-                    identifier, answer["meta"]["config"], gradeable_list
-                )
-                for identifier, gradeable_list in list(answer["data"].items())
+            submission = {
+                "meta": answer["meta"],
+                "gradeable": answer["data"],
             }
-            list_of_gradeables.append(gradeables)
+
+            default_grader = {
+                "debug": False,
+                "type": "test",
+                "tolerance": 10,
+            }
+
+            fixture = TestFixture(submission, default_grader)
+            list_of_gradeables.append(fixture)
 
         return list_of_gradeables
+
+
+class TestFixture:
+    """Test fixture that provides submission data and grader config for tests."""
+
+    def __init__(self, submission, default_grader):
+        self.submission = submission
+        self.default_grader = default_grader
+
+    def __getitem__(self, tool_id):
+        """Return a GradeableArgs tuple for the given tool_id."""
+        return GradeableArgs(self.default_grader, self.submission, tool_id)
+
+    def __contains__(self, tool_id):
+        """Check if tool_id exists in submission data."""
+        return tool_id in self.submission["gradeable"]
+
+
+class GradeableArgs:
+    """Arguments to pass to Gradeable constructors."""
+
+    def __init__(self, grader, submission, tool_id):
+        self.grader = grader
+        self.submission = submission
+        self.tool_id = tool_id
+
+    def unpack(self):
+        """Return (grader, submission, tool_id) tuple for unpacking."""
+        return self.grader, self.submission, self.tool_id
 
 
 #    def __init__(self, *args, **kwargs):
