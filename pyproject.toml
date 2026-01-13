@@ -31,7 +31,7 @@ dependencies = [
 
 [project.optional-dependencies]
 server = ["flask>=2.0.0"]
-dev = ["ruff>=0.8.0", "pandas>=1.0.0", "matplotlib>=3.0.0"]
+dev = ["ruff>=0.8.0", "pandas>=1.0.0", "matplotlib>=3.0.0", "pytest>=7.0.0"]
 
 [project.urls]
 Repository = "https://github.com/PrairieLearn/sketchresponse"
@@ -79,3 +79,7 @@ ignore = [
     "W292",  # missing-newline-at-end-of-file
     "W293",  # blank-line-with-whitespace
 ]
+
+[tool.pytest.ini_options]
+testpaths = ["test_grader_lib"]
+python_files = ["test*.py"]

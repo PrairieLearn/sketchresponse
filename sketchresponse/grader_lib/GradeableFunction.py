@@ -2,7 +2,7 @@ from collections.abc import Callable
 
 import numpy as np
 
-from grading.types import SketchCanvasSize
+from sketchresponse.types import SketchCanvasSize
 
 from .Axis import Axis
 from .fit_curve import fitCurve

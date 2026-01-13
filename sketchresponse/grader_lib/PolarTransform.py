@@ -10,7 +10,7 @@ from . import Point
 from . import Axis
 import numpy as np
 import math
-from .fitCurves import fitCurves
+from . import fit_curve as fitCurves
 import copy
 
 
