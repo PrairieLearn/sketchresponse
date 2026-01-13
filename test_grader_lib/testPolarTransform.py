@@ -18,9 +18,9 @@ class TestPolarTransform(TestDataPolar.TestDataPolar):
             args3 = d["pt3"]
             pt3 = GradeableFunction.GradeableFunction(args3.grader, args3.submission, args3.tool_id)
 
-            self.assertTrue(pt1.has_point_at(x=(11 * pi / 6), y=2))
-            self.assertTrue(pt2.has_point_at(x=(5 * pi / 4), y=sqrt(2)))
-            self.assertTrue(pt3.has_point_at(x=(2 * pi / 3), y=2))
+            self.assertTrue(pt1.has_point_at(x=(11 * pi / 6), y=2, distTolerance=20))
+            self.assertTrue(pt2.has_point_at(x=(5 * pi / 4), y=sqrt(2), distTolerance=20))
+            self.assertTrue(pt3.has_point_at(x=(2 * pi / 3), y=2, distTolerance=20))
 
     def test_polar_transform_points_false(self):
         data = self.loadData("test_grader_lib/polar_points_false.txt")
@@ -33,9 +33,9 @@ class TestPolarTransform(TestDataPolar.TestDataPolar):
             pt3 = GradeableFunction.GradeableFunction(args3.grader, args3.submission, args3.tool_id)
 
             isCorrect = True
-            isCorrect = isCorrect and pt1.has_point_at(x=(11 * pi / 6), y=2)
-            isCorrect = isCorrect and pt2.has_point_at(x=(5 * pi / 4), y=sqrt(2))
-            isCorrect = isCorrect and pt3.has_point_at(x=(2 * pi / 3), y=2)
+            isCorrect = isCorrect and pt1.has_point_at(x=(11 * pi / 6), y=2, distTolerance=20)
+            isCorrect = isCorrect and pt2.has_point_at(x=(5 * pi / 4), y=sqrt(2), distTolerance=20)
+            isCorrect = isCorrect and pt3.has_point_at(x=(2 * pi / 3), y=2, distTolerance=20)
 
             self.assertFalse(isCorrect)
 

@@ -40,7 +40,7 @@ class TestGradeableFunctionMethods(TestData.TestData):
             args = d["cp"]
             cp = GradeableFunction.GradeableFunction(args.grader, args.submission, args.tool_id)
             test_point = Point.Point(cp, -1, 3, pixel=False)
-            self.assertIsNotNone(cp.get_point_at(point=test_point))
+            self.assertIsNotNone(cp.get_point_at(100, point=test_point))
 
     def test_is_none_with_point_get_point_at(self):
         # test using data from the hw4A-4-1 csv
@@ -49,7 +49,7 @@ class TestGradeableFunctionMethods(TestData.TestData):
             args = d["cp"]
             cp = GradeableFunction.GradeableFunction(args.grader, args.submission, args.tool_id)
             test_point = Point.Point(cp, -2, 5, pixel=False)
-            self.assertIsNone(cp.get_point_at(point=test_point))
+            self.assertIsNone(cp.get_point_at(100, point=test_point))
 
     def test_not_none_with_xy_get_point_at(self):
         # test using data from the hw4A-4-1 csv
@@ -57,7 +57,7 @@ class TestGradeableFunctionMethods(TestData.TestData):
         for d in data:
             args = d["cp"]
             cp = GradeableFunction.GradeableFunction(args.grader, args.submission, args.tool_id)
-            self.assertIsNotNone(cp.get_point_at(x=-1, y=3))
+            self.assertIsNotNone(cp.get_point_at(100, x=-1, y=3))
 
     def test_is_none_with_xy_get_point_at(self):
         # test using data from the hw4A-4-1 csv
@@ -65,7 +65,7 @@ class TestGradeableFunctionMethods(TestData.TestData):
         for d in data:
             args = d["cp"]
             cp = GradeableFunction.GradeableFunction(args.grader, args.submission, args.tool_id)
-            self.assertIsNone(cp.get_point_at(x=-2, y=5))
+            self.assertIsNone(cp.get_point_at(100, x=-2, y=5))
 
     def test_not_none_with_x_get_point_at(self):
         # test using data from the hw4A-4-1 csv
@@ -73,7 +73,7 @@ class TestGradeableFunctionMethods(TestData.TestData):
         for d in data:
             args = d["cp"]
             cp = GradeableFunction.GradeableFunction(args.grader, args.submission, args.tool_id)
-            p = cp.get_point_at(x=-1)
+            p = cp.get_point_at(100, x=-1)
             self.assertIsNotNone(p)
             self.assertAlmostEqual(p.y, 3, places=0)
 
@@ -83,7 +83,7 @@ class TestGradeableFunctionMethods(TestData.TestData):
         for d in data:
             args = d["cp"]
             cp = GradeableFunction.GradeableFunction(args.grader, args.submission, args.tool_id)
-            p = cp.get_point_at(x=-2)
+            p = cp.get_point_at(100, x=-2)
             self.assertIsNone(p)
 
     def test_true_with_point_has_point_at(self):
@@ -93,7 +93,7 @@ class TestGradeableFunctionMethods(TestData.TestData):
             args = d["cp"]
             cp = GradeableFunction.GradeableFunction(args.grader, args.submission, args.tool_id)
             test_point = Point.Point(cp, -1, 3, pixel=False)
-            self.assertTrue(cp.has_point_at(point=test_point))
+            self.assertTrue(cp.has_point_at(-1, 3, 100, point=test_point))
 
     def test_false_with_point_has_point_at(self):
         # test using data from the hw4A-4-1 csv
@@ -102,7 +102,7 @@ class TestGradeableFunctionMethods(TestData.TestData):
             args = d["cp"]
             cp = GradeableFunction.GradeableFunction(args.grader, args.submission, args.tool_id)
             test_point = Point.Point(cp, -2, 5, pixel=False)
-            self.assertFalse(cp.has_point_at(point=test_point))
+            self.assertFalse(cp.has_point_at(-2, 5, 100, point=test_point))
 
     def test_true_with_xy_has_point_at(self):
         # test using data from the hw4A-4-1 csv
@@ -110,7 +110,7 @@ class TestGradeableFunctionMethods(TestData.TestData):
         for d in data:
             args = d["cp"]
             cp = GradeableFunction.GradeableFunction(args.grader, args.submission, args.tool_id)
-            self.assertTrue(cp.has_point_at(x=-1, y=3))
+            self.assertTrue(cp.has_point_at(-1, 3, 100))
 
     def test_false_with_xy_has_point_at(self):
         # test using data from the hw4A-4-1 csv
@@ -118,7 +118,7 @@ class TestGradeableFunctionMethods(TestData.TestData):
         for d in data:
             args = d["cp"]
             cp = GradeableFunction.GradeableFunction(args.grader, args.submission, args.tool_id)
-            self.assertFalse(cp.has_point_at(x=-2, y=5))
+            self.assertFalse(cp.has_point_at(-2, 5, 100))
 
     def test_true_with_x_has_point_at(self):
         # test using data from the hw4A-4-1 csv
@@ -126,7 +126,7 @@ class TestGradeableFunctionMethods(TestData.TestData):
         for d in data:
             args = d["cp"]
             cp = GradeableFunction.GradeableFunction(args.grader, args.submission, args.tool_id)
-            self.assertTrue(cp.has_point_at(x=-1))
+            self.assertTrue(cp.has_point_at(-1, None, 100))
 
     def test_false_with_x_has_point_at(self):
         # test using data from the hw4A-4-1 csv
@@ -134,7 +134,7 @@ class TestGradeableFunctionMethods(TestData.TestData):
         for d in data:
             args = d["cp"]
             cp = GradeableFunction.GradeableFunction(args.grader, args.submission, args.tool_id)
-            self.assertFalse(cp.has_point_at(x=-2))
+            self.assertFalse(cp.has_point_at(-2, None, 100))
 
     def test_get_number_of_points(self):
         # test using data from the hw4A-4-1 csv

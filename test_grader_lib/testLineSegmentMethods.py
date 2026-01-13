@@ -44,14 +44,14 @@ class TestAsymptoteMethods(TestData.TestData):
         for d in data:
             args = d["ls"]
             ls = LineSegment.LineSegments(args.grader, args.submission, args.tool_id)
-            self.assertTrue(ls.does_not_exist_between(-1, 1))
+            self.assertTrue(ls.does_not_exist_between(-1, 1, 10))
 
     def test_false_does_not_exist_between(self):
         data = self.load_as_gradeable_collections("ls-exist")
         for d in data:
             args = d["ls"]
             ls = LineSegment.LineSegments(args.grader, args.submission, args.tool_id)
-            self.assertFalse(ls.does_not_exist_between(-1, 1))
+            self.assertFalse(ls.does_not_exist_between(-1, 1, 10))
 
     def test_true_does_exist_between(self):
         data = self.load_as_gradeable_collections("ls-exist")

@@ -14,14 +14,14 @@ class TestPolygonMethods(TestData.TestData):
         d = data[0]
         args = d["pl"]
         poly = Polygon.Polygons(args.grader, args.submission, args.tool_id)
-        self.assertTrue(poly.contains_point([0, 1]))
+        self.assertTrue(poly.contains_point(0, 1))
 
     def test_contains_point_false(self):
         data = self.load_as_gradeable_collections("polygon_point")
         d = data[0]
         args = d["pl"]
         poly = Polygon.Polygons(args.grader, args.submission, args.tool_id)
-        self.assertFalse(poly.contains_point([3, 3]))
+        self.assertFalse(poly.contains_point(3, 3))
 
     def test_polygon_contains_point_true(self):
         data = self.load_as_gradeable_collections("polygon_point")
