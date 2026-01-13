@@ -1,7 +1,7 @@
 from __future__ import absolute_import
 import unittest
-from . import TestData
-from grader_lib import Asymptote, GradeableFunction, LineSegment, PolyLine, Polygon
+from test_grader_lib import TestData
+from sketchresponse.grader_lib import Asymptote, GradeableFunction, LineSegment, PolyLine, Polygon
 
 
 class TestTagMethods(TestData.TestData):

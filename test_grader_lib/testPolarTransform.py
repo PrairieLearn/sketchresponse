@@ -1,9 +1,9 @@
 from __future__ import absolute_import
 from __future__ import division
 import unittest
-from . import TestDataPolar
-from grader_lib import GradeableFunction
-from grader_lib import Point
+from test_grader_lib import TestDataPolar
+from sketchresponse.grader_lib import GradeableFunction
+from sketchresponse.grader_lib import Point
 from math import pi, sqrt
 
 

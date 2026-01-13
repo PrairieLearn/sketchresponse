@@ -77,3 +77,9 @@ target/
 
 # front-end build
 static/sketch_tool_dist/
+
+# uv / venv
+.venv/
+
+# Auto-generated version file
+sketchresponse/_version.py
