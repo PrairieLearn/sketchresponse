@@ -30,6 +30,41 @@ class GradeableFunction(MultipleSplinesFunction):  # noqa: PLR0904
             grader["tolerance"] * grader["tolerance"],
         )  # threshold for finding a point close to a point
 
+        # Transform from polar coordinates if specified
+        if "coordinates" in config and config["coordinates"] == "polar":
+            from .PolarTransform import PolarTransform
+
+            # Create wrapper that PolarTransform expects
+            class FunctionDataWrapper(list):
+                def __init__(self, gradeable_data, params):
+                    super().__init__(gradeable_data)
+                    self.params = params
+
+            func_data = FunctionDataWrapper(
+                submission["gradeable"][current_tool],
+                {
+                    "xrange": config["xrange"],
+                    "yrange": config["yrange"],
+                    "width": config["width"],
+                    "height": config["height"],
+                },
+            )
+            self.pt = PolarTransform(func_data, self)
+
+            # Get transformed data and update axes
+            # Note: transformed.params["yrange"] is already [max, min] (screen coords),
+            # so don't reverse it like we do in the normal init
+            transformed = self.pt.getTransformedFunctionData()
+            self.xaxis = Axis(transformed.params["xrange"], transformed.params["width"])
+            self.yaxis = Axis(transformed.params["yrange"], transformed.params["height"])
+
+            # Update submission with transformed data and recreate functions
+            self.submission["gradeable"][current_tool] = list(transformed)
+            self.create_from_path_info(None)
+
+            # Resample splines in the new coordinate space
+            self.pt.resampleNewSplines()
+
     def covers_function_domain(self, function, xmin, xmax, tolerance):
         """Return whether the submission covers the entire domain of the function (90%).
 
@@ -155,20 +190,20 @@ class GradeableFunction(MultipleSplinesFunction):  # noqa: PLR0904
                 d, _ = self.closest_point_to_point(point, squared=True)
                 if d >= dtol:
                     self.points.append(point)
-        # # Tag support
-        #     if 'tag' in submission_data[i]:
-        #         tag = submission_data[i]['tag']
-        #         if len(self.functions) > 0:
-        #             self.functions[-1].set_tag(tag)
-        #         elif len(self.points) > 0:
-        #             self.points[-1].set_tag(tag)
+            # Tag support
+            if "tag" in submission_data[i]:
+                tag = submission_data[i]["tag"]
+                if len(self.functions) > 0:
+                    self.functions[-1].set_tag(tag)
+                elif len(self.points) > 0:
+                    self.points[-1].set_tag(tag)
 
-        # # set the gradeable object list to the tagable list
-        # self.set_tagables(None)
-        # if len(self.functions) > 0:
-        #     self.set_tagables(self.functions)
-        # if len(self.points) > 0:
-        #     self.set_tagables(self.points)
+        # set the gradeable object list to the tagable list
+        self.set_tagables(None)
+        if len(self.functions) > 0:
+            self.set_tagables(self.functions)
+        if len(self.points) > 0:
+            self.set_tagables(self.points)
 
     # Grader Functions ##
     def has_point_at(self, x, y, distTolerance, point=None):
@@ -377,7 +412,8 @@ class GradeableFunction(MultipleSplinesFunction):  # noqa: PLR0904
 
         if x is not None:
             distance, found_point = self.closest_point_to_x(x)
-            if distance < distTolerance:
+            tol = distTolerance / self.xscale
+            if distance < tol:
                 return found_point
 
         if self.debug:
