@@ -92,27 +92,25 @@ class TestPolarTransform(TestDataPolar.TestDataPolar):
             f = GradeableFunction.GradeableFunction(args.grader, args.submission, args.tool_id)
             allowedFails = 4
 
-            isCorrect = True
-            isCorrect = isCorrect and f.is_increasing_between(
-                0, (pi / 6), failureTolerance=allowedFails
-            )
-            isCorrect = isCorrect and f.is_decreasing_between(
-                (pi / 6), (pi / 3), failureTolerance=allowedFails
-            )
-            isCorrect = isCorrect and f.is_increasing_between(
-                (4 * pi / 6), (5 * pi / 6), failureTolerance=allowedFails
-            )
-            isCorrect = isCorrect and f.is_decreasing_between(
-                (5 * pi / 6), pi, failureTolerance=allowedFails
-            )
-            isCorrect = isCorrect and f.is_increasing_between(
-                (8 * pi / 6), (3 * pi / 2), failureTolerance=allowedFails
-            )
-            isCorrect = isCorrect and f.is_decreasing_between(
-                (3 * pi / 2), (10 * pi / 6), failureTolerance=allowedFails
-            )
+            # This curve has wrong monotonicity - it's not a proper three-lobe shape
+            # At least one check should fail (return False or 'ndef')
+            r1 = f.is_increasing_between(0, (pi / 6), failureTolerance=allowedFails)
+            self.assertEqual(r1, "ndef")  # function doesn't exist in this range
 
-            self.assertFalse(isCorrect)
+            r2 = f.is_decreasing_between((pi / 6), (pi / 3), failureTolerance=allowedFails)
+            self.assertEqual(r2, False)  # function is increasing, not decreasing
+
+            r3 = f.is_increasing_between((4 * pi / 6), (5 * pi / 6), failureTolerance=allowedFails)
+            self.assertEqual(r3, True)
+
+            r4 = f.is_decreasing_between((5 * pi / 6), pi, failureTolerance=allowedFails)
+            self.assertEqual(r4, True)
+
+            r5 = f.is_increasing_between((8 * pi / 6), (3 * pi / 2), failureTolerance=allowedFails)
+            self.assertEqual(r5, True)
+
+            r6 = f.is_decreasing_between((3 * pi / 2), (10 * pi / 6), failureTolerance=allowedFails)
+            self.assertEqual(r6, True)
 
 
 if __name__ == "__main__":
