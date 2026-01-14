@@ -664,7 +664,7 @@ class LineSegments(Gradeable):  # noqa: PLR0904
             true if no line segments overlap with the range (xmin, xmax)
             within tolerances, otherwise false.
         """
-        overlap_tolerance = tolerance
+        overlap_tolerance = tolerance / self.xscale
 
         for segment in self.segments:
             if self.segment_within_y_range_between_x(segment, xmin, xmax, neg_tol=10):
@@ -1264,11 +1264,11 @@ class LineSegments(Gradeable):  # noqa: PLR0904
         point1, point2 = points
 
         point1_match = self.check_segment_startpoint(
-            segment, point1, tolerance
-        ) or self.check_segment_endpoint(segment, point1, tolerance)
+            segment, point1, tolerance, squared=True
+        ) or self.check_segment_endpoint(segment, point1, tolerance, squared=True)
         point2_match = self.check_segment_startpoint(
-            segment, point2, tolerance
-        ) or self.check_segment_endpoint(segment, point2, tolerance)
+            segment, point2, tolerance, squared=True
+        ) or self.check_segment_endpoint(segment, point2, tolerance, squared=True)
 
         return point1_match and point2_match
 
