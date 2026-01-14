@@ -412,9 +412,6 @@ class Polygons(Gradeable):  # noqa: PLR0904
             True if the point is contained within the polygon within tolerance,
             otherwise False.
         """
-        if tolerance is None:
-            tolerance = self.tolerance["point_distance"]
-
         if x is None:
             return self.intersects_at_y(y, tolerance)
         if y is None:
