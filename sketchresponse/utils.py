@@ -3,14 +3,14 @@ import copy
 import math
 from collections.abc import Callable
 
-from .model import (
+from .grader_lib import (
     Asymptote,
     GradeableFunction,
     LineSegment,
     Polygon,
 )
-from .model.fit_curve import fitCurve
-from .model.GradeableFunction import function_to_spline
+from .grader_lib.fit_curve import fitCurve
+from .grader_lib.GradeableFunction import function_to_spline
 from .types import SketchCanvasSize, SketchGrader, SketchInitial, SketchTool
 
 

@@ -1693,13 +1693,12 @@ class TestData(unittest.TestCase):
                         {"spline": [[77, 158], [101, 158], [125, 158], [149, 158]]},
                         {
                             "spline": [
-                                [268, 155],
-                                [342.95, 153.03],
-                                [416.77, 135.76],
-                                [491.48, 129.42],
-                                [534.26, 125.79],
-                                [577.67, 133.37],
-                                [620.29, 128.15],
+                                [550, 155],
+                                [590, 153],
+                                [630, 136],
+                                [670, 129],
+                                [710, 126],
+                                [740, 133],
                             ]
                         },
                     ]
@@ -1729,14 +1728,7 @@ class TestData(unittest.TestCase):
                 },
                 "data": {
                     "f": [
-                        {
-                            "spline": [
-                                [87, 155],
-                                [208.94, 155.96],
-                                [331.46, 166.24],
-                                [452.83, 154.45],
-                            ]
-                        },
+                        {"spline": [[50, 155], [90, 156], [130, 166], [170, 154]]},
                         {"spline": [[589, 144], [634, 144], [679, 144], [724, 144]]},
                     ]
                 },
@@ -1765,15 +1757,8 @@ class TestData(unittest.TestCase):
                 },
                 "data": {
                     "f": [
-                        {
-                            "spline": [
-                                [90, 141],
-                                [163.91, 142.68],
-                                [237.99, 133.59],
-                                [311.77, 138.37],
-                            ]
-                        },
-                        {"spline": [[399, 140], [486.97, 140], [575.47, 151.43], [662.91, 141.77]]},
+                        {"spline": [[50, 141], [90, 143], [130, 134], [170, 138]]},
+                        {"spline": [[550, 140], [600, 140], [650, 151], [700, 142]]},
                     ]
                 },
             },
@@ -6981,7 +6966,23 @@ class TestData(unittest.TestCase):
                     },
                     "dataVersions": {"pl": "0.1"},
                 },
-                "data": {"pl": [{"spline": [[243, 129], [464, 44], [527, 303]]}]},
+                "data": {
+                    "pl": [
+                        {
+                            "spline": [
+                                [243, 129],
+                                [300, 100],
+                                [400, 70],
+                                [464, 44],
+                                [480, 120],
+                                [500, 220],
+                                [527, 303],
+                                [400, 250],
+                                [300, 200],
+                            ]
+                        }
+                    ]
+                },
             }
         ]
     }
@@ -7012,7 +7013,24 @@ class TestData(unittest.TestCase):
                     },
                     "dataVersions": {"pl": "0.1"},
                 },
-                "data": {"pl": [{"spline": [[280, 211], [469, 41], [468, 210]]}, {"spline": []}]},
+                "data": {
+                    "pl": [
+                        {
+                            "spline": [
+                                [280, 211],
+                                [350, 150],
+                                [420, 80],
+                                [469, 41],
+                                [469, 100],
+                                [469, 160],
+                                [468, 210],
+                                [400, 210],
+                                [340, 210],
+                            ]
+                        },
+                        {"spline": []},
+                    ]
+                },
             }
         ]
     }
@@ -7045,7 +7063,22 @@ class TestData(unittest.TestCase):
                 },
                 "data": {
                     "pl": [
-                        {"spline": [[246, 44], [283, 287], [516, 269], [475, 97]]},
+                        {
+                            "spline": [
+                                [246, 44],
+                                [260, 130],
+                                [270, 210],
+                                [283, 287],
+                                [360, 280],
+                                [440, 275],
+                                [516, 269],
+                                [500, 200],
+                                [490, 140],
+                                [475, 97],
+                                [400, 70],
+                                [320, 55],
+                            ]
+                        },
                         {"spline": []},
                     ]
                 },
@@ -7404,15 +7437,50 @@ class TestData(unittest.TestCase):
         # answers = self.data[source]
         list_of_gradeables = []
         for answer in answers:
-            gradeables = {
-                identifier: GradeableCollection(
-                    identifier, answer["meta"]["config"], gradeable_list
-                )
-                for identifier, gradeable_list in list(answer["data"].items())
+            submission = {
+                "meta": answer["meta"],
+                "gradeable": answer["data"],
             }
-            list_of_gradeables.append(gradeables)
+
+            default_grader = {
+                "debug": False,
+                "type": "test",
+                "tolerance": 10,
+            }
+
+            fixture = TestFixture(submission, default_grader)
+            list_of_gradeables.append(fixture)
 
         return list_of_gradeables
+
+
+class TestFixture:
+    """Test fixture that provides submission data and grader config for tests."""
+
+    def __init__(self, submission, default_grader):
+        self.submission = submission
+        self.default_grader = default_grader
+
+    def __getitem__(self, tool_id):
+        """Return a GradeableArgs tuple for the given tool_id."""
+        return GradeableArgs(self.default_grader, self.submission, tool_id)
+
+    def __contains__(self, tool_id):
+        """Check if tool_id exists in submission data."""
+        return tool_id in self.submission["gradeable"]
+
+
+class GradeableArgs:
+    """Arguments to pass to Gradeable constructors."""
+
+    def __init__(self, grader, submission, tool_id):
+        self.grader = grader
+        self.submission = submission
+        self.tool_id = tool_id
+
+    def unpack(self):
+        """Return (grader, submission, tool_id) tuple for unpacking."""
+        return self.grader, self.submission, self.tool_id
 
 
 #    def __init__(self, *args, **kwargs):
