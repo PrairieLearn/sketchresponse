@@ -198,8 +198,7 @@ class MultipleSplinesFunction(MultiFunction):  # noqa: PLR0904
         if not domain:
             return False
         return all(
-            self.is_increasing_between(d[0], d[1], numPoints, failureTolerance)
-            for d in domain
+            self.is_increasing_between(d[0], d[1], numPoints, failureTolerance) for d in domain
         )
 
     def is_always_decreasing(self, numPoints=10, failureTolerance=None):
@@ -220,8 +219,7 @@ class MultipleSplinesFunction(MultiFunction):  # noqa: PLR0904
         if not domain:
             return False
         return all(
-            self.is_decreasing_between(d[0], d[1], numPoints, failureTolerance)
-            for d in domain
+            self.is_decreasing_between(d[0], d[1], numPoints, failureTolerance) for d in domain
         )
 
     def has_positive_curvature_between(self, xmin, xmax, numSegments=5, failureTolerance=None):

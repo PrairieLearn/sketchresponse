@@ -23,7 +23,9 @@ class MultiFunction(Function):
     ):
         super().__init__(xaxis, yaxis, path_info, grader, current_tool, tolerance)
         self.set_default_tolerance("straight_line", 0.1)  # threshold for straight lines
-        self.set_default_tolerance("point_distance", grader["tolerance"])  # threshold for point distance
+        self.set_default_tolerance(
+            "point_distance", grader["tolerance"]
+        )  # threshold for point distance
         if functions:
             self.functions = functions
 
