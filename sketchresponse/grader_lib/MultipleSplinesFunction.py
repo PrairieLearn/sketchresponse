@@ -180,6 +180,50 @@ class MultipleSplinesFunction(MultiFunction):  # noqa: PLR0904
 
         return self.always_comparer_at_points(greater_or_equal, yvals, delta, failureTolerance)
 
+    def is_always_increasing(self, numPoints=10, failureTolerance=None):
+        """Return whether the function is increasing over its entire domain.
+
+        Args:
+            numPoints(default: 10): the number of points to test along each range.
+            failureTolerance(default: None): the number of pairwise point increase
+                                          comparisons that can fail before the test
+                                          fails.
+
+        Returns:
+            bool:
+            true if the function is increasing over the entire domain,
+            otherwise false.
+        """
+        domain = self.get_domain()
+        if not domain:
+            return False
+        return all(
+            self.is_increasing_between(d[0], d[1], numPoints, failureTolerance)
+            for d in domain
+        )
+
+    def is_always_decreasing(self, numPoints=10, failureTolerance=None):
+        """Return whether the function is decreasing over its entire domain.
+
+        Args:
+            numPoints(default: 10): the number of points to test along each range.
+            failureTolerance(default: None): the number of pairwise point decrease
+                                          comparisons that can fail before the test
+                                          fails.
+
+        Returns:
+            bool:
+            true if the function is decreasing over the entire domain,
+            otherwise false.
+        """
+        domain = self.get_domain()
+        if not domain:
+            return False
+        return all(
+            self.is_decreasing_between(d[0], d[1], numPoints, failureTolerance)
+            for d in domain
+        )
+
     def has_positive_curvature_between(self, xmin, xmax, numSegments=5, failureTolerance=None):
         """Return whether the function has positive curvature in the range xmin to xmax.
 
@@ -245,7 +289,30 @@ class MultipleSplinesFunction(MultiFunction):  # noqa: PLR0904
     # helper function for has_increasing_curvature_between and has_decreasing_curvature_between
     # does most of the work, but the comparer differs for the two functions
     # breaks the function up into some segments, and checks if the delta_y has appropriately higher or lower
-    def has_curvature_between(self, xmin, xmax, numSegments, failureTolerance, comparer):
+    def has_curvature_between(
+        self, xmin, xmax, numSegments=5, failureTolerance=None, comparer=None
+    ):
+        if failureTolerance is None:
+            failureTolerance = self.tolerance["curve_failure"]
+
+        if self.does_not_exist_between(xmin, xmax, tolerance=10):
+            if self.debug:
+                self.debugger.add(f"Function does not exist in range [{xmin},{xmax}]")
+            return "ndef"
+
+        # When no comparer specified, check for ANY curvature (positive OR negative)
+        # A straight line passes BOTH positive and negative tests (since <= and >= both
+        # succeed when ydiffs are equal). A curved line passes only ONE test.
+        # So we use XOR logic: has curvature if exactly one test passes.
+        if comparer is None:
+            pos = self.has_curvature_between(
+                xmin, xmax, numSegments, failureTolerance, lesser_or_equal
+            )
+            neg = self.has_curvature_between(
+                xmin, xmax, numSegments, failureTolerance, greater_or_equal
+            )
+            return (pos is True) != (neg is True)
+
         [xleft, xright] = self.get_between_vals(xmin, xmax)
         if xleft > xright:
             if self.debug:
