@@ -1,6 +1,12 @@
 SketchResponse
 ===========
 
+**Note: This is a forked copy adapted for [PrairieLearn](https://www.prairielearn.com/). This library is used as the backing for the [`pl-sketch`](https://prairielearn.readthedocs.io/en/latest/elements/pl-sketch/) element.**
+
+This project (will be) published to PyPI as [`sketchresponse`](https://pypi.org/project/sketchresponse/), and on NPM as [`@prairielearn/sketchresponse`](https://www.npmjs.com/package/@prairielearn/sketchresponse).
+
+**Warning: The API is not fully compatible with the original SketchResponse project. Additionally, the codebase has been significantly refactored, and Python 3.10 is now the minimum supported version. The information in this README is not guaranteed to be up to date.**
+
 SketchResponse is a Javascript/Python(2.7-3.x) tool for drawing and evaluating
 mathematical functions. It was designed for use with the edX online
 courseware platform. However, it is a self-contained application that can be
