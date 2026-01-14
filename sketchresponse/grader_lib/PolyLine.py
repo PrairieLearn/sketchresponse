@@ -16,16 +16,17 @@ class PolyLines(Gradeable.Gradeable):
     LineSegments graders.
     """
 
-    def __init__(self, info, tolerance=dict()):
-        Gradeable.Gradeable.__init__(self, info, tolerance)
+    def __init__(self, grader, submission, current_tool, tolerance=dict()):
+        super().__init__(grader, submission, current_tool, tolerance)
 
         self.polyline_count = 0
         self.polysegments = None
         self.polysplines = None
         segmentSplines = []
         tag = []
+        info = submission["gradeable"][current_tool]
         for spline in info:
-            if not spline is None:
+            if spline is not None:
                 self.polyline_count += 1
                 segmentSplines.append(self.convertToSplineSegments(spline["spline"]))
                 if "tag" in spline:
@@ -34,8 +35,11 @@ class PolyLines(Gradeable.Gradeable):
                     tag.append("")
 
         newinfo = self.newFunctionData(info, segmentSplines, tag)
-        self.polysegments = LineSegments(newinfo)
-        self.polysplines = GradeableFunction(newinfo)
+        # Create a modified submission with the transformed data
+        new_submission = deepcopy(submission)
+        new_submission["gradeable"][current_tool] = newinfo
+        self.polysegments = LineSegments(grader, new_submission, current_tool)
+        self.polysplines = GradeableFunction(grader, new_submission, current_tool)
 
     def convertToSplineSegments(self, points):
         # input is a list of points [[x1,y1], [x2,y2], ...]

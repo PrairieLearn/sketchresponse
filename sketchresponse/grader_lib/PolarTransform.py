@@ -509,13 +509,11 @@ class PolarTransform(object):
             t_ = [np.array(v) for v in t]
             fit_ = fitCurves.fitCurve(t_, self.FIT_TOLERANCE)
 
+            # fitCurve returns a flat list of control points where curves share endpoints:
+            # [p0, p1, p2, p3, p4, p5, p6, ...] where each curve is (p_{3i}, p_{3i+1}, p_{3i+2}, p_{3i+3})
             refit_samples = []
-            for points in fit_:
-                if len(refit_samples) == 0:
-                    refit_samples.append([points[0][0], points[0][1]])
-                refit_samples.append([points[1][0], points[1][1]])
-                refit_samples.append([points[2][0], points[2][1]])
-                refit_samples.append([points[3][0], points[3][1]])
+            for point in fit_:
+                refit_samples.append([point[0], point[1]])
             #            print refit_samples
             # exp_curve_samples = []
             # for i, v in enumerate(t):
@@ -568,15 +566,23 @@ class PolarTransform(object):
         #        self.f.params['xscale'] = 'linear'
         #        self.f.params['yscale'] = 'linear'
 
-        # json_format_samples = []
+        # Invert y (r) pixel coordinates to compensate for the axis flip.
+        # Pixels were created with raxis [0, rmax], but will be interpreted
+        # with yaxis [rmax, 0], so we need to flip them.
+        height = self.f.params["height"]
+
         for s in splines:
+            # Each spline is a list of control points, flip y for each
+            s_flipped = [[pt[0], height - pt[1]] for pt in s]
             splineDict = {}
-            splineDict["spline"] = s
+            splineDict["spline"] = s_flipped
             self.f.append(splineDict)
 
         for p in points:
+            # Each point is [theta_pixel, r_pixel], flip r
+            p_flipped = [p[0], height - p[1]]
             pointDict = {}
-            pointDict["point"] = p
+            pointDict["point"] = p_flipped
             self.f.append(pointDict)
 
     def sample_x_and_y(self, curve, step):
