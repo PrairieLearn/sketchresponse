@@ -6,7 +6,7 @@ COPY sketch_tool .
 COPY LICENSE ..
 RUN npm run build
 
-FROM python:3.8
+FROM python:3.10
 WORKDIR /app/sketchresponse
 COPY requirements.txt .
 RUN pip install --no-cache-dir -r requirements.txt
