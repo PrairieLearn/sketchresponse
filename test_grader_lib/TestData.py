@@ -6861,85 +6861,6 @@ class TestData(unittest.TestCase):
         ],
     }
 
-    # nothing, N shape, spirally shape
-    polylines = {
-        "polyline": [
-            {
-                "apiVersion": "0.1",
-                "meta": {
-                    "config": {
-                        "width": 420,
-                        "yrange": [-4, 4],
-                        "yscale": "linear",
-                        "xscale": "linear",
-                        "xrange": [-4, 4],
-                        "plugins": [
-                            {"name": "axes"},
-                            {"color": "blue", "label": "PolyLine", "name": "polyline", "id": "pl"},
-                        ],
-                        "height": 420,
-                    },
-                    "dataVersions": {"pl": "0.1"},
-                },
-                "data": {"pl": []},
-            },
-            {
-                "apiVersion": "0.1",
-                "meta": {
-                    "config": {
-                        "width": 420,
-                        "coords": "polar",
-                        "yrange": [-4, 4],
-                        "yscale": "linear",
-                        "xscale": "linear",
-                        "xrange": [-4, 4],
-                        "plugins": [
-                            {"name": "axes"},
-                            {"color": "blue", "label": "PolyLine", "name": "polyline", "id": "pl"},
-                        ],
-                        "height": 420,
-                    },
-                    "dataVersions": {"pl": "0.1"},
-                },
-                "data": {"pl": [{"spline": [[62, 251], [133, 63], [214, 248], [278, 73]]}]},
-            },
-            {
-                "apiVersion": "0.1",
-                "meta": {
-                    "config": {
-                        "width": 420,
-                        "coords": "polar",
-                        "yrange": [-4, 4],
-                        "yscale": "linear",
-                        "xscale": "linear",
-                        "xrange": [-4, 4],
-                        "plugins": [
-                            {"name": "axes"},
-                            {"color": "blue", "label": "PolyLine", "name": "polyline", "id": "pl"},
-                        ],
-                        "height": 420,
-                    },
-                    "dataVersions": {"pl": "0.1"},
-                },
-                "data": {
-                    "pl": [
-                        {
-                            "spline": [
-                                [74, 153],
-                                [189, 32],
-                                [294, 85],
-                                [185, 167],
-                                [115, 40],
-                                [250, 17],
-                                [218, 109],
-                            ]
-                        }
-                    ]
-                },
-            },
-        ]
-    }
-
     polygonPoint = {
         "polygon_point": [
             {
@@ -7399,7 +7320,6 @@ class TestData(unittest.TestCase):
         ls_not_exist,
         ls_exist,
         ls_segs,
-        polylines,
         polygonPoint,
         polygonBoundary,
         polygonIntersection,

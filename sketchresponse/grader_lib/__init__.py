@@ -7,7 +7,6 @@ from . import Gradeable
 from . import GradeableFunction
 from . import LineSegment
 from . import Point
-from . import PolyLine
 from . import Polygon
 from . import PolarTransform
 from . import Tag
@@ -19,7 +18,6 @@ __all__ = [
     "GradeableFunction",
     "LineSegment",
     "Point",
-    "PolyLine",
     "Polygon",
     "PolarTransform",
     "Tag",

@@ -23,6 +23,9 @@ class MultiFunction(Function):
     ):
         super().__init__(xaxis, yaxis, path_info, grader, current_tool, tolerance)
         self.set_default_tolerance("straight_line", 0.1)  # threshold for straight lines
+        self.set_default_tolerance(
+            "point_distance", grader["tolerance"]
+        )  # threshold for point distance
         if functions:
             self.functions = functions
 
@@ -125,7 +128,7 @@ class MultiFunction(Function):
         """
         xvals = []
         for function in self.functions:
-            xvals += function.get_horizontal_line_crossings(yval)
+            xvals.extend(function.get_horizontal_line_crossings(yval))
 
         return xvals
 
@@ -141,7 +144,7 @@ class MultiFunction(Function):
         """
         yvals = []
         for function in self.functions:
-            yvals += function.get_vertical_line_crossings(xval)
+            yvals.extend(function.get_vertical_line_crossings(xval))
 
         return yvals
 
