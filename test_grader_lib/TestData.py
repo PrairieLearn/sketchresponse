@@ -7320,7 +7320,6 @@ class TestData(unittest.TestCase):
         ls_not_exist,
         ls_exist,
         ls_segs,
-        polylines,
         polygonPoint,
         polygonBoundary,
         polygonIntersection,
