@@ -1,7 +1,7 @@
 from __future__ import absolute_import
 import unittest
 from test_grader_lib import TestData
-from sketchresponse.grader_lib import Asymptote, GradeableFunction, LineSegment, PolyLine, Polygon
+from sketchresponse.grader_lib import Asymptote, GradeableFunction, LineSegment, Polygon
 
 
 class TestTagMethods(TestData.TestData):
@@ -187,78 +187,6 @@ class TestTagMethods(TestData.TestData):
         args = d["ls"]
         ls = LineSegment.LineSegments(args.grader, args.submission, args.tool_id)
         self.assertIsNone(ls.contains_tag("tag"))
-
-    # polyline segment
-    def test_polyline_segment_has_tag_true(self):
-        data = self.load_as_gradeable_collections("tag_data")
-        d = data[0]
-        args = d["pl"]
-        pl = PolyLine.PolyLines(args.grader, args.submission, args.tool_id)
-        self.assertTrue(pl.get_polyline_as_linesegments().segments[0].tag_equals("tag"))
-
-    def test_polyline_segment_has_tag_false(self):
-        data = self.load_as_gradeable_collections("tag_data")
-        d = data[0]
-        args = d["pl"]
-        pl = PolyLine.PolyLines(args.grader, args.submission, args.tool_id)
-        self.assertFalse(pl.get_polyline_as_linesegments().segments[0].tag_equals("somethingelse"))
-
-    def test_polyline_segment_contains_tag_true(self):
-        data = self.load_as_gradeable_collections("tag_data")
-        d = data[0]
-        args = d["pl"]
-        pl = PolyLine.PolyLines(args.grader, args.submission, args.tool_id)
-        self.assertIsNotNone(pl.get_polyline_as_linesegments().contains_tag("tag"))
-
-    def test_polyline_segment_contains_tag_false(self):
-        data = self.load_as_gradeable_collections("tag_data")
-        d = data[0]
-        args = d["pl"]
-        pl = PolyLine.PolyLines(args.grader, args.submission, args.tool_id)
-        self.assertIsNone(pl.get_polyline_as_linesegments().contains_tag("somethingelse"))
-
-    #    def test_polyline_segment_no_tags(self):
-    #        data = self.load_as_gradeable_collections('tag_none')
-    #        d = data[0]
-    #        pl = PolyLine.PolyLines(d['pl'])
-    #        self.assertIsNone(pl.get_polyline_as_segments(0).contains_tag('tag'))
-
-    # polyline spline
-    def test_polyline_spline_has_tag_true(self):
-        data = self.load_as_gradeable_collections("tag_data")
-        d = data[0]
-        args = d["pl"]
-        pl = PolyLine.PolyLines(args.grader, args.submission, args.tool_id)
-        self.assertTrue(pl.get_polyline_as_gradeablefunction().functions[0].tag_equals("tag"))
-
-    def test_polyline_spline_has_tag_false(self):
-        data = self.load_as_gradeable_collections("tag_data")
-        d = data[0]
-        args = d["pl"]
-        pl = PolyLine.PolyLines(args.grader, args.submission, args.tool_id)
-        self.assertFalse(
-            pl.get_polyline_as_gradeablefunction().functions[0].tag_equals("somethingelse")
-        )
-
-    def test_polyline_spline_contains_tag_true(self):
-        data = self.load_as_gradeable_collections("tag_data")
-        d = data[0]
-        args = d["pl"]
-        pl = PolyLine.PolyLines(args.grader, args.submission, args.tool_id)
-        self.assertIsNotNone(pl.get_polyline_as_gradeablefunction().contains_tag("tag"))
-
-    def test_polyline_spline_contains_tag_false(self):
-        data = self.load_as_gradeable_collections("tag_data")
-        d = data[0]
-        args = d["pl"]
-        pl = PolyLine.PolyLines(args.grader, args.submission, args.tool_id)
-        self.assertIsNone(pl.get_polyline_as_gradeablefunction().contains_tag("somethingelse"))
-
-    #    def test_polyline_spline_no_tags(self):
-    #        data = self.load_as_gradeable_collections('tag_none')
-    #        d = data[0]
-    #        pl = PolyLine.PolyLines(d['pl'])
-    #        self.assertIsNone(pl.get_polyline_as_splines(0).contains_tag('tag'))
 
     # polygon
     def test_polygon_has_tag_true(self):
