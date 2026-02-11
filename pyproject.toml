@@ -45,9 +45,9 @@ packages = ["sketchresponse"]
 [tool.hatch.build.targets.sdist]
 include = [
     "sketchresponse/",
-    "LICENSE",
-    "README.md",
-    "pyproject.toml",
+    "/LICENSE",
+    "/README.md",
+    "/pyproject.toml",
 ]
 
 [tool.ruff]
