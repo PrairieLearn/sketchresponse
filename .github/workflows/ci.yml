@@ -19,13 +19,16 @@ jobs:
         run: uv lock --check
 
       - name: Install dev dependencies
-        run: uv sync --extra dev
+        run: uv sync
 
       - name: Run ruff check
         run: uv run ruff check .
 
       - name: Run ruff format check
         run: uv run ruff format --check .
+
+      - name: Run ty typecheck
+        run: uv run ty check
 
   lint-js:
     runs-on: ubuntu-latest

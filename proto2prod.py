@@ -1,7 +1,5 @@
-from __future__ import division
-from builtins import zip
-import re
 import json
+import re
 
 
 def path_strings_from_svg(svg):
@@ -17,14 +15,12 @@ def points_from_path(path):
 
     xvals = [n for (i, n) in enumerate(numbers) if i % 2 == 0]
     yvals = [n for (i, n) in enumerate(numbers) if i % 2 == 1]
-    points = [[x, y] for (x, y) in zip(xvals, yvals)]
+    points = [[x, y] for (x, y) in zip(xvals, yvals, strict=False)]
 
     return points
 
 
 def delta_decode_spline_points(points):
-    num_segments = (len(points) - 1) // 3
-
     i = 0
     while i + 3 < len(points):
         for d in [0, 1]:
@@ -52,9 +48,11 @@ def parse_svg(svg):
     return paths
 
 
-def convert_ans_dict(
-    ans_dict, xrange=[-2.614, 2.608], yrange=[-3.207, 3.193], width=800, height=480
-):
+def convert_ans_dict(ans_dict, xrange=None, yrange=None, width=800, height=480):
+    if xrange is None:
+        xrange = [-2.614, 2.608]
+    if yrange is None:
+        yrange = [-3.207, 3.193]
     svg = ans_dict["answer"]
     paths = parse_svg(svg)
 

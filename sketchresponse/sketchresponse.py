@@ -1,13 +1,12 @@
-from __future__ import division
+import base64
 import inspect
 import json
-import base64
 from copy import deepcopy
 
 
 class GradeableCollection(list):
     def __init__(self, identifier, config, gradeable_list):
-        super(GradeableCollection, self).__init__(gradeable_list)
+        super().__init__(gradeable_list)
         self.identifier = identifier
         self.params = self.resolve_params_for_id(identifier, config)
 
@@ -57,7 +56,7 @@ def grader(func):
                 all_gradeables[identifier] = GradeableCollection(identifier, config, data)
 
         # filter gradeables for what the grader script is expecting
-        (args, varargs, keywords, defaults) = inspect.getargspec(func)
+        args = list(inspect.signature(func).parameters.keys())
         gradeables = {validkey: all_gradeables[validkey] for validkey in args}
 
         result = func(**gradeables)  # run the user-provided grading function

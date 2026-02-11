@@ -1,7 +1,6 @@
 from sketchresponse import sketchresponse
-from sketchresponse.grader_lib import GradeableFunction
 
-problemconfig = sketchinput.config(
+problemconfig = sketchresponse.config(
     {
         "width": 750,  # set the pixel width of the front-end interface
         "height": 420,  # set the pixel height of the front-end interface
@@ -18,6 +17,6 @@ problemconfig = sketchinput.config(
 )
 
 
-@sketchinput.grader
+@sketchresponse.grader
 def grader(f):  # arguments is a list of the 'id' values for each plugin
     return True, "Good Job"

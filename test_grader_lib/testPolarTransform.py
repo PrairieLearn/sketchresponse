@@ -1,10 +1,7 @@
-from __future__ import absolute_import
-from __future__ import division
-import unittest
-from test_grader_lib import TestDataPolar
-from sketchresponse.grader_lib import GradeableFunction
-from sketchresponse.grader_lib import Point
 from math import pi, sqrt
+
+from sketchresponse.grader_lib import GradeableFunction
+from test_grader_lib import TestDataPolar
 
 
 class TestPolarTransform(TestDataPolar.TestDataPolar):
@@ -114,6 +111,6 @@ class TestPolarTransform(TestDataPolar.TestDataPolar):
 
 
 if __name__ == "__main__":
-    testPolar = TestPolarTransformMethods()
+    testPolar = TestPolarTransform()
     testPolar.test_polar_transform_points_true()
     testPolar.test_polar_transform_points_false()

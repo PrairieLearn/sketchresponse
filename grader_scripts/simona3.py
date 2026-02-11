@@ -1,9 +1,5 @@
 from .. import sketchresponse
-from ..grader_lib import GradeableFunction
-from ..grader_lib import LineSegment
-from ..grader_lib import PolyLine
-from ..grader_lib import Point
-from ..grader_lib import Polygon
+from ..grader_lib import Polygon, PolyLine
 
 problemconfig = sketchresponse.config(
     {
@@ -123,13 +119,13 @@ problemconfig = sketchresponse.config(
 def grader(b1, b2, b3, lw, rw, blk, sl, force, plate, iso):
     bar1 = PolyLine.PolyLines(b1)
     bar2 = PolyLine.PolyLines(b2)
-    bar3 = PolyLine.PolyLines(b3)
+    _bar3 = PolyLine.PolyLines(b3)
     block = Polygon.Polygons(blk)
     iso_bub = Polygon.Polygons(iso)
 
     block_poly = block.polygons[0]
 
-    if not iso_bub.get_polygon_count() == 1:
+    if iso_bub.get_polygon_count() != 1:
         return False, "There should be one isolation bubble."
 
     iso_poly = iso_bub.polygons[0]
@@ -143,7 +139,7 @@ def grader(b1, b2, b3, lw, rw, blk, sl, force, plate, iso):
     if len(iso_bub.get_intersections_with_polygon_boundary(bar2_line, iso_poly)) != 1:
         return False, "Iso bubble should cut the bars"
 
-    if iso_bub.contains_polygon(block_poly) == None:
+    if iso_bub.contains_polygon(block_poly) is None:
         return False, "Iso bubble should contain the block"
 
     if not iso_bub.point_is_on_boundary([3, 0.6]):

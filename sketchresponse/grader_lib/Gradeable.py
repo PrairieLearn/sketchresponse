@@ -9,9 +9,11 @@ from .Tag import Tagable
 
 class Gradeable(Tagable):
     def __init__(
-        self, grader, submission, current_tool, tolerance=dict()
+        self, grader, submission, current_tool, tolerance=None
     ):  # gradeable_info : {"grader": grader, "submission": submission}
         super().__init__()
+        if tolerance is None:
+            tolerance = {}
         self.grader = grader
         self.submission = submission
         self.current_tool = current_tool

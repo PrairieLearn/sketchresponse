@@ -17,8 +17,8 @@ class SplineFunction(MultiFunction):
         path_info,
         grader,
         current_tool,
-        functions=[],
-        tolerance=dict(),
+        functions=None,
+        tolerance=None,
     ):
         super().__init__(xaxis, yaxis, path_info, grader, current_tool, tolerance)
         # self.tolerance['straight_line'] = 0.1 # threshold for straight lines

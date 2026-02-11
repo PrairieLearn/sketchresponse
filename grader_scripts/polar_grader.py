@@ -1,6 +1,7 @@
+from math import pi
+
 from sketchresponse import sketchresponse
 from sketchresponse.grader_lib import GradeableFunction
-from math import pi
 
 problemconfig = sketchresponse.config(
     {

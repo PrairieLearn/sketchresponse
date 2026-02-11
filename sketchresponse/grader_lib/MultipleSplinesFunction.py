@@ -44,8 +44,8 @@ class MultipleSplinesFunction(MultiFunction):  # noqa: PLR0904
         grader,
         submission,
         current_tool,
-        functions=[],
-        tolerance=dict(),
+        functions=None,
+        tolerance=None,
     ):
         self.submission = submission
         super().__init__(xaxis, yaxis, path_info, grader, current_tool, functions, tolerance)
@@ -67,6 +67,7 @@ class MultipleSplinesFunction(MultiFunction):  # noqa: PLR0904
 
     def create_from_path_info(self, path_info):
         self.functions = []
+        self.points = []
         xvals = []
         toolid = self.current_tool
         submission_data = self.submission["gradeable"][toolid]  # CHECK

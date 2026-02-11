@@ -1,8 +1,6 @@
-from __future__ import absolute_import
-import copy
-import unittest
 import json
-from test_grader_lib.GradeableCollection import GradeableCollection
+import unittest
+
 from test_grader_lib.csv_to_data_new import load_csv_data
 from test_grader_lib.TestData import TestFixture
 

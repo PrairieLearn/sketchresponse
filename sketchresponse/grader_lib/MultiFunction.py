@@ -18,8 +18,8 @@ class MultiFunction(Function):
         path_info,
         grader,
         current_tool,
-        functions=[],
-        tolerance=dict(),
+        functions=None,
+        tolerance=None,
     ):
         super().__init__(xaxis, yaxis, path_info, grader, current_tool, tolerance)
         self.set_default_tolerance("straight_line", 0.1)  # threshold for straight lines

@@ -1,8 +1,5 @@
 from sketchresponse import sketchresponse
-from sketchresponse.grader_lib import GradeableFunction
-from sketchresponse.grader_lib import LineSegment
-from sketchresponse.grader_lib import PolyLine
-from sketchresponse.grader_lib import Polygon
+from sketchresponse.grader_lib import GradeableFunction, LineSegment, Polygon, PolyLine
 
 problemconfig = sketchresponse.config(
     {
@@ -101,12 +98,12 @@ problemconfig = sketchresponse.config(
 def grader(pl, pg, pt, ls, c, cwm, ccwm):
     pl = PolyLine.PolyLines(pl)
     pg = Polygon.Polygons(pg)
-    cls = LineSegment.LineSegments(c)
+    _cls = LineSegment.LineSegments(c)
     points = GradeableFunction.GradeableFunction(pt)
 
     beam = pl.get_polyline_as_linesegments()
 
-    if not pg.get_polygon_count() == 1:
+    if pg.get_polygon_count() != 1:
         return False, "Did you forget the isolation bubble?"
 
     poly = pg.polygons[0]
@@ -126,13 +123,13 @@ def grader(pl, pg, pt, ls, c, cwm, ccwm):
     if len(pg.get_intersections_with_polygon_boundary(poly, beam1)) > 0:
         return False, "Isolation bubble should not cut vertical beam."
 
-    if not len(pg.get_intersections_with_polygon_boundary(poly, beam2)) == 1:
+    if len(pg.get_intersections_with_polygon_boundary(poly, beam2)) != 1:
         return False, "Isolation bubble should only cut the horizontal beam once."
 
-    if pg.point_is_on_boundary([-2, -1]) == None:
+    if pg.point_is_on_boundary([-2, -1]) is None:
         return False, "Check where the isolation bubble cuts the horizontal beam."
 
-    if pg.point_is_on_boundary(pointA) == None and pg.point_is_on_boundary(pointB) == None:
+    if pg.point_is_on_boundary(pointA) is None and pg.point_is_on_boundary(pointB) is None:
         return False, "Check the isolation bubble containment."
 
     return True, "Good job!"
