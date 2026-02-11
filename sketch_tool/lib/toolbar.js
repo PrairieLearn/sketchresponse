@@ -15,9 +15,11 @@ function renderIcon(id, src, alt) {
 }
 
 function renderLabel(id, text, hasDropdown) {
-  return z('div.label',
+  return z(
+    'div.label',
     z('span', { id }, text),
-    z.if(hasDropdown,
+    z.if(
+      hasDropdown,
       z('span', { 'aria-label': 'Open dropdown menu' }, ' \u25be'),
     ),
   );
@@ -34,9 +36,13 @@ export default class Toolbar {
     this.focusedItemID = null;
     this.openDropdownID = null; // TODO: better name
 
-    this.items = [{
-      id: TOOLBAR_ID, activate: this.activate.bind(this), deactivate: this.deactivate.bind(this),
-    }];
+    this.items = [
+      {
+        id: TOOLBAR_ID,
+        activate: this.activate.bind(this),
+        deactivate: this.deactivate.bind(this),
+      },
+    ];
 
     this.activeItemID = null;
     this.selectedDropdownItemMap = {}; // TODO: better name
@@ -48,7 +54,10 @@ export default class Toolbar {
       setState: this.setState.bind(this),
     });
 
-    app.__messageBus.on('registerToolbarItem', this.registerToolbarItem.bind(this));
+    app.__messageBus.on(
+      'registerToolbarItem',
+      this.registerToolbarItem.bind(this),
+    );
     app.__messageBus.on('activateItem', this.activateItem.bind(this));
     app.__messageBus.on('closeDropdown', this.closeDropdown.bind(this));
   }
@@ -92,7 +101,9 @@ export default class Toolbar {
           allItems.push(item);
         }
       });
-      const oldActiveItem = allItems.find((item) => item.id === this.activeItemID);
+      const oldActiveItem = allItems.find(
+        (item) => item.id === this.activeItemID,
+      );
       const newActiveItem = allItems.find((item) => item.id === id);
 
       oldActiveItem && oldActiveItem.deactivate();
@@ -108,7 +119,9 @@ export default class Toolbar {
   registerToolbarItem(item) {
     if (item.type === 'splitbutton') {
       if (!item.items || !item.items[0] || !item.items[0].id) {
-        throw new TypeError('Toolbar split buttons must contain at least one item');
+        throw new TypeError(
+          'Toolbar split buttons must contain at least one item',
+        );
       }
       this.selectedDropdownItemMap[item.id] = item.items[0].id;
     }
@@ -135,89 +148,118 @@ export default class Toolbar {
   }
 
   render() {
-    const renderableItems = this.items.filter((item) =>
-      ['separator', 'button', 'splitbutton'].indexOf(item.type) >= 0);
+    const renderableItems = this.items.filter(
+      (item) => ['separator', 'button', 'splitbutton'].indexOf(item.type) >= 0,
+    );
 
-    z.render(this.el,
-      z.each(renderableItems, ({ type, id, icon, label, color, items, action }) => {
-        if (type === 'separator') return z('hr');
-        let selectedItem;
-        let isActive;
-        if (type === 'splitbutton') {
-          selectedItem = items.find((item) => item.id === this.selectedDropdownItemMap[id]);
-          icon = selectedItem.icon;
-          color = selectedItem.color;
-          isActive = (selectedItem.id === this.activeItemID);
-        } else if (type === 'button') {
-          isActive = (id === this.activeItemID);
-        }
+    z.render(
+      this.el,
+      z.each(
+        renderableItems,
+        ({ type, id, icon, label, color, items, action }) => {
+          if (type === 'separator') return z('hr');
+          let selectedItem;
+          let isActive;
+          if (type === 'splitbutton') {
+            selectedItem = items.find(
+              (item) => item.id === this.selectedDropdownItemMap[id],
+            );
+            icon = selectedItem.icon;
+            color = selectedItem.color;
+            isActive = selectedItem.id === this.activeItemID;
+          } else if (type === 'button') {
+            isActive = id === this.activeItemID;
+          }
 
-        const hasDropdown = (items && items.length);
-        const isOpen = (id === this.openDropdownID);
+          const hasDropdown = items && items.length;
+          const isOpen = id === this.openDropdownID;
 
-        return z('div.item', {
-            id,
-            'data-is-open': isOpen,
-            'data-is-active': isActive,
-            style: isActive ? `border-bottom-color: ${color};` : '',
-          },
-          z.if(type === 'button',
-            z('button', {
-                onclick: () => {
-                  // Finalize any shape that isn't
-                  this.app.__messageBus.emit('finalizeShapes', id);
-                  action ? action() : this.activateItem(id);
+          return z(
+            'div.item',
+            {
+              id,
+              'data-is-open': isOpen,
+              'data-is-active': isActive,
+              style: isActive ? `border-bottom-color: ${color};` : '',
+            },
+            z.if(
+              type === 'button',
+              z(
+                'button',
+                {
+                  onclick: () => {
+                    // Finalize any shape that isn't
+                    this.app.__messageBus.emit('finalizeShapes', id);
+                    action ? action() : this.activateItem(id);
+                  },
+                  'aria-labelledby': `${id}-label ${id}-icon`,
+                  type: 'button',
                 },
-                'aria-labelledby': `${id}-label ${id}-icon`,
-                type: 'button',
-              },
-              renderIcon(`${id}-icon`, icon.src, icon.alt),
-              renderLabel(`${id}-label`, label, hasDropdown),
+                renderIcon(`${id}-icon`, icon.src, icon.alt),
+                renderLabel(`${id}-label`, label, hasDropdown),
+              ),
             ),
-          ),
-          z.if(type === 'splitbutton',
-            z('button.split-button-main', {
-                onclick: () => {
-                  // Finalize any shape that isn't
-                  this.app.__messageBus.emit('finalizeShapes', this.selectedDropdownItemMap[id]);
-                  this.activateItem(this.selectedDropdownItemMap[id]);
+            z.if(
+              type === 'splitbutton',
+              z(
+                'button.split-button-main',
+                {
+                  onclick: () => {
+                    // Finalize any shape that isn't
+                    this.app.__messageBus.emit(
+                      'finalizeShapes',
+                      this.selectedDropdownItemMap[id],
+                    );
+                    this.activateItem(this.selectedDropdownItemMap[id]);
+                  },
+                  'aria-labelledby': `${id}-label ${id}-icon`,
+                  type: 'button',
                 },
-                'aria-labelledby': `${id}-label ${id}-icon`,
-                type: 'button'
-              },
-              renderIcon(`${id}-icon`, icon.src, icon.alt), // TODO: title
-            ),
-            z('button.split-button-aux', {
-                onclick: () => {
-                  // Finalize any shape that isn't
-                  this.app.__messageBus.emit('finalizeShapes', this.selectedDropdownItemMap[id]);
-                  this.activateItem(this.selectedDropdownItemMap[id]);
-                  this.openDropdown(id);
+                renderIcon(`${id}-icon`, icon.src, icon.alt), // TODO: title
+              ),
+              z(
+                'button.split-button-aux',
+                {
+                  onclick: () => {
+                    // Finalize any shape that isn't
+                    this.app.__messageBus.emit(
+                      'finalizeShapes',
+                      this.selectedDropdownItemMap[id],
+                    );
+                    this.activateItem(this.selectedDropdownItemMap[id]);
+                    this.openDropdown(id);
+                  },
+                  'aria-haspopup': 'true',
+                  type: 'button',
                 },
-                'aria-haspopup': 'true',
-                type: 'button'
-              },
-              renderLabel(`${id}-label`, label, hasDropdown),
+                renderLabel(`${id}-label`, label, hasDropdown),
+              ),
             ),
-          ),
-          z.if(hasDropdown,
-            z('menu.si-dropdown',
-              z.each(items, (item) =>
-                z('div.si-dropdown-item',
-                  z('button.si-dropdown-button', {
-                      id: item.id,
-                      onpointerdown: () => this.selectDropdownItem(id, item.id),
-                      type: 'button'
-                    },
-                    renderIcon(`${id}-icon`, item.icon.src, item.icon.alt), // TODO: title
-                    renderLabel(`${id}-label`, item.label, false),
+            z.if(
+              hasDropdown,
+              z(
+                'menu.si-dropdown',
+                z.each(items, (item) =>
+                  z(
+                    'div.si-dropdown-item',
+                    z(
+                      'button.si-dropdown-button',
+                      {
+                        id: item.id,
+                        onpointerdown: () =>
+                          this.selectDropdownItem(id, item.id),
+                        type: 'button',
+                      },
+                      renderIcon(`${id}-icon`, item.icon.src, item.icon.alt), // TODO: title
+                      renderLabel(`${id}-label`, item.label, false),
+                    ),
                   ),
                 ),
               ),
             ),
-          ),
-        );
-      }),
+          );
+        },
+      ),
     );
 
     // Update focus if needed

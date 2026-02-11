@@ -20,7 +20,7 @@ export default class DragManager {
       // expensive as getting all selected elements, so just do the latter.
       this.elementsToDrag = this.selectionManager.getSelected();
     } else {
-       // possibly a no-op, but finding out is almost as expensive
+      // possibly a no-op, but finding out is almost as expensive
       this.selectionManager.deselectAll();
       this.selectionManager.select(element);
       const className = element.getAttribute('class');
@@ -28,21 +28,28 @@ export default class DragManager {
         const classNamePrefix = className.substring(9);
         // IE and Edge do not have getElementsByClassName on SVG elements, use polyfill instead
         this.visibleElements = getElementsByClassName(
-          // eslint-disable-next-line prefer-template
-          element.parentNode, 'visible' + classNamePrefix,
+          element.parentNode,
+          'visible' + classNamePrefix,
         );
         if (this.visibleElements) {
           // All plugins except spline
           if (this.visibleElements.length === 1) {
             // Only polyline has an opacity that needs to be overriden during selection
-            if (this.visibleElements[0].getAttribute('class').indexOf('polyline') !== -1) {
+            if (
+              this.visibleElements[0]
+                .getAttribute('class')
+                .indexOf('polyline') !== -1
+            ) {
               this.selectionManager.select(this.visibleElements[0], 'override');
             } else {
               this.selectionManager.select(this.visibleElements[0]);
             }
-          } else { // spline
+          } else {
+            // spline
             // HTMLCollection is an 'array-like' object that needs to be spread into an array
-            [...this.visibleElements].forEach((el) => this.selectionManager.select(el));
+            [...this.visibleElements].forEach((el) =>
+              this.selectionManager.select(el),
+            );
           }
         }
       }
@@ -77,7 +84,8 @@ export default class DragManager {
         .map((element) => this.registry.get(element).inBoundsY)
         .filter((inBoundsY) => inBoundsY !== undefined);
 
-      let insideX = true; let insideY = true;
+      let insideX = true;
+      let insideY = true;
 
       for (const inBoundsX of inBoundsXHandlers) {
         if (!inBoundsX(dx)) {
@@ -85,7 +93,7 @@ export default class DragManager {
           break;
         }
       }
-       
+
       for (const inBoundsY of inBoundsYHandlers) {
         if (!inBoundsY(dy)) {
           insideY = false;
@@ -109,15 +117,14 @@ export default class DragManager {
     let bb0 = svg.getBoundingClientRect();
     let [left0, top0, right0, bottom0] = [bb0.x, bb0.y, bb0.right, bb0.bottom];
 
-    let outsideCanvas = []
+    let outsideCanvas = [];
     this.elementsToDrag.forEach(function (el) {
       let bb = el.getBoundingClientRect();
       let [left, top, right, bottom] = [bb.x, bb.y, bb.right, bb.bottom];
       let bboxIntersection =
-        (left < right0 &&
-        top < bottom0 &&
-        bottom > top0 &&
-        right > left0) ? true : false;
+        left < right0 && top < bottom0 && bottom > top0 && right > left0
+          ? true
+          : false;
       if (!bboxIntersection) {
         outsideCanvas.push(el);
       }
@@ -126,13 +133,14 @@ export default class DragManager {
     if (outsideCanvas.length > 0) {
       this.selectionManager.deselectAll();
       const sm = this.selectionManager;
-      outsideCanvas.forEach(function(el) {
+      outsideCanvas.forEach(function (el) {
         sm.select(el);
         sm.deleteSelected();
       });
-      this.elementsToDrag.filter(el => !outsideCanvas.includes(el)).forEach((el) => sm.select(el));
+      this.elementsToDrag
+        .filter((el) => !outsideCanvas.includes(el))
+        .forEach((el) => sm.select(el));
     }
-   
 
     this.visibleElements = null;
     this.previousPosition = null;

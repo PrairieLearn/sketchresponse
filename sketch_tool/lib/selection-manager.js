@@ -20,19 +20,26 @@ export const SELECTED_ATTR = 'data-si-selected';
 //   </filter>
 // `);
 injectStyleSheet(`
-  [${ SELECTED_ATTR }='default'] { opacity: 0.5;}
-  [${ SELECTED_ATTR }='override'] { opacity: 0.5 !important;}
-`,
-);
+  [${SELECTED_ATTR}='default'] { opacity: 0.5;}
+  [${SELECTED_ATTR}='override'] { opacity: 0.5 !important;}
+`);
 
 export default class SelectionManager {
   constructor(rootElement, messageBus) {
     this.rootElement = rootElement;
     this.selectMode = false;
-    messageBus.on('enableSelectMode', () => { this.setSelectMode(true); });
-    messageBus.on('disableSelectMode', () => { this.setSelectMode(false); });
-    messageBus.on('deselectAll', () => { this.deselectAll(); });
-    messageBus.on('deleteSelected', () => { this.deleteSelected(); });
+    messageBus.on('enableSelectMode', () => {
+      this.setSelectMode(true);
+    });
+    messageBus.on('disableSelectMode', () => {
+      this.setSelectMode(false);
+    });
+    messageBus.on('deselectAll', () => {
+      this.deselectAll();
+    });
+    messageBus.on('deleteSelected', () => {
+      this.deleteSelected();
+    });
     this.messageBus = messageBus;
   }
 
@@ -43,16 +50,21 @@ export default class SelectionManager {
     }
   }
 
-  // eslint-disable-next-line class-methods-use-this
   select(element, mode) {
-    element.setAttributeNS(null, SELECTED_ATTR, mode === 'override' ? 'override' : 'default');
+    element.setAttributeNS(
+      null,
+      SELECTED_ATTR,
+      mode === 'override' ? 'override' : 'default',
+    );
   }
 
-  // eslint-disable-next-line class-methods-use-this
-  deselect(element) { element.removeAttributeNS(null, SELECTED_ATTR); }
+  deselect(element) {
+    element.removeAttributeNS(null, SELECTED_ATTR);
+  }
 
-  // eslint-disable-next-line class-methods-use-this
-  isSelected(element) { return element.getAttributeNS(null, SELECTED_ATTR) !== null; }
+  isSelected(element) {
+    return element.getAttributeNS(null, SELECTED_ATTR) !== null;
+  }
 
   toggleSelected(element, mode) {
     const condition = !this.isSelected(element); // toggle current value
@@ -61,10 +73,14 @@ export default class SelectionManager {
   }
 
   // Expensive; call circumspectly
-  getSelected() { return Array.from(this.rootElement.querySelectorAll(`[${ SELECTED_ATTR }]`)); }
+  getSelected() {
+    return Array.from(this.rootElement.querySelectorAll(`[${SELECTED_ATTR}]`));
+  }
 
   // Expensive; call circumspectly
-  deselectAll() { this.getSelected().forEach((element) => this.deselect(element)); }
+  deselectAll() {
+    this.getSelected().forEach((element) => this.deselect(element));
+  }
 
   deleteSelected() {
     let elWasDeleted = false;

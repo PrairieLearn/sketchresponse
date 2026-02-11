@@ -12,7 +12,11 @@ export default class ElementManager {
 
     this.pointerDownCache = new PointerDownCache(app.svg);
     this.selectionManager = new SelectionManager(app.svg, app.__messageBus);
-    this.dragManager = new DragManager(this.registry, this.selectionManager, enforceBounds);
+    this.dragManager = new DragManager(
+      this.registry,
+      this.selectionManager,
+      enforceBounds,
+    );
 
     // Only dealing with global (not per-pointer) dragging for now
     this.activePointerId = null;
@@ -42,7 +46,8 @@ export default class ElementManager {
     if (entry.initialBehavior === 'drag') {
       // Initialize and dispatch a clone of the nearest pointerdown event
       const clientRect = element.getBoundingClientRect();
-      const initialEvent = this.pointerDownCache.getNearestByClientRect(clientRect);
+      const initialEvent =
+        this.pointerDownCache.getNearestByClientRect(clientRect);
       const clonedEvent = new PointerEvent('pointerdown', initialEvent);
       element.dispatchEvent(clonedEvent);
     }
@@ -64,8 +69,11 @@ export default class ElementManager {
     // We do check that (1) there isn't already an active pointer, and (2) this is a left click
     // or touch/pen equivalent (see http://www.w3.org/TR/pointerevents/#button-states)
     if (
-      this.activePointerId !== null || event.buttons !== 1 || !this.selectionManager.selectMode
-    ) return;
+      this.activePointerId !== null ||
+      event.buttons !== 1 ||
+      !this.selectionManager.selectMode
+    )
+      return;
     event.stopPropagation();
     event.preventDefault();
 
@@ -82,7 +90,7 @@ export default class ElementManager {
     if (!this.isDragging) {
       const dx = event.clientX - this.initialEvent.clientX;
       const dy = event.clientY - this.initialEvent.clientY;
-       // Don't consider this a drag for small distances
+      // Don't consider this a drag for small distances
       if (dx ** 2 + dy ** 2 < MIN_DRAG_DISTANCE_SQUARED) return;
       // TODO: GAH: timing: this might not fire until after the corresponding pointerup...
       // Note: initialEvent has clientX/Y
@@ -103,8 +111,11 @@ export default class ElementManager {
     if (className && className.substring(0, 9) === 'invisible') {
       const classNamePrefix = className.substring(9);
       // IE and Edge do not have getElementsByClassName on SVG elements, use polyfill instead
-      // eslint-disable-next-line prefer-template
-      visibleElements = getElementsByClassName(element.parentNode, 'visible' + classNamePrefix);
+
+      visibleElements = getElementsByClassName(
+        element.parentNode,
+        'visible' + classNamePrefix,
+      );
     }
     if (this.isDragging) {
       this.dragManager.dragEnd();
@@ -116,14 +127,22 @@ export default class ElementManager {
         // All plugins except spline
         if (visibleElements.length === 1) {
           // Only polyline has an opacity that needs to be overriden during selection
-          if (visibleElements[0].getAttribute('class').indexOf('polyline') !== -1) {
-            this.selectionManager.toggleSelected(visibleElements[0], 'override');
+          if (
+            visibleElements[0].getAttribute('class').indexOf('polyline') !== -1
+          ) {
+            this.selectionManager.toggleSelected(
+              visibleElements[0],
+              'override',
+            );
           } else {
             this.selectionManager.toggleSelected(visibleElements[0]);
           }
-        } else { // spline
+        } else {
+          // spline
           // HTMLCollection is an 'array-like' object that needs to be spread into an array
-          [...visibleElements].forEach((el) => this.selectionManager.toggleSelected(el));
+          [...visibleElements].forEach((el) =>
+            this.selectionManager.toggleSelected(el),
+          );
         }
       }
     } else {
@@ -133,14 +152,19 @@ export default class ElementManager {
         // All plugins except spline
         if (visibleElements.length === 1) {
           // Only polyline has an opacity that needs to be overriden during selection
-          if (visibleElements[0].getAttribute('class').indexOf('polyline') !== -1) {
+          if (
+            visibleElements[0].getAttribute('class').indexOf('polyline') !== -1
+          ) {
             this.selectionManager.select(visibleElements[0], 'override');
           } else {
             this.selectionManager.select(visibleElements[0]);
           }
-        } else { // spline
+        } else {
+          // spline
           // HTMLCollection is an 'array-like' object that needs to be spread into an array
-          [...visibleElements].forEach((el) => this.selectionManager.select(el));
+          [...visibleElements].forEach((el) =>
+            this.selectionManager.select(el),
+          );
         }
       }
     }

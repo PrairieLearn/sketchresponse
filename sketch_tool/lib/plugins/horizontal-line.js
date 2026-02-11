@@ -27,8 +27,12 @@ export default class HorizontalLine extends BasePlugin {
     hlParams.gradeableVersion = GRADEABLE_VERSION;
     super(hlParams, app);
     // Message listeners
-    this.app.__messageBus.on('addHorizontalLine', (id, index) => { this.addHorizontalLine(id, index); });
-    this.app.__messageBus.on('deleteHorizontalLines', () => { this.deleteHorizontalLines(); });
+    this.app.__messageBus.on('addHorizontalLine', (id, index) => {
+      this.addHorizontalLine(id, index);
+    });
+    this.app.__messageBus.on('deleteHorizontalLines', () => {
+      this.deleteHorizontalLines();
+    });
     ['drawMove', 'drawEnd'].forEach((name) => {
       this[name] = this[name].bind(this);
     });
@@ -38,7 +42,7 @@ export default class HorizontalLine extends BasePlugin {
     const xvals = [
       0,
       Math.round(this.params.width / 3),
-      Math.round(2 * this.params.width / 3),
+      Math.round((2 * this.params.width) / 3),
       this.params.width,
     ];
 
@@ -70,7 +74,7 @@ export default class HorizontalLine extends BasePlugin {
   initDraw(event) {
     if (this.limit > 0 && this.state.length >= this.limit) {
       this.app.__messageBus.emit('showLimitWarning');
-      return
+      return;
     }
 
     // Add event listeners in capture phase
@@ -106,25 +110,31 @@ export default class HorizontalLine extends BasePlugin {
   }
 
   render() {
-    z.render(this.el,
+    z.render(
+      this.el,
       // Draw visible line, under invisible line
       z.each(this.state, (position, positionIndex) =>
-        // eslint-disable-next-line prefer-template, no-useless-concat
-        z('line.visible-' + positionIndex + '.horizontal-line' + '.plugin-id-' + this.id, {
-          x1: 0,
-          y1: position.y,
-          x2: this.params.width,
-          y2: position.y,
-          style: `
+        z(
+          'line.visible-' +
+            positionIndex +
+            '.horizontal-line' +
+            '.plugin-id-' +
+            this.id,
+          {
+            x1: 0,
+            y1: position.y,
+            x2: this.params.width,
+            y2: position.y,
+            style: `
             stroke: ${this.params.color};
             stroke-width: 2px;
             stroke-dasharray: ${this.computeDashArray(this.params.dashStyle, 2)};
           `,
-        }),
+          },
+        ),
       ),
       // Draw invisible and selectable line
       z.each(this.state, (position, positionIndex) =>
-        // eslint-disable-next-line prefer-template
         z('line.invisible-' + positionIndex + this.readOnlyClass(), {
           x1: 0,
           y1: position.y,
@@ -145,7 +155,8 @@ export default class HorizontalLine extends BasePlugin {
                 this.render();
               },
               inBoundsX: () => true,
-              inBoundsY: (dy) => this.inBoundsY(this.state[positionIndex].y + dy),
+              inBoundsY: (dy) =>
+                this.inBoundsY(this.state[positionIndex].y + dy),
             });
           },
         }),
@@ -153,31 +164,34 @@ export default class HorizontalLine extends BasePlugin {
       // Tags, regular or rendered by Katex
       z.each(this.state, (position, positionIndex) =>
         z.if(this.hasTag, () =>
-          z(this.latex ? 'foreignObject.tag' : 'text.tag', {
-            'text-anchor': (this.latex ? undefined : this.tag.align),
-            x: this.params.width / 2 + this.tag.xoffset,
-            y: position.y + this.tag.yoffset,
-            style: this.getStyle(),
-            onmount: (el) => {
-              if (this.latex) {
-                this.renderKatex(el, positionIndex);
-              }
-              if (!this.params.readonly) {
-                this.addDoubleClickEventListener(el, positionIndex);
-              }
+          z(
+            this.latex ? 'foreignObject.tag' : 'text.tag',
+            {
+              'text-anchor': this.latex ? undefined : this.tag.align,
+              x: this.params.width / 2 + this.tag.xoffset,
+              y: position.y + this.tag.yoffset,
+              style: this.getStyle(),
+              onmount: (el) => {
+                if (this.latex) {
+                  this.renderKatex(el, positionIndex);
+                }
+                if (!this.params.readonly) {
+                  this.addDoubleClickEventListener(el, positionIndex);
+                }
+              },
+              onupdate: (el) => {
+                if (this.latex) {
+                  this.renderKatex(el, positionIndex);
+                }
+              },
             },
-            onupdate: (el) => {
-              if (this.latex) {
-                this.renderKatex(el, positionIndex);
-              }
-            },
-          }, this.latex ? '' : this.state[positionIndex].tag),
+            this.latex ? '' : this.state[positionIndex].tag,
+          ),
         ),
       ),
     );
   }
 
-  // eslint-disable-next-line class-methods-use-this
   inBoundsX() {
     return true;
   }

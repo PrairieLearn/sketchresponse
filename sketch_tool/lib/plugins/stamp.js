@@ -28,8 +28,12 @@ export default class Stamp extends BasePlugin {
     sParams.gradeableVersion = GRADEABLE_VERSION;
     super(sParams, app);
     // Message listeners
-    this.app.__messageBus.on('addStamp', (id, index) => { this.addStamp(id, index); });
-    this.app.__messageBus.on('deleteStamps', () => { this.deleteStamps(); });
+    this.app.__messageBus.on('addStamp', (id, index) => {
+      this.addStamp(id, index);
+    });
+    this.app.__messageBus.on('deleteStamps', () => {
+      this.deleteStamps();
+    });
     ['drawMove', 'drawEnd'].forEach((name) => {
       this[name] = this[name].bind(this);
     });
@@ -64,7 +68,7 @@ export default class Stamp extends BasePlugin {
   initDraw(event) {
     if (this.limit > 0 && this.state.length >= this.limit) {
       this.app.__messageBus.emit('showLimitWarning');
-      return
+      return;
     }
 
     // Add event listeners in capture phase
@@ -114,54 +118,68 @@ export default class Stamp extends BasePlugin {
   }
 
   render() {
-    z.render(this.el,
+    z.render(
+      this.el,
       z.each(this.state, (position, positionIndex) =>
-        // eslint-disable-next-line prefer-template, no-useless-concat
-        z('image.stamp' + '.plugin-id-' + this.id + '.state-index-' + positionIndex + this.readOnlyClass(), {
-          x: 0,
-          y: 0,
-          width: this.params.imgwidth,
-          height: this.params.imgheight,
-          transform: this.getTransform(position.x, position.y),
-          'xlink:href': this.params.src,
-          onmount: (el) => {
-            this.app.registerElement({
-              ownerID: this.params.id,
-              element: el,
-              initialBehavior: 'none',
-              onDrag: ({ dx, dy }) => {
-                this.state[positionIndex].x += dx;
-                this.state[positionIndex].y += dy;
-                this.render();
-              },
-              inBoundsX: (dx) => this.inBoundsX(this.state[positionIndex].x + dx),
-              inBoundsY: (dy) => this.inBoundsY(this.state[positionIndex].y + dy),
-            });
+        z(
+          'image.stamp' +
+            '.plugin-id-' +
+            this.id +
+            '.state-index-' +
+            positionIndex +
+            this.readOnlyClass(),
+          {
+            x: 0,
+            y: 0,
+            width: this.params.imgwidth,
+            height: this.params.imgheight,
+            transform: this.getTransform(position.x, position.y),
+            'xlink:href': this.params.src,
+            onmount: (el) => {
+              this.app.registerElement({
+                ownerID: this.params.id,
+                element: el,
+                initialBehavior: 'none',
+                onDrag: ({ dx, dy }) => {
+                  this.state[positionIndex].x += dx;
+                  this.state[positionIndex].y += dy;
+                  this.render();
+                },
+                inBoundsX: (dx) =>
+                  this.inBoundsX(this.state[positionIndex].x + dx),
+                inBoundsY: (dy) =>
+                  this.inBoundsY(this.state[positionIndex].y + dy),
+              });
+            },
           },
-        }),
+        ),
       ),
       // Tags, regular or rendered by Katex
       z.each(this.state, (position, positionIndex) =>
         z.if(this.hasTag, () =>
-          z(this.latex ? 'foreignObject.tag' : 'text.tag', {
-            'text-anchor': (this.latex ? undefined : this.tag.align),
-            x: position.x + this.tag.xoffset,
-            y: position.y + this.tag.yoffset,
-            style: this.getStyle(),
-            onmount: (el) => {
-              if (this.latex) {
-                this.renderKatex(el, positionIndex);
-              }
-              if (!this.params.readonly) {
-                this.addDoubleClickEventListener(el, positionIndex);
-              }
+          z(
+            this.latex ? 'foreignObject.tag' : 'text.tag',
+            {
+              'text-anchor': this.latex ? undefined : this.tag.align,
+              x: position.x + this.tag.xoffset,
+              y: position.y + this.tag.yoffset,
+              style: this.getStyle(),
+              onmount: (el) => {
+                if (this.latex) {
+                  this.renderKatex(el, positionIndex);
+                }
+                if (!this.params.readonly) {
+                  this.addDoubleClickEventListener(el, positionIndex);
+                }
+              },
+              onupdate: (el) => {
+                if (this.latex) {
+                  this.renderKatex(el, positionIndex);
+                }
+              },
             },
-            onupdate: (el) => {
-              if (this.latex) {
-                this.renderKatex(el, positionIndex);
-              }
-            },
-          }, this.latex ? '' : this.state[positionIndex].tag),
+            this.latex ? '' : this.state[positionIndex].tag,
+          ),
         ),
       ),
     );

@@ -1,4 +1,3 @@
-/* eslint-disable import/no-extraneous-dependencies */
 const path = require('path');
 
 module.exports = {
@@ -11,7 +10,7 @@ module.exports = {
     chunkFilename: 'sketchresponse-[name].min.js',
     library: 'sketchresponse',
     libraryTarget: 'umd',
-    umdNamedDefine: true
+    umdNamedDefine: true,
   },
   resolve: {
     extensions: ['.js'],
@@ -27,7 +26,7 @@ module.exports = {
             options: {
               presets: ['@babel/preset-env'],
             },
-          }
+          },
         ],
       },
       {
@@ -40,10 +39,7 @@ module.exports = {
       },
       {
         test: /\.css$/,
-        use: [
-          'style-loader',
-          'css-loader',
-        ],
+        use: ['style-loader', 'css-loader'],
       },
     ],
   },

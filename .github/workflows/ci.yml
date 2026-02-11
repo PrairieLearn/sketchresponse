@@ -27,6 +27,29 @@ jobs:
       - name: Run ruff format check
         run: uv run ruff format --check .
 
+  lint-js:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: npm
+          cache-dependency-path: sketch_tool/package-lock.json
+
+      - name: Install dependencies
+        run: npm ci
+        working-directory: sketch_tool
+
+      - name: Run ESLint
+        run: npm run lint
+        working-directory: sketch_tool
+
+      - name: Check Prettier formatting
+        run: npm run format:check
+        working-directory: sketch_tool
+
   test:
     runs-on: ubuntu-latest
     strategy:

@@ -28,7 +28,7 @@ function splinePathData(points) {
   if (points.length < 2) return '';
 
   const coords = splineData(points).map((p) => `${p.x},${p.y}`);
-  return `M${ coords[0] }C${ coords.splice(1).join(' ') }`;
+  return `M${coords[0]}C${coords.splice(1).join(' ')}`;
 }
 
 export default class Spline extends BasePlugin {
@@ -47,9 +47,15 @@ export default class Spline extends BasePlugin {
     sParams.gradeableVersion = GRADEABLE_VERSION;
     super(sParams, app);
     // Message listeners
-    this.app.__messageBus.on('addSpline', (id, index) => { this.addSpline(id, index); });
-    this.app.__messageBus.on('deleteSplines', () => { this.deleteSplines(); });
-    this.app.__messageBus.on('finalizeShapes', (id) => { this.drawEnd(id); });
+    this.app.__messageBus.on('addSpline', (id, index) => {
+      this.addSpline(id, index);
+    });
+    this.app.__messageBus.on('deleteSplines', () => {
+      this.deleteSplines();
+    });
+    this.app.__messageBus.on('finalizeShapes', (id) => {
+      this.drawEnd(id);
+    });
   }
 
   getGradeable() {
@@ -71,7 +77,7 @@ export default class Spline extends BasePlugin {
 
   deleteSplines() {
     if (this.delIndices.length !== 0) {
-      this.delIndices = [...new Set(this.delIndices)]
+      this.delIndices = [...new Set(this.delIndices)];
       this.delIndices.sort();
       for (let i = this.delIndices.length - 1; i >= 0; i--) {
         this.state.splice(this.delIndices[i], 1);
@@ -86,7 +92,7 @@ export default class Spline extends BasePlugin {
   initDraw(event) {
     if (this.limit > 0 && this.state.length >= this.limit) {
       this.app.__messageBus.emit('showLimitWarning');
-      return
+      return;
     }
 
     const currentPosition = {
@@ -100,7 +106,8 @@ export default class Spline extends BasePlugin {
         currentPosition.tag = this.tag.value;
       }
       this.state[this.state.length - 1].push(currentPosition);
-    } else { // Create our first spline
+    } else {
+      // Create our first spline
       // Only add tag to first point
       if (this.hasTag) {
         currentPosition.tag = this.tag.value;
@@ -116,8 +123,13 @@ export default class Spline extends BasePlugin {
   drawEnd(id) {
     // To signal that a spline has been completed, push an empty array except when
     // associated plugin button is clicked or undo/redo
-    if (id !== this.id && id !== 'undo' && id !== 'redo' &&
-        this.state.length > 0 && this.state[this.state.length - 1].length > 0) {
+    if (
+      id !== this.id &&
+      id !== 'undo' &&
+      id !== 'redo' &&
+      this.state.length > 0 &&
+      this.state[this.state.length - 1].length > 0
+    ) {
       // Remove any dangling point
       if (this.state[this.state.length - 1].length < 2) {
         this.state.pop();
@@ -133,7 +145,8 @@ export default class Spline extends BasePlugin {
   }
 
   render() {
-    z.render(this.el,
+    z.render(
+      this.el,
       // Draw visible elements under invisible elements
       z.each(this.state, (spline, splineIndex) =>
         // Draw spline
@@ -148,22 +161,32 @@ export default class Spline extends BasePlugin {
         }),
       ),
       // Draw points
-      z.if(!this.params.readonly, z.each(this.state, (spline, splineIndex) =>
-        z.each(spline, (pt, ptIndex) =>
-          z('circle.visible-' + splineIndex + '.spline' + '.plugin-id-' + this.id, {
-            cx: this.state[splineIndex][ptIndex].x,
-            cy: this.state[splineIndex][ptIndex].y,
-            r: 3,
-            style: `
+      z.if(
+        !this.params.readonly,
+        z.each(this.state, (spline, splineIndex) =>
+          z.each(spline, (pt, ptIndex) =>
+            z(
+              'circle.visible-' +
+                splineIndex +
+                '.spline' +
+                '.plugin-id-' +
+                this.id,
+              {
+                cx: this.state[splineIndex][ptIndex].x,
+                cy: this.state[splineIndex][ptIndex].y,
+                r: 3,
+                style: `
               fill: ${this.params.color};
               stroke: none;
             `,
-          }),
+              },
+            ),
+          ),
         ),
-      )),
+      ),
       z.each(this.state, (spline, splineIndex) =>
         // Draw invisible and selectable spline under invisible points
-         
+
         z('path.invisible-' + splineIndex + this.readOnlyClass(), {
           d: splinePathData(this.state[splineIndex]),
           style: `
@@ -226,8 +249,10 @@ export default class Spline extends BasePlugin {
                   this.state[splineIndex][ptIndex].y += dy;
                   this.render();
                 },
-                inBoundsX: (dx) => this.inBoundsX(this.state[splineIndex][ptIndex].x + dx),
-                inBoundsY: (dy) => this.inBoundsY(this.state[splineIndex][ptIndex].y + dy),
+                inBoundsX: (dx) =>
+                  this.inBoundsX(this.state[splineIndex][ptIndex].x + dx),
+                inBoundsY: (dy) =>
+                  this.inBoundsY(this.state[splineIndex][ptIndex].y + dy),
               });
             },
           }),
@@ -235,26 +260,34 @@ export default class Spline extends BasePlugin {
       ),
       // Tags, regular or rendered by Katex
       z.each(this.state, (spline, splineIndex) =>
-        z.if(this.hasTag && this.state[splineIndex].length > 0 && this.state[splineIndex][0].tag, () =>
-          z(this.latex ? 'foreignObject.tag' : 'text.tag', {
-            'text-anchor': (this.latex ? undefined : this.tag.align),
-            x: this.state[splineIndex][0].x + this.tag.xoffset,
-            y: this.state[splineIndex][0].y + this.tag.yoffset,
-            style: this.getStyle(),
-            onmount: (el) => {
-              if (this.latex) {
-                this.renderKatex(el, splineIndex, 0);
-              }
-              if (!this.params.readonly) {
-                this.addDoubleClickEventListener(el, splineIndex, 0);
-              }
-            },
-            onupdate: (el) => {
-              if (this.latex) {
-                this.renderKatex(el, splineIndex, 0);
-              }
-            },
-          }, this.latex ? '' : this.state[splineIndex][0].tag),
+        z.if(
+          this.hasTag &&
+            this.state[splineIndex].length > 0 &&
+            this.state[splineIndex][0].tag,
+          () =>
+            z(
+              this.latex ? 'foreignObject.tag' : 'text.tag',
+              {
+                'text-anchor': this.latex ? undefined : this.tag.align,
+                x: this.state[splineIndex][0].x + this.tag.xoffset,
+                y: this.state[splineIndex][0].y + this.tag.yoffset,
+                style: this.getStyle(),
+                onmount: (el) => {
+                  if (this.latex) {
+                    this.renderKatex(el, splineIndex, 0);
+                  }
+                  if (!this.params.readonly) {
+                    this.addDoubleClickEventListener(el, splineIndex, 0);
+                  }
+                },
+                onupdate: (el) => {
+                  if (this.latex) {
+                    this.renderKatex(el, splineIndex, 0);
+                  }
+                },
+              },
+              this.latex ? '' : this.state[splineIndex][0].tag,
+            ),
         ),
       ),
     );
