@@ -77,6 +77,7 @@ target/
 
 # front-end build
 static/sketch_tool_dist/
+node_modules/
 
 # uv / venv
 .venv/
