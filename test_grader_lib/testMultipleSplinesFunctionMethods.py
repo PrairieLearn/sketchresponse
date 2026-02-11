@@ -1,8 +1,9 @@
-from __future__ import print_function
-from __future__ import absolute_import
+from __future__ import absolute_import, print_function
+
 import unittest
-from test_grader_lib import TestData
+
 from sketchresponse.grader_lib import GradeableFunction
+from test_grader_lib import TestData
 
 
 class TestMultipleSplinesFunctionMethods(TestData.TestData):

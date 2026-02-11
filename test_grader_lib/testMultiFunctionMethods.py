@@ -1,7 +1,9 @@
 from __future__ import absolute_import
+
 import unittest
-from test_grader_lib import TestData
+
 from sketchresponse.grader_lib import GradeableFunction
+from test_grader_lib import TestData
 
 
 class TestMultiFunctionMethods(TestData.TestData):

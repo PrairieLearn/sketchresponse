@@ -1,7 +1,9 @@
 from __future__ import absolute_import
+
 import unittest
-from test_grader_lib import TestData
+
 from sketchresponse.grader_lib import Polygon
+from test_grader_lib import TestData
 
 
 class TestPolygonMethods(TestData.TestData):
@@ -59,7 +61,7 @@ class TestPolygonMethods(TestData.TestData):
         poly = Polygon.Polygons(args.grader, args.submission, args.tool_id)
         self.assertTrue(poly.polygon_contains_polygon(poly.polygons[0], [[0, 1]]))
 
-    def test_polygon_contains_point_false(self):
+    def test_polygon_contains_polygon_false(self):
         data = self.load_as_gradeable_collections("polygon_point")
         d = data[0]
         args = d["pl"]

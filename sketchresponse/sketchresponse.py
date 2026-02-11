@@ -1,7 +1,8 @@
 from __future__ import division
+
+import base64
 import inspect
 import json
-import base64
 from copy import deepcopy
 
 

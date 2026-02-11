@@ -1,8 +1,5 @@
 from .. import sketchresponse
-from ..grader_lib import GradeableFunction
-from ..grader_lib import LineSegment
-from ..grader_lib import PolyLine
-from ..grader_lib import Polygon
+from ..grader_lib import LineSegment, Polygon, PolyLine
 
 problemconfig = sketchresponse.config(
     {
@@ -91,7 +88,7 @@ problemconfig = sketchresponse.config(
 def grader(pl, pg, pt, ls, c, cwm, ccwm):
     pl = PolyLine.PolyLines(pl)
     pg = Polygon.Polygons(pg)
-    cls = LineSegment.LineSegments(c)
+    _cls = LineSegment.LineSegments(c)
 
     beam = pl.get_polyline_as_segments(0)
 
@@ -109,10 +106,10 @@ def grader(pl, pg, pt, ls, c, cwm, ccwm):
     if len(pg.get_intersections_with_polygon_boundary(beam2, poly)) > 1:
         return False, "wrong 2"
 
-    if pg.point_is_on_boundary([-2, -1]) == None:
+    if pg.point_is_on_boundary([-2, -1]) is None:
         return False, "wrong 3"
 
-    if pg.point_is_on_boundary([-3, 2]) == None and pg.point_is_on_boundary([2, -1]) == None:
+    if pg.point_is_on_boundary([-3, 2]) is None and pg.point_is_on_boundary([2, -1]) is None:
         return False, "wrong 4"
 
     return True, "Good job!"

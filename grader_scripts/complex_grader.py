@@ -1,6 +1,5 @@
 from sketchresponse import sketchresponse
-from sketchresponse.grader_lib import GradeableFunction
-from sketchresponse.grader_lib import Asymptote
+from sketchresponse.grader_lib import Asymptote, GradeableFunction
 
 problemconfig = sketchresponse.config(
     {
@@ -75,12 +74,9 @@ def grader(f, cp, ip, va, ha):
         if not cp.has_point_at(x=0):
             msg += '<font color="blue"> Check the x value of your critical point</font><br />'
         if not va.has_asym_at_value(-1) or not va.has_asym_at_value(1):
-            v1 = va.closest_asym_to_value(-1)
-            v2 = va.closest_asym_to_value(1)
             msg += '<font color="blue"> Check the locations of your vertical asymptotes.  </font><br />'
 
         if not ha.has_asym_at_value(2):
-            ha1 = ha.closest_asym_to_value(2)
             msg += '<font color="blue"> Check the locations of your horizontal asymptotes. </font><br />'
 
         maxpt = cp.get_point_at(x=0)

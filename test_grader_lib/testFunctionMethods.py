@@ -1,11 +1,10 @@
 from __future__ import absolute_import
+
+# from ..sketchinput import GradeableCollection
 import unittest
 
 # from ..csv_to_data_new import load_csv_data
 from sketchresponse.grader_lib import GradeableFunction
-
-# from ..sketchinput import GradeableCollection
-import json
 from test_grader_lib import TestData
 
 

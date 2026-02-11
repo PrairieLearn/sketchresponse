@@ -1,11 +1,12 @@
 from __future__ import absolute_import
-import sys
+
 import importlib
-from flask import Flask, render_template, request, json
-from .proto2prod import convert_ans_dict
 
 # from imp import reload
 import os
+import sys
+
+from flask import Flask, json, render_template, request
 
 app = Flask(__name__)
 
@@ -25,7 +26,7 @@ def list_grader_scripts():
 @app.route("/<path:path>/<grader_module_name>")
 def new_local_frontend(path=None, grader_module_name=None):
     print(type(grader_module_name))
-    if not path is None:
+    if path is not None:
         path = path.replace("/", ".")
         if not path.endswith("."):
             path = path + "."
@@ -41,7 +42,7 @@ def new_local_frontend(path=None, grader_module_name=None):
 @app.route("/<grader_module_name>/check", methods=["POST"])
 @app.route("/<path:path>/<grader_module_name>/check", methods=["POST"])
 def check_local(path=None, grader_module_name=None):
-    if not path is None:
+    if path is not None:
         path = path.replace("/", ".")
         if not path.endswith("."):
             path = path + "."
@@ -55,12 +56,12 @@ def check_local(path=None, grader_module_name=None):
 
     # Dispatch to grader in the required format
     # Assume no 'expect' value for now
-    if ENABLE_DATA_PRINTING == True:
+    if ENABLE_DATA_PRINTING:
         print(json.dumps(submitted_data))
     grader_response = grader_module.grader(None, json.dumps(submitted_data))
 
     # Allow boolean grader return values instead of dicts
-    if type(grader_response) == bool:
+    if isinstance(grader_response, bool):
         grader_response = {"ok": grader_response, "msg": ""}
 
     return json.dumps(grader_response)
@@ -88,7 +89,7 @@ def check_aws(grader_module_name):
     grader_response = grader_module.grader(None, json.dumps(submitted_data))
 
     # Allow boolean grader return values instead of dicts
-    if type(grader_response) == bool:
+    if isinstance(grader_response, bool):
         grader_response = {"ok": grader_response, "msg": ""}
 
     return json.dumps(grader_response)

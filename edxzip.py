@@ -1,6 +1,6 @@
-import zipfile
 import os
 import re
+import zipfile
 
 
 def addfile(source, ziph):

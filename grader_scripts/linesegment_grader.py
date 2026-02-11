@@ -1,6 +1,5 @@
 from sketchresponse import sketchresponse
-from sketchresponse.grader_lib import GradeableFunction
-from sketchresponse.grader_lib import LineSegment
+from sketchresponse.grader_lib import GradeableFunction, LineSegment
 
 problemconfig = sketchresponse.config(
     {

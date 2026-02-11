@@ -1,5 +1,7 @@
+import json
 from builtins import zip
-import pandas, json, re
+
+import pandas
 
 
 def load_csv_data(filename, xrange, yrange, width=800, height=480):

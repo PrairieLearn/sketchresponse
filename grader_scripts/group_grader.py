@@ -42,8 +42,8 @@ problemconfig = sketchresponse.config(
 
 @sketchresponse.grader
 def grader(grp, f):  # Only have to declare the plugins you want to grade.
-    lines = GradeableFunction.GradeableFunction(grp)
-    function = GradeableFunction.GradeableFunction(f)
+    _lines = GradeableFunction.GradeableFunction(grp)
+    _function = GradeableFunction.GradeableFunction(f)
 
     # Can now grade data either from individual plugins or handle multiple
     # plugins with comparable data through the group

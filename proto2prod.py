@@ -1,7 +1,8 @@
 from __future__ import division
-from builtins import zip
-import re
+
 import json
+import re
+from builtins import zip
 
 
 def path_strings_from_svg(svg):
@@ -23,8 +24,6 @@ def points_from_path(path):
 
 
 def delta_decode_spline_points(points):
-    num_segments = (len(points) - 1) // 3
-
     i = 0
     while i + 3 < len(points):
         for d in [0, 1]:

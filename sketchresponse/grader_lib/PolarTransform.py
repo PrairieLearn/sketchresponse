@@ -1,17 +1,13 @@
-from __future__ import print_function
-from __future__ import absolute_import
-from __future__ import division
-from builtins import map
-from builtins import object
-from . import GradeableFunction
-from . import MultipleSplinesFunction
-from . import SplineFunction
-from . import Point
-from . import Axis
-import numpy as np
-import math
-from . import fit_curve as fitCurves
+from __future__ import absolute_import, division, print_function
+
 import copy
+import math
+from builtins import map, object
+
+import numpy as np
+
+from . import Axis
+from . import fit_curve as fitCurves
 
 
 class PolarTransform(object):
