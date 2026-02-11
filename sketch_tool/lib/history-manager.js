@@ -15,8 +15,12 @@ export default class HistoryManager {
     messageBus.on('addUndoPoint', this.addUndoPoint.bind(this));
     messageBus.on('undo', this.undo.bind(this));
     messageBus.on('redo', this.redo.bind(this));
-    messageBus.on('ready', () => { this.currentState = this.getUndoableState(); });
-    messageBus.on('stateSet', () => { this.currentState = this.getUndoableState(); });
+    messageBus.on('ready', () => {
+      this.currentState = this.getUndoableState();
+    });
+    messageBus.on('stateSet', () => {
+      this.currentState = this.getUndoableState();
+    });
 
     messageBus.emit('registerState', {
       id: '$__history',
@@ -42,7 +46,9 @@ export default class HistoryManager {
 
   addUndoPoint() {
     if (!this.currentState) {
-      throw new Error('Cannot add an undo point before the application has finished loading.');
+      throw new Error(
+        'Cannot add an undo point before the application has finished loading.',
+      );
     }
 
     const newState = this.getUndoableState();

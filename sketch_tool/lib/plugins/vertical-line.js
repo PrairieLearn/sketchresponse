@@ -27,8 +27,12 @@ export default class VerticalLine extends BasePlugin {
     vlParams.gradeableVersion = GRADEABLE_VERSION;
     super(vlParams, app);
     // Message listeners
-    this.app.__messageBus.on('addVerticalLine', (id, index) => { this.addVerticalLine(id, index); });
-    this.app.__messageBus.on('deleteVerticalLines', () => { this.deleteVerticalLines(); });
+    this.app.__messageBus.on('addVerticalLine', (id, index) => {
+      this.addVerticalLine(id, index);
+    });
+    this.app.__messageBus.on('deleteVerticalLines', () => {
+      this.deleteVerticalLines();
+    });
     ['drawMove', 'drawEnd'].forEach((name) => {
       this[name] = this[name].bind(this);
     });
@@ -38,8 +42,8 @@ export default class VerticalLine extends BasePlugin {
     const yvals = [
       0,
       Math.round(this.params.height / 3),
-       
-      Math.round(2 * this.params.height / 3),
+
+      Math.round((2 * this.params.height) / 3),
       this.params.height,
     ];
 
@@ -71,7 +75,7 @@ export default class VerticalLine extends BasePlugin {
   initDraw(event) {
     if (this.limit > 0 && this.state.length >= this.limit) {
       this.app.__messageBus.emit('showLimitWarning');
-      return
+      return;
     }
 
     // Add event listeners in capture phase
@@ -107,25 +111,31 @@ export default class VerticalLine extends BasePlugin {
   }
 
   render() {
-    z.render(this.el,
+    z.render(
+      this.el,
       // Draw visible line, under invisible line
       z.each(this.state, (position, positionIndex) =>
-         
-        z('line.visible-' + positionIndex + '.vertical-line' + '.plugin-id-' + this.id, {
-          x1: position.x,
-          y1: 0,
-          x2: position.x,
-          y2: this.params.height,
-          style: `
+        z(
+          'line.visible-' +
+            positionIndex +
+            '.vertical-line' +
+            '.plugin-id-' +
+            this.id,
+          {
+            x1: position.x,
+            y1: 0,
+            x2: position.x,
+            y2: this.params.height,
+            style: `
             stroke: ${this.params.color};
             stroke-width: 2px;
             stroke-dasharray: ${this.computeDashArray(this.params.dashStyle, 2)};
           `,
-        }),
+          },
+        ),
       ),
       // Draw invisible and selectable line
       z.each(this.state, (position, positionIndex) =>
-         
         z('line.invisible-' + positionIndex + this.readOnlyClass(), {
           x1: position.x,
           y1: 0,
@@ -145,7 +155,8 @@ export default class VerticalLine extends BasePlugin {
                 this.state[positionIndex].x += dx;
                 this.render();
               },
-              inBoundsX: (dx) => this.inBoundsX(this.state[positionIndex].x + dx),
+              inBoundsX: (dx) =>
+                this.inBoundsX(this.state[positionIndex].x + dx),
               inBoundsY: () => true,
             });
           },
@@ -154,25 +165,29 @@ export default class VerticalLine extends BasePlugin {
       // Tags, regular or rendered by Katex
       z.each(this.state, (position, positionIndex) =>
         z.if(this.hasTag, () =>
-          z(this.latex ? 'foreignObject.tag' : 'text.tag', {
-            'text-anchor': (this.latex ? undefined : this.tag.align),
-            x: position.x + this.tag.xoffset,
-            y: this.params.height / 2 + this.tag.yoffset,
-            style: this.getStyle(),
-            onmount: (el) => {
-              if (this.latex) {
-                this.renderKatex(el, positionIndex);
-              }
-              if (!this.params.readonly) {
-                this.addDoubleClickEventListener(el, positionIndex);
-              }
+          z(
+            this.latex ? 'foreignObject.tag' : 'text.tag',
+            {
+              'text-anchor': this.latex ? undefined : this.tag.align,
+              x: position.x + this.tag.xoffset,
+              y: this.params.height / 2 + this.tag.yoffset,
+              style: this.getStyle(),
+              onmount: (el) => {
+                if (this.latex) {
+                  this.renderKatex(el, positionIndex);
+                }
+                if (!this.params.readonly) {
+                  this.addDoubleClickEventListener(el, positionIndex);
+                }
+              },
+              onupdate: (el) => {
+                if (this.latex) {
+                  this.renderKatex(el, positionIndex);
+                }
+              },
             },
-            onupdate: (el) => {
-              if (this.latex) {
-                this.renderKatex(el, positionIndex);
-              }
-            },
-          }, this.latex ? '' : this.state[positionIndex].tag),
+            this.latex ? '' : this.state[positionIndex].tag,
+          ),
         ),
       ),
     );
@@ -182,7 +197,6 @@ export default class VerticalLine extends BasePlugin {
     return x >= this.bounds.xmin && x <= this.bounds.xmax;
   }
 
-   
   inBoundsY() {
     return true;
   }

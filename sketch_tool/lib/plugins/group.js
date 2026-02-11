@@ -13,21 +13,26 @@ export default class Group {
   constructor(params, app, lowPriority = false) {
     if (app.debug) {
       if (typeof params.label !== 'string') {
-         
         params.label = 'Group'; // Default value
       }
     }
     this.params = params;
     this.app = app;
     const items = [];
-    const plugins = this.params.plugins.map((pluginParams) => pluginParams.name);
+    const plugins = this.params.plugins.map(
+      (pluginParams) => pluginParams.name,
+    );
     plugins.forEach((name, index) => {
       this.params.plugins[index].isSubItem = true;
       // There are 4 base canvas elements for frame and axes, so lowest priority is inserted after those
       if (lowPriority) {
         this.params.plugins[index].zIndex = 4 + index;
       }
-      const plugin = this.createPlugin(name, this.params.plugins[index], this.app);
+      const plugin = this.createPlugin(
+        name,
+        this.params.plugins[index],
+        this.app,
+      );
       items.push(plugin.menuItem);
     });
     this.menuItem = {
@@ -42,7 +47,6 @@ export default class Group {
     this.app.registerToolbarItem(this.menuItem);
   }
 
-   
   createPlugin(name, params, app) {
     switch (name) {
       case 'freeform':

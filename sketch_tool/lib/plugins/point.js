@@ -19,9 +19,7 @@ export default class Point extends BasePlugin {
     const pParams = BasePlugin.generateDefaultParams(DEFAULT_PARAMS, params);
     deepExtend(pParams, params);
     // Add params that are specific to this plugin
-    const iconSrc = pParams.hollow
-      ? pointHollowSvg
-      : pointSvg;
+    const iconSrc = pParams.hollow ? pointHollowSvg : pointSvg;
     pParams.icon = {
       src: iconSrc,
       alt: 'Point tool',
@@ -35,9 +33,11 @@ export default class Point extends BasePlugin {
     this.fillOpacity = pParams.hollow ? 0 : 1;
     // Given a params.size, to have identical visible radiuses in both cases, we need to shrink
     // the hollow point to take in account the 2px width of the stroke
-    this.radius = pParams.hollow ? (pParams.size / 2) - 1 : pParams.size / 2;
+    this.radius = pParams.hollow ? pParams.size / 2 - 1 : pParams.size / 2;
     // Message listeners
-    this.app.__messageBus.on('addPoint', (id, index) => this.addPoint(id, index));
+    this.app.__messageBus.on('addPoint', (id, index) =>
+      this.addPoint(id, index),
+    );
     this.app.__messageBus.on('deletePoints', () => this.deletePoints());
     ['drawMove', 'drawEnd'].forEach((name) => {
       this[name] = this[name].bind(this);
@@ -73,7 +73,7 @@ export default class Point extends BasePlugin {
   initDraw(event) {
     if (this.limit > 0 && this.state.length >= this.limit) {
       this.app.__messageBus.emit('showLimitWarning');
-      return
+      return;
     }
 
     // Add event listeners in capture phase
@@ -115,56 +115,71 @@ export default class Point extends BasePlugin {
   }
 
   render() {
-    z.render(this.el,
+    z.render(
+      this.el,
       z.each(this.state, (position, positionIndex) =>
-        z('circle.point' + '.plugin-id-' + this.id + '.state-index-' + positionIndex + this.readOnlyClass(), {
-          cx: position.x,
-          cy: position.y,
-          r: this.radius,
-          style: `
+        z(
+          'circle.point' +
+            '.plugin-id-' +
+            this.id +
+            '.state-index-' +
+            positionIndex +
+            this.readOnlyClass(),
+          {
+            cx: position.x,
+            cy: position.y,
+            r: this.radius,
+            style: `
             fill: ${this.params.color};
             fill-opacity: ${this.fillOpacity};
             stroke: ${this.params.color};
             stroke-width: ${this.strokeWidth};
           `,
-          onmount: (el) => {
-            this.app.registerElement({
-              ownerID: this.params.id,
-              element: el,
-              initialBehavior: 'none',
-              onDrag: ({ dx, dy }) => {
-                this.state[positionIndex].x += dx;
-                this.state[positionIndex].y += dy;
-                this.render();
-              },
-              inBoundsX: (dx) => this.inBoundsX(this.state[positionIndex].x + dx),
-              inBoundsY: (dy) => this.inBoundsY(this.state[positionIndex].y + dy),
-            });
+            onmount: (el) => {
+              this.app.registerElement({
+                ownerID: this.params.id,
+                element: el,
+                initialBehavior: 'none',
+                onDrag: ({ dx, dy }) => {
+                  this.state[positionIndex].x += dx;
+                  this.state[positionIndex].y += dy;
+                  this.render();
+                },
+                inBoundsX: (dx) =>
+                  this.inBoundsX(this.state[positionIndex].x + dx),
+                inBoundsY: (dy) =>
+                  this.inBoundsY(this.state[positionIndex].y + dy),
+              });
+            },
           },
-        }),
+        ),
       ),
       // Tags, regular or rendered by Katex
       z.each(this.state, (position, positionIndex) =>
         z.if(this.hasTag, () =>
-          z(this.latex ? 'foreignObject.tag' : 'text.tag', {
-            'text-anchor': (this.latex ? undefined : this.tag.align),
-            x: position.x + this.tag.xoffset,
-            y: position.y + this.tag.yoffset,
-            style: this.getStyle(),
-            onmount: (el) => {
-              if (this.latex) {
-                this.renderKatex(el, positionIndex);
-              }
-              if (!this.params.readonly) {
-                this.addDoubleClickEventListener(el, positionIndex);
-              }
+          z(
+            this.latex ? 'foreignObject.tag' : 'text.tag',
+            {
+              'text-anchor': this.latex ? undefined : this.tag.align,
+              x: position.x + this.tag.xoffset,
+              y: position.y + this.tag.yoffset,
+              style: this.getStyle(),
+              onmount: (el) => {
+                if (this.latex) {
+                  this.renderKatex(el, positionIndex);
+                }
+                if (!this.params.readonly) {
+                  this.addDoubleClickEventListener(el, positionIndex);
+                }
+              },
+              onupdate: (el) => {
+                if (this.latex) {
+                  this.renderKatex(el, positionIndex);
+                }
+              },
             },
-            onupdate: (el) => {
-              if (this.latex) {
-                this.renderKatex(el, positionIndex);
-              }
-            },
-          }, this.latex ? '' : this.state[positionIndex].tag),
+            this.latex ? '' : this.state[positionIndex].tag,
+          ),
         ),
       ),
     );

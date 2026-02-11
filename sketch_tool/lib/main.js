@@ -13,7 +13,7 @@ import ElementManager from './element-manager';
 import deepCopy from './util/deep-copy';
 
 import Toolbar from './toolbar';
-import Group from "./plugins/group";
+import Group from './plugins/group';
 
 import deleteSvg from './delete-icon.svg';
 import selectSvg from './select-icon.svg';
@@ -71,7 +71,9 @@ export default class SketchInput {
 
     Promise.all(
       this.params.plugins.map((pluginParams) =>
-        import(`./plugins/${pluginParams.name}`).then((module) => module.default),
+        import(`./plugins/${pluginParams.name}`).then(
+          (module) => module.default,
+        ),
       ),
     ).then((plugins) => this.init(plugins));
   }
@@ -81,7 +83,7 @@ export default class SketchInput {
       <menu id="${this.id}-si-toolbar" class="si-toolbar${this.params.readonly ? ' disable' : ''}"></menu>
       <svg id="${this.id}-si-canvas" class="si-canvas" touch-action="none" width="${this.params.width}" height="${this.params.height}">
         <rect width="100%" height="100%" fill="#F0F0F0" />
-        <rect x="${this.config.safetyBuffer}" y="${this.config.safetyBuffer}" width="${this.config.width-2*this.config.safetyBuffer}" height="${this.config.height-2*this.config.safetyBuffer}" fill="white" />
+        <rect x="${this.config.safetyBuffer}" y="${this.config.safetyBuffer}" width="${this.config.width - 2 * this.config.safetyBuffer}" height="${this.config.height - 2 * this.config.safetyBuffer}" fill="white" />
       </svg>
       <div id="${this.id}-si-attribution" class="si-attribution">
         <a id="${this.id}-si-show-legal" href="#">Made with <span aria-label="love">&hearts;</span> at MIT, adapted for PrairieLearn</a>
@@ -146,21 +148,38 @@ export default class SketchInput {
       legalDialog.setAttribute('data-visible', 'true');
     });
 
-    legalDialog.addEventListener('click', () => legalDialog.setAttribute('data-visible', 'false'));
+    legalDialog.addEventListener('click', () =>
+      legalDialog.setAttribute('data-visible', 'false'),
+    );
     legalDialog.addEventListener('click', (event) => event.stopPropagation());
-    helpDialog.addEventListener('click', () => helpDialog.setAttribute('data-visible', 'false'));
+    helpDialog.addEventListener('click', () =>
+      helpDialog.setAttribute('data-visible', 'false'),
+    );
     helpDialog.addEventListener('click', (event) => event.stopPropagation());
 
-    this.notificationManager = new NotificationManager(this.config, this.messageBus);
+    this.notificationManager = new NotificationManager(
+      this.config,
+      this.messageBus,
+    );
     this.gradeableManager = new GradeableManager(this.config, this.messageBus);
-    this.stateManager = new StateManager(this.config, this.messageBus, this.initialState);
-    this.historyManager = new HistoryManager(this.config, this.messageBus, this.stateManager);
+    this.stateManager = new StateManager(
+      this.config,
+      this.messageBus,
+      this.initialState,
+    );
+    this.historyManager = new HistoryManager(
+      this.config,
+      this.messageBus,
+      this.stateManager,
+    );
 
     this.app = {
       id: this.id,
       registerState: (entry) => this.messageBus.emit('registerState', entry),
-      registerGradeable: (entry) => this.messageBus.emit('registerGradeable', entry),
-      registerToolbarItem: (entry) => this.messageBus.emit('registerToolbarItem', entry),
+      registerGradeable: (entry) =>
+        this.messageBus.emit('registerGradeable', entry),
+      registerToolbarItem: (entry) =>
+        this.messageBus.emit('registerToolbarItem', entry),
       addUndoPoint: () => this.messageBus.emit('addUndoPoint'),
       __messageBus: this.messageBus,
       svg: document.getElementById(`${this.id}-si-canvas`),
@@ -171,39 +190,55 @@ export default class SketchInput {
     // setting capture to true to get the event as soon as possible
     // NOTE: Cannot use mousedown here since that also prevents mouse move/up
     // from being captured when the mouse leaves the window/iframe (in Chrome at least)
-    this.app.svg.addEventListener('dragstart', (event) => event.preventDefault(), true);
+    this.app.svg.addEventListener(
+      'dragstart',
+      (event) => event.preventDefault(),
+      true,
+    );
 
     this.toolbar = new Toolbar(this.id, this.params, this.app);
-    this.elementManager = new ElementManager(this.app, this.config.enforceBounds);
-    this.app.registerElement = this.elementManager.registerElement.bind(this.elementManager);
+    this.elementManager = new ElementManager(
+      this.app,
+      this.config.enforceBounds,
+    );
+    this.app.registerElement = this.elementManager.registerElement.bind(
+      this.elementManager,
+    );
 
     // Disable multiple pointerdown events if the events are close together in time and distance:
     // Less or equal to 500 ms and less or equal to 10 px.
     // Double clicks are still enabled though when they happen on a label element.
-    document.addEventListener('pointerdown', (event) => {
-      const newTime = Date.now();
-      const deltaT = newTime - this.oldTime;
-      const newPt = {
-        x: event.clientX,
-        y: event.clientY,
-      };
-      const dist = Math.sqrt(
-        (newPt.x - this.oldPt.x) * (newPt.x - this.oldPt.x) +
-        (newPt.y - this.oldPt.y) * (newPt.y - this.oldPt.y),
-      );
-      if (deltaT <= 500 && dist <= 10) {
-        // Stop event propagation except when it happens on a tag where a double click
-        // will open a SweetAlert2 window for editing.
-        // Tags are either a text node with a 'tag' class name. Or a Katex foreignElement, also
-        // with a 'tag' class name, containing span children.
-        if (event.target.getAttribute('class') !== 'tag' && event.target.tagName !== 'SPAN') {
-          event.stopPropagation();
+    document.addEventListener(
+      'pointerdown',
+      (event) => {
+        const newTime = Date.now();
+        const deltaT = newTime - this.oldTime;
+        const newPt = {
+          x: event.clientX,
+          y: event.clientY,
+        };
+        const dist = Math.sqrt(
+          (newPt.x - this.oldPt.x) * (newPt.x - this.oldPt.x) +
+            (newPt.y - this.oldPt.y) * (newPt.y - this.oldPt.y),
+        );
+        if (deltaT <= 500 && dist <= 10) {
+          // Stop event propagation except when it happens on a tag where a double click
+          // will open a SweetAlert2 window for editing.
+          // Tags are either a text node with a 'tag' class name. Or a Katex foreignElement, also
+          // with a 'tag' class name, containing span children.
+          if (
+            event.target.getAttribute('class') !== 'tag' &&
+            event.target.tagName !== 'SPAN'
+          ) {
+            event.stopPropagation();
+          }
         }
-      }
-      this.oldTime = newTime;
-      this.oldPt.x = newPt.x;
-      this.oldPt.y = newPt.y;
-    }, true);
+        this.oldTime = newTime;
+        this.oldPt.x = newPt.x;
+        this.oldPt.y = newPt.y;
+      },
+      true,
+    );
 
     // Add stateful buttons (Select and plugins) to the left of the toolbar
     this.app.registerToolbarItem({
@@ -234,15 +269,17 @@ export default class SketchInput {
       },
     });
 
-    const helpers = []
+    const helpers = [];
     plugins.forEach((Plugin, idx) => {
       if (this.params.readonly) {
-        this.params.plugins[idx]["readonly"] = true;
+        this.params.plugins[idx]['readonly'] = true;
       }
-      if (!this.params.plugins[idx].readonly && this.params.plugins[idx].helper) {
+      if (
+        !this.params.plugins[idx].readonly &&
+        this.params.plugins[idx].helper
+      ) {
         helpers.push(idx);
-      }
-      else {
+      } else {
         new Plugin(this.params.plugins[idx], this.app);
       }
     });
@@ -253,15 +290,19 @@ export default class SketchInput {
         name: 'group',
         id: 'helpers',
         label: 'Helpers (ungraded)',
-        plugins: []
-      }
+        plugins: [],
+      };
       helpers.forEach((idx) => {
-        helperGroup.plugins.push(this.params.plugins[idx])
-      })
+        helperGroup.plugins.push(this.params.plugins[idx]);
+      });
       new Group(helperGroup, this.app, true);
     }
 
-    document.addEventListener('pointerdown', () => this.messageBus.emit('closeDropdown'), true);
+    document.addEventListener(
+      'pointerdown',
+      () => this.messageBus.emit('closeDropdown'),
+      true,
+    );
 
     // Add action buttons (Delete, Undo, and Redo) to the right of the toolbar
     // TODO: factor into... something
@@ -335,46 +376,63 @@ export default class SketchInput {
     const messageBus = this.messageBus;
     this.el.addEventListener('keydown', function (event) {
       if ((event.ctrlKey || event.metaKey) && event.key === 'z') {
-        event.preventDefault(); 
+        event.preventDefault();
         messageBus.emit('undo');
       }
-      if ((event.ctrlKey || event.metaKey) && (event.key === 'y' || event.key === 'z' && event.shiftKey)) {
-        event.preventDefault(); 
+      if (
+        (event.ctrlKey || event.metaKey) &&
+        (event.key === 'y' || (event.key === 'z' && event.shiftKey))
+      ) {
+        event.preventDefault();
         messageBus.emit('redo');
       }
       if (event.key === 'Escape') {
-        event.preventDefault(); 
-        messageBus.emit('deselectAll')
+        event.preventDefault();
+        messageBus.emit('deselectAll');
       }
       if (event.key === 'Enter') {
-        event.preventDefault(); 
+        event.preventDefault();
         event.stopPropagation();
-        messageBus.emit('finalizeShapes')
+        messageBus.emit('finalizeShapes');
       }
       if (event.key === 'Delete' || event.key === 'Backspace') {
-        event.preventDefault(); 
-        messageBus.emit('deleteSelected')
+        event.preventDefault();
+        messageBus.emit('deleteSelected');
       }
     });
 
     // Allow multitouch zoom on SVG element (TODO: move elsewhere?)
-    this.app.svg.addEventListener('touchstart', (event) => {
-      if (event.touches.length > 1) this.app.svg.setAttribute('touch-action', 'auto');
-    }, true);
+    this.app.svg.addEventListener(
+      'touchstart',
+      (event) => {
+        if (event.touches.length > 1)
+          this.app.svg.setAttribute('touch-action', 'auto');
+      },
+      true,
+    );
 
-    this.app.svg.addEventListener('touchend', (event) => {
-      if (event.touches.length === 0) this.app.svg.setAttribute('touch-action', 'none');
-    }, true);
+    this.app.svg.addEventListener(
+      'touchend',
+      (event) => {
+        if (event.touches.length === 0)
+          this.app.svg.setAttribute('touch-action', 'none');
+      },
+      true,
+    );
 
     this.messageBus.on('showLimitWarning', () => {
       let popup = document.querySelector('#warning-popup');
       if (!popup) {
-        this.el.insertAdjacentHTML('beforeend', `<div id="warning-popup" class="position-absolute translate-middle-x start-50" style="margin-top:100px;"></div>`);
+        this.el.insertAdjacentHTML(
+          'beforeend',
+          `<div id="warning-popup" class="position-absolute translate-middle-x start-50" style="margin-top:100px;"></div>`,
+        );
         popup = document.querySelector('#warning-popup');
       }
       // Only show one popup with the same ID at the same time
       if (!document.querySelector('#popup-limit')) {
-        popup.insertAdjacentHTML('beforeend', 
+        popup.insertAdjacentHTML(
+          'beforeend',
           `<div id="popup-limit"
               class="show p-1 alert alert-dismissible alert-warning"
               style="padding-right:2rem!important;"
@@ -388,19 +446,24 @@ export default class SketchInput {
                 data-bs-dismiss="alert"
                 aria-label="Close"
               ></button>
-            </div>`);
+            </div>`,
+        );
       }
     });
 
     this.messageBus.on('showDeleteWarning', () => {
       let popup = document.querySelector('#warning-popup');
       if (!popup) {
-        this.el.insertAdjacentHTML('beforeend', `<div id="warning-popup" class="position-absolute translate-middle-x start-50" style="margin-top:100px;"></div>`);
+        this.el.insertAdjacentHTML(
+          'beforeend',
+          `<div id="warning-popup" class="position-absolute translate-middle-x start-50" style="margin-top:100px;"></div>`,
+        );
         popup = document.querySelector('#warning-popup');
       }
       // Only show one popup with the same ID at the same time
       if (!document.querySelector('#popup-limit')) {
-        popup.insertAdjacentHTML('beforeend', 
+        popup.insertAdjacentHTML(
+          'beforeend',
           `<div id="popup-limit"
               class="show p-1 alert alert-dismissible alert-warning"
               style="padding-right:2rem!important;"
@@ -414,20 +477,29 @@ export default class SketchInput {
                 data-bs-dismiss="alert"
                 aria-label="Close"
               ></button>
-            </div>`);
+            </div>`,
+        );
       }
     });
 
-    this.messageBus.on('deleteFinished', () => { this.app.addUndoPoint(); });
+    this.messageBus.on('deleteFinished', () => {
+      this.app.addUndoPoint();
+    });
 
     if (this.initialState) this.messageBus.emit('loadInitialState');
 
     this.messageBus.emit('ready');
   }
 
-  setState(state) { return this.stateManager.setState(state); }
+  setState(state) {
+    return this.stateManager.setState(state);
+  }
 
-  getState() { return this.stateManager.getState(); }
+  getState() {
+    return this.stateManager.getState();
+  }
 
-  getGradeable() { return this.gradeableManager.getGradeable(); }
+  getGradeable() {
+    return this.gradeableManager.getGradeable();
+  }
 }

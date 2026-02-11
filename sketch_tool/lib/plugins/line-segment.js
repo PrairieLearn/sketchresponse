@@ -23,7 +23,9 @@ export default class LineSegment extends BasePlugin {
     if (lsParams.arrowHead) {
       const { length, base } = lsParams.arrowHead;
       const refY = base / 2;
-      injectSVGDefs(app.id, `
+      injectSVGDefs(
+        app.id,
+        `
         <marker id="arrowhead-${params.id}" markerWidth="${length}" markerHeight="${base}" refX="${length}" refY="${refY}" orient="auto">
           <polygon points="0 0, ${length} ${refY}, 0 ${base}" style="fill: ${params.color}; stroke: ${params.color}; stroke-width: 1;"/>
         </marker>`,
@@ -42,11 +44,21 @@ export default class LineSegment extends BasePlugin {
     lsParams.gradeableVersion = GRADEABLE_VERSION;
     super(lsParams, app);
     // Message listeners
-    this.app.__messageBus.on('addLineSegment', (id, index) => { this.addLineSegment(id, index); });
-    this.app.__messageBus.on('addLineSegmentPoint', (id, index) => { this.addLineSegmentPoint(id, index); });
-    this.app.__messageBus.on('deleteLineSegments', () => { this.deleteLineSegments(); });
-    this.app.__messageBus.on('deleteLineSegmentPoints', () => { this.deleteLineSegmentPoints(); });
-    this.app.__messageBus.on('finalizeShapes', (id) => { this.finalizeShape(id); });
+    this.app.__messageBus.on('addLineSegment', (id, index) => {
+      this.addLineSegment(id, index);
+    });
+    this.app.__messageBus.on('addLineSegmentPoint', (id, index) => {
+      this.addLineSegmentPoint(id, index);
+    });
+    this.app.__messageBus.on('deleteLineSegments', () => {
+      this.deleteLineSegments();
+    });
+    this.app.__messageBus.on('deleteLineSegmentPoints', () => {
+      this.deleteLineSegmentPoints();
+    });
+    this.app.__messageBus.on('finalizeShapes', (id) => {
+      this.finalizeShape(id);
+    });
     this.hConstraint = false;
     this.vConstraint = false;
     this.rConstraint = false;
@@ -70,8 +82,10 @@ export default class LineSegment extends BasePlugin {
   getGradeable() {
     const result = [];
     let len = this.state.length;
-    let x1; let y1;
-    let x2; let y2;
+    let x1;
+    let y1;
+    let x2;
+    let y2;
     // Do not take into account dangling points from half drawn segments
     len = len % 2 === 0 ? len : len - 1;
     for (let i = 0; i < len; i += 2) {
@@ -132,7 +146,7 @@ export default class LineSegment extends BasePlugin {
   initDraw(event) {
     if (this.limit > 0 && this.state.length > this.limit) {
       this.app.__messageBus.emit('showLimitWarning');
-      return
+      return;
     }
 
     const x = event.clientX - this.params.left;
@@ -142,7 +156,7 @@ export default class LineSegment extends BasePlugin {
     document.addEventListener('pointermove', this.drawMove, true);
     document.addEventListener('pointerup', this.drawEnd, true);
     document.addEventListener('pointercancel', this.drawEnd, true);
-    this.firstPoint = (this.state.length % 2 === 0);
+    this.firstPoint = this.state.length % 2 === 0;
     // Push current position
     // First endpoint, no constraint
     if (this.firstPoint) {
@@ -151,7 +165,8 @@ export default class LineSegment extends BasePlugin {
         currentPosition.tag = this.tag.value;
       }
       this.state.push(currentPosition);
-    } else { // Second endpoint, constrain with first endpoint
+    } else {
+      // Second endpoint, constrain with first endpoint
       const point = this.pointConstrained(x, y, this.state.length - 1);
       currentPosition.x = point.x;
       currentPosition.y = point.y;
@@ -267,27 +282,38 @@ export default class LineSegment extends BasePlugin {
 
   hConstrained1(y, index) {
     const len = this.state.length;
-    return this.hConstraint && (len !== 0) && (len % 2 === 0) ? this.state[index].y : y;
+    return this.hConstraint && len !== 0 && len % 2 === 0
+      ? this.state[index].y
+      : y;
   }
 
   vConstrained1(x, index) {
     const len = this.state.length;
-    return this.vConstraint && (len !== 0) && (len % 2 === 0) ? this.state[index].x : x;
+    return this.vConstraint && len !== 0 && len % 2 === 0
+      ? this.state[index].x
+      : x;
   }
 
   rConstrained1(x, y, index) {
     const len = this.state.length;
     const result = { x, y };
-    if (this.rConstraint && (len !== 0) && (len % 2 === 0)) {
-      let xf; let yf;
-      let xm; let ym;
+    if (this.rConstraint && len !== 0 && len % 2 === 0) {
+      let xf;
+      let yf;
+      let xm;
+      let ym;
       // First end point
       if (index % 2 === 0) {
-        xm = x; ym = y;
-        xf = this.state[index + 1].x; yf = this.state[index + 1].y;
-      } else { // Second endpoint
-        xf = this.state[index - 1].x; yf = this.state[index - 1].y;
-        xm = x; ym = y;
+        xm = x;
+        ym = y;
+        xf = this.state[index + 1].x;
+        yf = this.state[index + 1].y;
+      } else {
+        // Second endpoint
+        xf = this.state[index - 1].x;
+        yf = this.state[index - 1].y;
+        xm = x;
+        ym = y;
       }
       const vx = xm - xf;
       const vy = ym - yf;
@@ -302,16 +328,19 @@ export default class LineSegment extends BasePlugin {
   }
 
   pointOpacity(ptIndex) {
-    return (ptIndex === this.state.length - 1) && (ptIndex % 2 === 0) ? '' : 'opacity: 0';
+    return ptIndex === this.state.length - 1 && ptIndex % 2 === 0
+      ? ''
+      : 'opacity: 0';
   }
 
   pointClass(ptIndex) {
-     
-    return (ptIndex === this.state.length - 1) && (ptIndex % 2 === 0) ? '.line-segment-point' + '.plugin-id-' + this.id : '';
+    return ptIndex === this.state.length - 1 && ptIndex % 2 === 0
+      ? '.line-segment-point' + '.plugin-id-' + this.id
+      : '';
   }
 
   pointRadius(ptIndex) {
-    return (ptIndex === this.state.length - 1) && (ptIndex % 2 === 0) ? 4 : 8;
+    return ptIndex === this.state.length - 1 && ptIndex % 2 === 0 ? 4 : 8;
   }
 
   arrowHead() {
@@ -335,7 +364,8 @@ export default class LineSegment extends BasePlugin {
           return (x1 + x2) / 2;
         case 'end':
           return x2;
-        default: return undefined;
+        default:
+          return undefined;
       }
     } else {
       return x1;
@@ -355,7 +385,8 @@ export default class LineSegment extends BasePlugin {
           return (y1 + y2) / 2;
         case 'end':
           return y2;
-          default: return undefined;
+        default:
+          return undefined;
       }
     } else {
       return y1;
@@ -363,29 +394,35 @@ export default class LineSegment extends BasePlugin {
   }
 
   render() {
-    z.render(this.el,
+    z.render(
+      this.el,
       // Draw visible line, under invisible line and endpoints
       z.each(this.state, (pt, ptIndex) =>
         z.if(this.lineIsDefined(ptIndex), () =>
-           
-          z('line.visible-' + ptIndex + '.line-segment' + '.plugin-id-' + this.id, {
-            x1: this.state[ptIndex].x,
-            y1: this.state[ptIndex].y,
-            x2: this.state[ptIndex + 1].x,
-            y2: this.state[ptIndex + 1].y,
-            style: `
+          z(
+            'line.visible-' +
+              ptIndex +
+              '.line-segment' +
+              '.plugin-id-' +
+              this.id,
+            {
+              x1: this.state[ptIndex].x,
+              y1: this.state[ptIndex].y,
+              x2: this.state[ptIndex + 1].x,
+              y2: this.state[ptIndex + 1].y,
+              style: `
               stroke: ${this.params.color};
               stroke-width: 2px;
               stroke-dasharray: ${this.computeDashArray(this.params.dashStyle, 2)};
               marker-end: ${this.arrowHead()};
             `,
-          }),
+            },
+          ),
         ),
       ),
       // Draw invisible and selectable line, under invisible endpoints
       z.each(this.state, (pt, ptIndex) =>
         z.if(this.lineIsDefined(ptIndex), () =>
-           
           z('line.invisible-' + ptIndex + this.readOnlyClass(), {
             x1: this.state[ptIndex].x,
             y1: this.state[ptIndex].y,
@@ -408,10 +445,12 @@ export default class LineSegment extends BasePlugin {
                   this.state[ptIndex + 1].y += dy;
                   this.render();
                 },
-                inBoundsX: (dx) => this.inBoundsX(this.state[ptIndex].x + dx)
-                                && this.inBoundsX(this.state[ptIndex + 1].x + dx),
-                inBoundsY: (dy) => this.inBoundsY(this.state[ptIndex].y + dy)
-                                && this.inBoundsY(this.state[ptIndex + 1].y + dy),
+                inBoundsX: (dx) =>
+                  this.inBoundsX(this.state[ptIndex].x + dx) &&
+                  this.inBoundsX(this.state[ptIndex + 1].x + dx),
+                inBoundsY: (dy) =>
+                  this.inBoundsY(this.state[ptIndex].y + dy) &&
+                  this.inBoundsY(this.state[ptIndex + 1].y + dy),
               });
             },
           }),
@@ -419,60 +458,70 @@ export default class LineSegment extends BasePlugin {
       ),
       // Draw invisible and selectable line endpoints
       z.each(this.state, (pt, ptIndex) =>
-       
-        z('circle.invisible-' + (ptIndex % 2 === 0 ? ptIndex : (ptIndex - 1).toString()) + this.pointClass(ptIndex) + this.readOnlyClass(), {
-          cx: this.state[ptIndex].x,
-          cy: this.state[ptIndex].y,
-          r: this.pointRadius(ptIndex),
-           
-          style: `
+        z(
+          'circle.invisible-' +
+            (ptIndex % 2 === 0 ? ptIndex : (ptIndex - 1).toString()) +
+            this.pointClass(ptIndex) +
+            this.readOnlyClass(),
+          {
+            cx: this.state[ptIndex].x,
+            cy: this.state[ptIndex].y,
+            r: this.pointRadius(ptIndex),
+
+            style:
+              `
             fill: ${this.params.color};
             stroke-width: 0;
           ` + this.pointOpacity(ptIndex),
-          onmount: (el) => {
-            this.app.registerElement({
-              ownerID: this.params.id,
-              element: el,
-              initialBehavior: 'none',
-              onDrag: ({ dx, dy }) => {
-                const x = this.state[ptIndex].x + dx;
-                const y = this.state[ptIndex].y + dy;
-                const point = this.rConstrained1(x, y, ptIndex);
-                const xConstrained = this.vConstrained1(point.x, ptIndex);
-                const yConstrained = this.hConstrained1(point.y, ptIndex);
+            onmount: (el) => {
+              this.app.registerElement({
+                ownerID: this.params.id,
+                element: el,
+                initialBehavior: 'none',
+                onDrag: ({ dx, dy }) => {
+                  const x = this.state[ptIndex].x + dx;
+                  const y = this.state[ptIndex].y + dy;
+                  const point = this.rConstrained1(x, y, ptIndex);
+                  const xConstrained = this.vConstrained1(point.x, ptIndex);
+                  const yConstrained = this.hConstrained1(point.y, ptIndex);
 
-                this.state[ptIndex].x = xConstrained;
-                this.state[ptIndex].y = yConstrained;
-                this.render();
-              },
-              inBoundsX: (dx) => this.inBoundsX(this.state[ptIndex].x + dx),
-              inBoundsY: (dy) => this.inBoundsY(this.state[ptIndex].y + dy),
-            });
+                  this.state[ptIndex].x = xConstrained;
+                  this.state[ptIndex].y = yConstrained;
+                  this.render();
+                },
+                inBoundsX: (dx) => this.inBoundsX(this.state[ptIndex].x + dx),
+                inBoundsY: (dy) => this.inBoundsY(this.state[ptIndex].y + dy),
+              });
+            },
           },
-        }),
+        ),
       ),
       // Tags, regular or rendered by Katex
       z.each(this.state, (pt, ptIndex) =>
         z.if(this.hasTag && ptIndex % 2 === 0, () =>
-          z(this.latex ? 'foreignObject.tag' : 'text.tag', {
-            'text-anchor': (this.latex ? undefined : this.tag.align),
-            x: this.tagXPosition(ptIndex) + this.tag.xoffset,
-            y: this.tagYPosition(ptIndex) + this.tag.yoffset,
-            style: this.getStyle(),
-            onmount: (el) => {
-              if (this.latex) {
-                this.renderKatex(el, ptIndex);
-              }
-              if (!this.params.readonly) {
-                this.addDoubleClickEventListener(el, ptIndex);
-              }
+          z(
+            this.latex ? 'foreignObject.tag' : 'text.tag',
+            {
+              'text-anchor': this.latex ? undefined : this.tag.align,
+              x: this.tagXPosition(ptIndex) + this.tag.xoffset,
+              y: this.tagYPosition(ptIndex) + this.tag.yoffset,
+              style: this.getStyle(),
+              onmount: (el) => {
+                if (this.latex) {
+                  this.renderKatex(el, ptIndex);
+                }
+                if (!this.params.readonly) {
+                  this.addDoubleClickEventListener(el, ptIndex);
+                }
+              },
+              onupdate: (el) => {
+                if (this.latex) {
+                  this.renderKatex(el, ptIndex);
+                }
+              },
             },
-            onupdate: (el) => {
-              if (this.latex) {
-                this.renderKatex(el, ptIndex);
-              }
-            },
-          }, this.latex ? '' : this.state[ptIndex].tag),
+            this.latex ? '' : this.state[ptIndex].tag,
+          ),
         ),
       ),
     );

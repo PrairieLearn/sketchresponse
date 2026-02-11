@@ -1,5 +1,3 @@
- 
- 
 const namespaces = {
   xmlns: 'http://www.w3.org/2000/xmlns/',
   xhtml: 'http://www.w3.org/1999/xhtml',
@@ -18,10 +16,12 @@ function qualify(name) {
 }
 
 function implementsZNodeInterface(obj) {
-  return obj &&
+  return (
+    obj &&
     typeof obj.mount === 'function' &&
     typeof obj.unmount === 'function' &&
-    typeof obj.update === 'function';
+    typeof obj.update === 'function'
+  );
 }
 
 class ZNode {
@@ -68,12 +68,12 @@ class ZNodeCollection {
   constructor(...nodes) {
     // Coerce any non-zNodes to text
     this.nodes = nodes.map((node) =>
-      (implementsZNodeInterface(node) ? node : new ZTextNode(String(node))),
+      implementsZNodeInterface(node) ? node : new ZTextNode(String(node)),
     );
 
     // Assign keys with precedence props.key > props.id > index
-    this.keys = this.nodes.map((node, i) =>
-      node.props && (node.props.key || node.props.id) || i,
+    this.keys = this.nodes.map(
+      (node, i) => (node.props && (node.props.key || node.props.id)) || i,
     );
 
     /* this.parentEl = undefined; */
@@ -110,7 +110,11 @@ class ZNodeCollection {
 
     // create & update
     // TODO: document this...
-    for (let node, oldIdx, newIdx = next.keys.length - 1; newIdx >= 0; --newIdx) {
+    for (
+      let node, oldIdx, newIdx = next.keys.length - 1;
+      newIdx >= 0;
+      --newIdx
+    ) {
       oldIdx = this.keys.indexOf(next.keys[newIdx]);
       if (oldIdx >= 0) {
         // old node exists; update it now
@@ -143,7 +147,10 @@ class ZElement extends ZNode {
     const { namespaceURI, localName } = qualify(this.tagName);
 
     // Note: namespaceURI is inherited from the parent unless it's explicitly given
-    this.el = document.createElementNS(namespaceURI || parentEl.namespaceURI, localName);
+    this.el = document.createElementNS(
+      namespaceURI || parentEl.namespaceURI,
+      localName,
+    );
     this._syncDOMProps({}, this.props);
     this.childCollection.mount(this.el);
     super.mount(parentEl, refEl);
@@ -244,17 +251,15 @@ function z(tagName, props, ...children) {
   return new ZElement(tagName, props, ...children);
 }
 
- 
 z.if = function z_if(condition, ...children) {
   if (!condition) return new ZNodeCollection();
 
   // resolve any callbacks to their corresponding child nodes:
   return new ZNodeCollection(
-    ...children.map((child) => ((typeof child === 'function') ? child() : child)),
+    ...children.map((child) => (typeof child === 'function' ? child() : child)),
   );
 };
 
- 
 z.each = function z_each(items = [], callback) {
   return new ZNodeCollection(...items.map(callback));
 };
@@ -272,7 +277,6 @@ function renderCallback(targetEl) {
   targetEl.__zPending__ = null;
 }
 
- 
 z.render = function z_render(targetEl, ...children) {
   if (!targetEl.__zPending__) {
     // Note: RAF is async, so __zPending__ is set below before renderCallback executes

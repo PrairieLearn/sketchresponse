@@ -589,36 +589,36 @@ function loadConfig(configId) {
       ],
     },
     invalidConfig: {
-      debug: true,                      // Enables validation of config
-      width: '750',                     // Incorrect type
+      debug: true, // Enables validation of config
+      width: '750', // Incorrect type
       // height: 420,                   // Missing mandatory key
-      xrange: [-4.5, '4.5', 3],         // Extra element and incorrect type
+      xrange: [-4.5, '4.5', 3], // Extra element and incorrect type
       yrange: [-2.5, 2.5],
-      xscale: 'not linear',             // Only linear is valid
+      xscale: 'not linear', // Only linear is valid
       yscale: 'linear',
-      coordinates: 'spheric',           // Only cartesian or polar
+      coordinates: 'spheric', // Only cartesian or polar
       plugins: [
         {
           name: 'axes',
-          xmajor: [3, 4],               // Wrong type
+          xmajor: [3, 4], // Wrong type
           // xminor: 2,                 // Missing optional, won't report
           ymajor: 3,
           yminor: 2,
-          wrongkey: 'wrong',            // Wrong key
+          wrongkey: 'wrong', // Wrong key
           colors: {
             // Cartesian coordinates
-            xmajor:     2,              // Wrong type
-            ymajor:     '#f0f0f0',
-            xminor:     '#f6f6f6',
-            yminor:     '#f6f6f6',
-            xaxis:      '#333',
-            yaxis:      '#333',
-            xlabels:    '#333',
-            ylabels:    '#333',
-            zeroLabel:  '#333',
+            xmajor: 2, // Wrong type
+            ymajor: '#f0f0f0',
+            xminor: '#f6f6f6',
+            yminor: '#f6f6f6',
+            xaxis: '#333',
+            yaxis: '#333',
+            xlabels: '#333',
+            ylabels: '#333',
+            zeroLabel: '#333',
             // Polar coordinates
-            circle:     '#f0f0f0',
-            ray:        '#f0f0f0',
+            circle: '#f0f0f0',
+            ray: '#f0f0f0',
             // Both
             xaxisLabel: '#333',
             yaxisLabel: '#333',
@@ -629,14 +629,14 @@ function loadConfig(configId) {
           id: 'pt',
           label: 'Point',
           color: 'sienna',
-          size: '15',                   // Wrong type
+          size: '15', // Wrong type
           tag: {
             value: 'tag',
-            xoffset: [15],              // Wrong type
+            xoffset: [15], // Wrong type
             yoffset: 15,
             align: 'start',
           },
-          wrongkey: 2,                  // Wrong key
+          wrongkey: 2, // Wrong key
         },
         {
           name: 'stamp',
@@ -644,25 +644,25 @@ function loadConfig(configId) {
           label: 'Stamp',
           imgwidth: 450,
           imgheight: 100,
-          scale: 'wrong',               // Wrong value
+          scale: 'wrong', // Wrong value
           tag: {
             value: 'tag',
             xoffset: 0,
             yoffset: -35,
             align: 'middle',
           },
-          wrongkey: 2,                  // Wrong key
+          wrongkey: 2, // Wrong key
         },
         {
           name: 'line-segment',
           id: 'ar',
           label: 'Arrow',
           color: 'mediumseagreen',
-          dashStyle: 'wrong',           // Wrong value
+          dashStyle: 'wrong', // Wrong value
           arrowHead: {
-            length: '10',               // Wrong value
+            length: '10', // Wrong value
             base: 7,
-            wrongkey: 2,                // Wrong key
+            wrongkey: 2, // Wrong key
           },
           tag: {
             value: 'tag',
@@ -678,10 +678,10 @@ function loadConfig(configId) {
           label: 'Polygon',
           closed: true,
           color: 'mediumseagreen',
-          fillColor: 1,                 // Wrong value
+          fillColor: 1, // Wrong value
           dashStyle: 'solid',
           opacity: 0.8,
-          wrongkey: 2,                  // Wrong key
+          wrongkey: 2, // Wrong key
           tag: {
             value: 'tag',
             xoffset: 15,
@@ -692,9 +692,9 @@ function loadConfig(configId) {
         {
           name: 'spline',
           id: 'spl',
-          label: 1,                     // Wrong value
+          label: 1, // Wrong value
           color: 'royalblue',
-          wrongkey: 2 ,                 // Wrong key
+          wrongkey: 2, // Wrong key
           tag: {
             value: 'tag',
             xoffset: 15,
@@ -705,7 +705,7 @@ function loadConfig(configId) {
         {
           name: 'freeform',
           id: 'f',
-          label: 1,                     // Wrong value
+          label: 1, // Wrong value
           color: 'orange',
           tag: {
             value: 'tag',
@@ -713,7 +713,7 @@ function loadConfig(configId) {
             yoffset: 15,
             align: 'start',
           },
-          wrongkey: 2,                  // Wrong key
+          wrongkey: 2, // Wrong key
         },
         {
           name: 'group',
@@ -724,16 +724,16 @@ function loadConfig(configId) {
               name: 'horizontal-line',
               id: 'hl',
               label: 'Horizontal line',
-              color: 2,                 // Wrong type
-              dashStyle: 'wrong',       // Wrong value
+              color: 2, // Wrong type
+              dashStyle: 'wrong', // Wrong value
               tag: {
                 value: 'tag',
                 xoffset: 15,
                 yoffset: 15,
-                align: 'wrong',         // Wrong value
-                wrongkey: 2,            // Wrong key
+                align: 'wrong', // Wrong value
+                wrongkey: 2, // Wrong key
               },
-              wrongkey: 2,              // Wrong key
+              wrongkey: 2, // Wrong key
             },
             {
               name: 'vertical-line',
@@ -745,8 +745,8 @@ function loadConfig(configId) {
                 value: 'tag',
                 xoffset: 15,
                 yoffset: -15,
-                align: 'wrong',           // Wrong value
-                wrongkey: 2,              // Wrong key
+                align: 'wrong', // Wrong value
+                wrongkey: 2, // Wrong key
               },
             },
           ],

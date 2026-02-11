@@ -3,7 +3,8 @@ export const USER_MESSAGES = {
   pluginError: 'An error occured in a SketchInput plugin',
   getStateError: 'An error occured while preparing your submission for saving',
   setStateError: 'An error occured while importing your saved data',
-  getGradeableError: 'An error occured while preparing your submission for grading',
+  getGradeableError:
+    'An error occured while preparing your submission for grading',
 };
 
 export default class NotificationManager {
@@ -11,10 +12,11 @@ export default class NotificationManager {
     messageBus.on('warnUser', this.warnUser.bind(this));
   }
 
-   
   warnUser(type, error) {
     const message = USER_MESSAGES[type] || USER_MESSAGES.unknownError;
-     
-    window.alert(`SketchInput: ${message}; please contact your instructor. Details: ${error.stack}`);
+
+    window.alert(
+      `SketchInput: ${message}; please contact your instructor. Details: ${error.stack}`,
+    );
   }
 }

@@ -13,20 +13,30 @@ export default class Image {
     deepExtend(this.params, params);
     const { scale, align, offset } = this.params; // Note: params.align.toLowerCase() was removed
 
-    const x = (offset[0] / 100 + (
-      (align.match('left')) ? 0 :
-      (align.match('right')) ? (1 - scale) :
-      0.5 * (1 - scale)
-    )) / scale;
+    const x =
+      (offset[0] / 100 +
+        (align.match('left')
+          ? 0
+          : align.match('right')
+            ? 1 - scale
+            : 0.5 * (1 - scale))) /
+      scale;
 
-    const y = (-offset[1] / 100 + ( // Sign is flipped so positive y offsets move image upward
-      (align.match('top')) ? 0 :
-      (align.match('bottom')) ? (1 - scale) :
-      0.5 * (1 - scale)
-    )) / scale;
+    const y =
+      (-offset[1] / 100 + // Sign is flipped so positive y offsets move image upward
+        (align.match('top')
+          ? 0
+          : align.match('bottom')
+            ? 1 - scale
+            : 0.5 * (1 - scale))) /
+      scale;
 
     this.el = document.createElementNS('http://www.w3.org/2000/svg', 'image');
-    this.el.setAttributeNS('http://www.w3.org/1999/xlink', 'xlink:href', this.params.src);
+    this.el.setAttributeNS(
+      'http://www.w3.org/1999/xlink',
+      'xlink:href',
+      this.params.src,
+    );
     this.el.setAttributeNS(null, 'x', `${x * 100}%`);
     this.el.setAttributeNS(null, 'y', `${y * 100}%`);
     this.el.setAttributeNS(null, 'width', '100%');

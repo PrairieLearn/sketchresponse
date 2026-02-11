@@ -15,15 +15,14 @@ module.exports = [
       'no-mixed-operators': 'off',
       'no-nested-ternary': 'off',
       'no-plusplus': 'off',
-      'no-unused-vars': ['warn', { argsIgnorePattern: '^_', caughtErrorsIgnorePattern: '^_' }],
+      'no-unused-vars': [
+        'warn',
+        { argsIgnorePattern: '^_', caughtErrorsIgnorePattern: '^_' },
+      ],
     },
   },
   {
-    files: [
-      'webpack.*.js',
-      'postcss.config.js',
-      'eslint.config.js',
-    ],
+    files: ['webpack.*.js', 'postcss.config.js', 'eslint.config.js'],
     languageOptions: {
       sourceType: 'commonjs',
       globals: {

@@ -1,5 +1,7 @@
 function uniqueID() {
-  return 'xxxxxxxx'.replace(/x/g, () => Math.floor(16 * Math.random()).toString(16));
+  return 'xxxxxxxx'.replace(/x/g, () =>
+    Math.floor(16 * Math.random()).toString(16),
+  );
 }
 
 export class AttributeList {
@@ -8,15 +10,18 @@ export class AttributeList {
     this.baseName = `${prefix + uniqueID()}-`;
   }
 
-  resolve(attrName) { return this.baseName + attrName; }
+  resolve(attrName) {
+    return this.baseName + attrName;
+  }
 
-  has(element, attrName) { return this.cache.get(element).has(attrName); }
+  has(element, attrName) {
+    return this.cache.get(element).has(attrName);
+  }
 
   toggle(element, attrName, condition) {
     if (!this.cache.has(element)) this.cache.set(element, new Set());
     const attrCache = this.cache.get(element);
 
-     
     if (arguments.length === 2) condition = !attrCache.has(attrName); // no third argument passed
 
     // Return early if nothing has changed to avoid unnecessary DOM manipulation
@@ -32,13 +37,19 @@ export class AttributeList {
     }
   }
 
-  add(element, attrName) { this.toggle(element, attrName, true); }
+  add(element, attrName) {
+    this.toggle(element, attrName, true);
+  }
 
-  remove(element, attrName) { this.toggle(element, attrName, false); }
+  remove(element, attrName) {
+    this.toggle(element, attrName, false);
+  }
 
   removeAll(element) {
     if (!this.cache.has(element)) return;
-    this.cache.get(element).forEach((attrName) => this.toggle(element, attrName, false));
+    this.cache
+      .get(element)
+      .forEach((attrName) => this.toggle(element, attrName, false));
   }
 }
 
@@ -54,15 +65,19 @@ export function injectStyleSheet(innerHTML) {
 export function injectSVGDefs(id, xmlStr) {
   const canvas = document.getElementById(`${id}-si-canvas`);
   const defs = document.createElementNS('http://www.w3.org/2000/svg', 'defs');
-   
-  xmlStr = '<svg xmlns=\'http://www.w3.org/2000/svg\'>' + xmlStr + '</svg>';
-  const svgDocElement = new DOMParser().parseFromString(xmlStr, 'text/xml').documentElement;
+
+  xmlStr = "<svg xmlns='http://www.w3.org/2000/svg'>" + xmlStr + '</svg>';
+  const svgDocElement = new DOMParser().parseFromString(
+    xmlStr,
+    'text/xml',
+  ).documentElement;
   // Do not use svgDocElement.children, no support on Safari & Edge:
   // https://developer.mozilla.org/en-US/docs/Web/API/ParentNode/children
   // Loop through childNodes instead.
   let childNode = svgDocElement.firstChild;
   while (childNode) {
-    if (childNode.nodeType === 1) { // Only append Element nodes
+    if (childNode.nodeType === 1) {
+      // Only append Element nodes
       defs.appendChild(canvas.ownerDocument.importNode(childNode, true));
     }
     childNode = childNode.nextSibling;

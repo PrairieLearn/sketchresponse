@@ -6,19 +6,20 @@ export function getClass(el) {
 }
 
 export function hasClass(elem, name) {
-   
   return new RegExp('(\\s|^)' + name + '(\\s|$)').test(getClass(elem));
 }
 
 export function addClass(elem, name) {
-   
-  !hasClass(elem, name) && elem.setAttribute('class', (getClass(elem) && getClass(elem) + ' ') + name);
+  !hasClass(elem, name) &&
+    elem.setAttribute('class', (getClass(elem) && getClass(elem) + ' ') + name);
 }
 
 export function removeClass(elem, name) {
-   
-  const news = getClass(elem).replace(new RegExp('(\\s|^)' + name + '(\\s|$)', 'g'), '$2');
-   
+  const news = getClass(elem).replace(
+    new RegExp('(\\s|^)' + name + '(\\s|$)', 'g'),
+    '$2',
+  );
+
   hasClass(elem, name) && elem.setAttribute('class', news);
 }
 

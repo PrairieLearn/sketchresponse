@@ -20,8 +20,7 @@ export default class BasePlugin {
     this.el = document.createElementNS('http://www.w3.org/2000/svg', 'g');
     if (this.params.zIndex) {
       app.svg.insertBefore(this.el, app.svg.children[this.params.zIndex]);
-    }
-    else {
+    } else {
       app.svg.appendChild(this.el);
     }
 
@@ -47,14 +46,21 @@ export default class BasePlugin {
       this.latex = this.tag.latex ? this.tag.latex : false;
     }
     this.selectMode = false;
-    this.app.__messageBus.on('enableSelectMode', () => this.setSelectMode(true));
-    this.app.__messageBus.on('disableSelectMode', () => this.setSelectMode(false));
+    this.app.__messageBus.on('enableSelectMode', () =>
+      this.setSelectMode(true),
+    );
+    this.app.__messageBus.on('disableSelectMode', () =>
+      this.setSelectMode(false),
+    );
 
     app.registerState({
       id: this.params.id,
       dataVersion: this.params.version,
       getState: () => this.state,
-      setState: (state) => { this.state = state; this.render(); },
+      setState: (state) => {
+        this.state = state;
+        this.render();
+      },
     });
 
     app.registerGradeable({
@@ -72,7 +78,8 @@ export default class BasePlugin {
       if (this.params.fillColor && this.params.fillColor !== 'none') {
         strokeColor = this.params.icon.color;
         fillColor = this.params.icon.fillColor;
-      } else if (this.params.icon.color) { // Other plugins except stamp
+      } else if (this.params.icon.color) {
+        // Other plugins except stamp
         fillColor = this.params.icon.color;
       }
       const icon = {
@@ -103,12 +110,13 @@ export default class BasePlugin {
       Check if all the methods that must be implemented in extended classes are
       present
     */
-    ['getGradeable', 'initDraw', 'render', 'inBoundsX', 'inBoundsY']
-    .forEach((fnStr) => {
-      if (!(typeof this[fnStr] === 'function')) {
-        throw new TypeError(this.getTypeErrorStr(fnStr));
-      }
-    });
+    ['getGradeable', 'initDraw', 'render', 'inBoundsX', 'inBoundsY'].forEach(
+      (fnStr) => {
+        if (!(typeof this[fnStr] === 'function')) {
+          throw new TypeError(this.getTypeErrorStr(fnStr));
+        }
+      },
+    );
 
     Object.defineProperty(this.params, 'left', {
       get: () => this.app.svg.getBoundingClientRect().left,
@@ -121,9 +129,18 @@ export default class BasePlugin {
 
   static generateDefaultParams(defaultParams, params) {
     const keys = [
-      'id', 'name', 'width', 'height', 'xrange', 'yrange', 'xscale', 'yscale', 'coordinates'];
+      'id',
+      'name',
+      'width',
+      'height',
+      'xrange',
+      'yrange',
+      'xscale',
+      'yscale',
+      'coordinates',
+    ];
     const allDefaultParams = deepCopy(defaultParams);
-     
+
     for (const key of keys) {
       allDefaultParams[key] = params[key];
     }
@@ -140,7 +157,6 @@ export default class BasePlugin {
     });
   }
 
-   
   getTypeErrorStr(method) {
     return `You must implement the ${method} method in a class extending BasePlugin`;
   }
@@ -187,7 +203,11 @@ export default class BasePlugin {
   }
 
   getTagCursor() {
-    return this.params.readonly ? 'default' : (this.selectMode ? 'pointer' : 'crosshair');
+    return this.params.readonly
+      ? 'default'
+      : this.selectMode
+        ? 'pointer'
+        : 'crosshair';
   }
 
   getStyle() {
@@ -220,7 +240,7 @@ export default class BasePlugin {
       });
       // Set the foreignObject bounding box to match the Katex rendering
       this.adjustBoundingBox(el);
-    // eslint-disable-next-line no-unused-vars
+      // eslint-disable-next-line no-unused-vars
     } catch (e) {
       katex.render('\\text{\\color{red}{Error: invalid markup}}', el, {
         errorColor: '#0000ff',
@@ -269,23 +289,31 @@ export default class BasePlugin {
     });
   }
 
-   
   adjustBoundingBox(el) {
-    const bRect = getElementsByClassName(el, 'katex-html')[0].getBoundingClientRect();
+    const bRect = getElementsByClassName(
+      el,
+      'katex-html',
+    )[0].getBoundingClientRect();
     el.setAttributeNS(null, 'width', bRect.width.toString());
     el.setAttributeNS(null, 'height', bRect.height.toString());
   }
 
-   
   computeDashArray(dashStyle, strokeWidth) {
     const scale = strokeWidth ** 0.6; // seems about right perceptually
     switch (dashStyle) {
-      case 'dashed': return 5 * scale + ',' + 3 * scale; 
-      case 'longdashed': return 10 * scale + ',' + 3 * scale;
-      case 'dotted': return 2 * scale + ',' + 2 * scale;
-      case 'dashdotted': return 7 * scale + ',' + 3 * scale + ',' + 1.5 * scale + ',' + 3 * scale;
+      case 'dashed':
+        return 5 * scale + ',' + 3 * scale;
+      case 'longdashed':
+        return 10 * scale + ',' + 3 * scale;
+      case 'dotted':
+        return 2 * scale + ',' + 2 * scale;
+      case 'dashdotted':
+        return (
+          7 * scale + ',' + 3 * scale + ',' + 1.5 * scale + ',' + 3 * scale
+        );
       // 'solid' or anything else
-      default: return 'none';
+      default:
+        return 'none';
     }
   }
 }
