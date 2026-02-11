@@ -1,7 +1,7 @@
 SketchResponse
 ===========
 
-**Note: This is a forked copy adapted for [PrairieLearn](https://www.prairielearn.com/). This library is used as the backing for the [`pl-sketch`](https://prairielearn.readthedocs.io/en/latest/elements/pl-sketch/) element.**
+**Note: This is a forked copy of [`sketchresponse/SketchResponse`](https://github.com/SketchResponse/sketchresponse) adapted for [PrairieLearn](https://www.prairielearn.com/). This library is used as the backing for the [`pl-sketch`](https://prairielearn.readthedocs.io/en/latest/elements/pl-sketch/) element.**
 
 This project (will be) published to PyPI as [`sketchresponse`](https://pypi.org/project/sketchresponse/), and on NPM as [`@prairielearn/sketchresponse`](https://www.npmjs.com/package/@prairielearn/sketchresponse).
 
