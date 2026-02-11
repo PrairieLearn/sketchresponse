@@ -1,0 +1,12 @@
+{
+  "private": true,
+  "workspaces": ["sketch_tool"],
+  "scripts": {
+    "changeset": "changeset",
+    "version": "changeset version",
+    "release": "npm run build --workspace sketch_tool && changeset publish"
+  },
+  "devDependencies": {
+    "@changesets/cli": "^2.29.8"
+  }
+}

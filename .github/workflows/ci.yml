@@ -39,11 +39,9 @@ jobs:
         with:
           node-version: 20
           cache: npm
-          cache-dependency-path: sketch_tool/package-lock.json
 
       - name: Install dependencies
         run: npm ci
-        working-directory: sketch_tool
 
       - name: Run ESLint
         run: npm run lint
