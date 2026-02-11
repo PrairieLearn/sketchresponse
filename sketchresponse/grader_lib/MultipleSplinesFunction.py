@@ -44,8 +44,8 @@ class MultipleSplinesFunction(MultiFunction):  # noqa: PLR0904
         grader,
         submission,
         current_tool,
-        functions=[],
-        tolerance=dict(),
+        functions=None,
+        tolerance=None,
     ):
         self.submission = submission
         super().__init__(xaxis, yaxis, path_info, grader, current_tool, functions, tolerance)

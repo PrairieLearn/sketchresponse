@@ -125,7 +125,7 @@ def grader(b1, b2, b3, lw, rw, blk, sl, force, plate, iso):
 
     block_poly = block.polygons[0]
 
-    if not iso_bub.get_polygon_count() == 1:
+    if iso_bub.get_polygon_count() != 1:
         return False, "There should be one isolation bubble."
 
     iso_poly = iso_bub.polygons[0]

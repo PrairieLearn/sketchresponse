@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 #
 # SketchResponse documentation build configuration file, created by
 # sphinx-quickstart on Tue Apr  5 15:34:26 2016.

@@ -1,4 +1,3 @@
-from __future__ import division
 
 import base64
 import inspect
@@ -8,7 +7,7 @@ from copy import deepcopy
 
 class GradeableCollection(list):
     def __init__(self, identifier, config, gradeable_list):
-        super(GradeableCollection, self).__init__(gradeable_list)
+        super().__init__(gradeable_list)
         self.identifier = identifier
         self.params = self.resolve_params_for_id(identifier, config)
 

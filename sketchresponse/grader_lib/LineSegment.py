@@ -8,7 +8,7 @@ from .Tag import Tag
 
 
 class LineSegments(Gradeable):  # noqa: PLR0904
-    def __init__(self, grader, submission, current_tool, tolerance=dict()):
+    def __init__(self, grader, submission, current_tool, tolerance=None):
         super().__init__(grader, submission, current_tool, tolerance)
 
         self.set_default_tolerance(

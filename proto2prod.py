@@ -1,8 +1,6 @@
-from __future__ import division
 
 import json
 import re
-from builtins import zip
 
 
 def path_strings_from_svg(svg):
@@ -18,7 +16,7 @@ def points_from_path(path):
 
     xvals = [n for (i, n) in enumerate(numbers) if i % 2 == 0]
     yvals = [n for (i, n) in enumerate(numbers) if i % 2 == 1]
-    points = [[x, y] for (x, y) in zip(xvals, yvals)]
+    points = [[x, y] for (x, y) in zip(xvals, yvals, strict=False)]
 
     return points
 
@@ -52,8 +50,12 @@ def parse_svg(svg):
 
 
 def convert_ans_dict(
-    ans_dict, xrange=[-2.614, 2.608], yrange=[-3.207, 3.193], width=800, height=480
+    ans_dict, xrange=None, yrange=None, width=800, height=480
 ):
+    if xrange is None:
+        xrange = [-2.614, 2.608]
+    if yrange is None:
+        yrange = [-3.207, 3.193]
     svg = ans_dict["answer"]
     paths = parse_svg(svg)
 

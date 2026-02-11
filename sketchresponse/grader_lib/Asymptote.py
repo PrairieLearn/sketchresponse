@@ -20,7 +20,7 @@ class Asymptotes(Gradeable):
     #        VerticalAsymptotes or the HorizontalAsymptotes class to use the
     #        grading functions below.
     #    """
-    def __init__(self, grader, submission, current_tool, tolerance=dict()):
+    def __init__(self, grader, submission, current_tool, tolerance=None):
         super().__init__(grader, submission, current_tool, tolerance)
 
         self.set_default_tolerance(

@@ -1,8 +1,6 @@
-from __future__ import absolute_import, division, print_function
 
 import copy
 import math
-from builtins import map, object
 
 import numpy as np
 
@@ -10,7 +8,7 @@ from . import Axis
 from . import fit_curve as fitCurves
 
 
-class PolarTransform(object):
+class PolarTransform:
     FIT_TOLERANCE = 5
     STEP = 0.02
 
@@ -185,14 +183,13 @@ class PolarTransform(object):
             maxima = self.findMaxima(ts)
             if len(maxima) > 0:
                 for m in maxima:
-                    if m > 0 and m < len(ts) - 1:
-                        if ts[m - 1][0] > ts[m][0] and ts[m + 1][0] < ts[m][0]:
+                    if m > 0 and m < len(ts) - 1 and ts[m - 1][0] > ts[m][0] and ts[m + 1][0] < ts[m][0]:
                             ts.reverse()
                 reordered.append(ts)
             else:
                 inc = 0
                 dec = 0
-                for i, (theta, r) in enumerate(ts):
+                for i, (theta, _r) in enumerate(ts):
                     if i < len(ts) - 1:
                         theta_n, r_n = ts[i + 1]
                         if theta_n >= theta:
@@ -360,7 +357,7 @@ class PolarTransform(object):
         minTheta = float("inf")
         maxTheta = float("-inf")
 
-        for theta, r in curve:
+        for theta, _r in curve:
             if theta < minTheta:
                 minTheta = theta
             if theta > maxTheta:
@@ -617,24 +614,22 @@ class PolarTransform(object):
     def findMinima(self, curve):
         minima = []
         for i, v in enumerate(curve):
-            if i > 0 and i < len(curve) - 1:
-                if curve[i - 1][1] > v[1] and curve[i + 1][1] > v[1]:
-                    minima.append(i)
+            if i > 0 and i < len(curve) - 1 and curve[i - 1][1] > v[1] and curve[i + 1][1] > v[1]:
+                minima.append(i)
 
         return minima
 
     def findMaxima(self, curve):
         maxima = []
         for i, v in enumerate(curve):
-            if i > 0 and i < len(curve) - 1:
-                if curve[i - 1][1] < v[1] and curve[i + 1][1] < v[1]:
-                    maxima.append(i)
+            if i > 0 and i < len(curve) - 1 and curve[i - 1][1] < v[1] and curve[i + 1][1] < v[1]:
+                maxima.append(i)
 
         return maxima
 
     def findMaximumValue(self, curve):
         maximum = float("-inf")
-        for theta, r in curve:
+        for _theta, r in curve:
             if r > maximum:
                 maximum = r
 

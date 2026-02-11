@@ -10,8 +10,10 @@ class Function(Tag, Tagable):  # noqa: PLR0904
     # establishes the axes, the size (from the axes), and the tolerance, with default tolerance of 20 pixels
     # Function info will be stored in terms of the function itself, not the pixel information
     # the actual path is yet to be specified
-    def __init__(self, xaxis, yaxis, path_info, grader, current_tool, tolerance=dict()):
+    def __init__(self, xaxis, yaxis, path_info, grader, current_tool, tolerance=None):
         super().__init__()
+        if tolerance is None:
+            tolerance = {}
         self.grader = grader
         self.current_tool = current_tool
         self.xaxis = xaxis

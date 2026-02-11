@@ -17,7 +17,7 @@ class CurveFunction(Function):
     # self.dxdt, self.dydt
     # self.ddx, self.ddy
 
-    def __init__(self, xaxis, yaxis, path_info, grader, current_tool, tolerance=dict()):
+    def __init__(self, xaxis, yaxis, path_info, grader, current_tool, tolerance=None):
         super().__init__(xaxis, yaxis, path_info, grader, current_tool, tolerance)
 
         self.set_default_tolerance(

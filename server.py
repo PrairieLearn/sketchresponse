@@ -1,4 +1,3 @@
-from __future__ import absolute_import
 
 import importlib
 
@@ -112,7 +111,6 @@ def make_tree(path):
 
 
 if __name__ == "__main__":
-    if len(sys.argv) > 1:
-        if sys.argv[1] == "-p":
-            ENABLE_DATA_PRINTING = True
+    if len(sys.argv) > 1 and sys.argv[1] == "-p":
+        ENABLE_DATA_PRINTING = True
     app.run(debug=True)

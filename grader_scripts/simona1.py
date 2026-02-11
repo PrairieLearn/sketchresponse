@@ -84,13 +84,11 @@ def grader(pl, pt, h, r, ls, cwm, ccwm):
             return False, "Did you forget the beam?"
 
         for segment in beam.segments:
-            if beam.check_segment_startpoint(segment, [-3, 2]):
-                if not beam.check_segment_endpoint(segment, [-3, -1]):
-                    return False, "Check beam segment connected to A"
+            if beam.check_segment_startpoint(segment, [-3, 2]) and not beam.check_segment_endpoint(segment, [-3, -1]):
+                return False, "Check beam segment connected to A"
 
-            if beam.check_segment_startpoint(segment, [-3, -1]):
-                if not beam.check_segment_endpoint(segment, [2, -1]):
-                    return False, "Check beam segment connected to B"
+            if beam.check_segment_startpoint(segment, [-3, -1]) and not beam.check_segment_endpoint(segment, [2, -1]):
+                return False, "Check beam segment connected to B"
 
     if not cwm.has_point_at(x=-3, y=1):
         return False, "Check cwm position"

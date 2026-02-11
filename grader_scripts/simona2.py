@@ -92,7 +92,7 @@ def grader(pl, pg, pt, ls, c, cwm, ccwm):
 
     beam = pl.get_polyline_as_segments(0)
 
-    if not pg.get_polygon_count() == 1:
+    if pg.get_polygon_count() != 1:
         return False, "Did you forget the isolation bubble?"
 
     poly = pg.polygons[0]

@@ -28,7 +28,7 @@ def grader(ls1, ls2):
 
     ls = LineSegment.LineSegments(ls2)
 
-    if not ls.get_number_of_segments() == 1:
+    if ls.get_number_of_segments() != 1:
         return False, "ls2 doesn't have 1 segment"
 
     segment = ls.segments[0]

@@ -1,5 +1,4 @@
 import json
-from builtins import zip
 
 import pandas
 
@@ -19,7 +18,7 @@ def load_csv_data(filename, xrange, yrange, width=800, height=480):
     #    print(data)
 
     ids = [
-        i for (i, d) in zip(ids, data) if "correct_map" in d and list(d["correct_map"].keys())
+        i for (i, d) in zip(ids, data, strict=False) if "correct_map" in d and list(d["correct_map"].keys())
     ]  # hackily keep ids for the data, too
 
     data = [
@@ -33,9 +32,9 @@ def load_csv_data(filename, xrange, yrange, width=800, height=480):
     return [
         {
             "id": i,
-            "correct": True if cmap["correctness"] == "correct" else False,
+            "correct": cmap["correctness"] == "correct",
             "message": cmap["msg"],
             "gradeable": a["answer"],
         }
-        for (a, cmap, i) in zip(ans_dicts, correct_maps, ids)
+        for (a, cmap, i) in zip(ans_dicts, correct_maps, ids, strict=False)
     ]

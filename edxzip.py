@@ -11,7 +11,7 @@ def addfile(source, ziph):
 
 def zipdir(path, ziph):
     # ziph is zipfile handle
-    for root, dirs, files in os.walk(path):
+    for root, _dirs, files in os.walk(path):
         for file in files:
             if re.fullmatch(r".+\.py|LICENSE", file):
                 addfile(os.path.join(root, file), ziph)
