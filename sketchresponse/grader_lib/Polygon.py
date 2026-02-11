@@ -690,7 +690,7 @@ class Polygons(Gradeable):  # noqa: PLR0904
                 self.debugger.var1 = min(self.debugger.var1, distance * self.xscale)
         if self.debug:
             self.debugger.add(
-                f"Polygon is roughly {self.debugger.var1.evalf()} pixels away from point ({point[0]},{point[1]})."
+                f"Polygon is roughly {float(self.debugger.var1)} pixels away from point ({point[0]},{point[1]})."
             )
             self.debugger.add(f"Max allowed distance is {tolerance * self.xscale} pixels.")
 

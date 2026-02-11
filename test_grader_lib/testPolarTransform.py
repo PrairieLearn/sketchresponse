@@ -1,4 +1,3 @@
-
 from math import pi, sqrt
 
 from sketchresponse.grader_lib import GradeableFunction

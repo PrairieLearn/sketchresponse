@@ -1,4 +1,3 @@
-
 import copy
 import math
 
@@ -183,8 +182,13 @@ class PolarTransform:
             maxima = self.findMaxima(ts)
             if len(maxima) > 0:
                 for m in maxima:
-                    if m > 0 and m < len(ts) - 1 and ts[m - 1][0] > ts[m][0] and ts[m + 1][0] < ts[m][0]:
-                            ts.reverse()
+                    if (
+                        m > 0
+                        and m < len(ts) - 1
+                        and ts[m - 1][0] > ts[m][0]
+                        and ts[m + 1][0] < ts[m][0]
+                    ):
+                        ts.reverse()
                 reordered.append(ts)
             else:
                 inc = 0

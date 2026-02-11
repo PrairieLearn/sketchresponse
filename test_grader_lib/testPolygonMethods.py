@@ -1,4 +1,3 @@
-
 import unittest
 
 from sketchresponse.grader_lib import Polygon

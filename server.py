@@ -1,4 +1,3 @@
-
 import importlib
 
 # from imp import reload
@@ -24,6 +23,7 @@ def list_grader_scripts():
 @app.route("/<grader_module_name>")
 @app.route("/<path:path>/<grader_module_name>")
 def new_local_frontend(path=None, grader_module_name=None):
+    assert grader_module_name is not None
     print(type(grader_module_name))
     if path is not None:
         path = path.replace("/", ".")
@@ -41,6 +41,7 @@ def new_local_frontend(path=None, grader_module_name=None):
 @app.route("/<grader_module_name>/check", methods=["POST"])
 @app.route("/<path:path>/<grader_module_name>/check", methods=["POST"])
 def check_local(path=None, grader_module_name=None):
+    assert grader_module_name is not None
     if path is not None:
         path = path.replace("/", ".")
         if not path.endswith("."):

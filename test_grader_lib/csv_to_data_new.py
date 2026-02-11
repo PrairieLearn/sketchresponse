@@ -18,7 +18,9 @@ def load_csv_data(filename, xrange, yrange, width=800, height=480):
     #    print(data)
 
     ids = [
-        i for (i, d) in zip(ids, data, strict=False) if "correct_map" in d and list(d["correct_map"].keys())
+        i
+        for (i, d) in zip(ids, data, strict=False)
+        if "correct_map" in d and list(d["correct_map"].keys())
     ]  # hackily keep ids for the data, too
 
     data = [

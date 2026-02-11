@@ -1,4 +1,3 @@
-
 import json
 import re
 
@@ -49,9 +48,7 @@ def parse_svg(svg):
     return paths
 
 
-def convert_ans_dict(
-    ans_dict, xrange=None, yrange=None, width=800, height=480
-):
+def convert_ans_dict(ans_dict, xrange=None, yrange=None, width=800, height=480):
     if xrange is None:
         xrange = [-2.614, 2.608]
     if yrange is None:

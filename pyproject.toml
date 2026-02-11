@@ -65,3 +65,20 @@ ignore = [
 [tool.pytest.ini_options]
 testpaths = ["test_grader_lib"]
 python_files = ["test*.py"]
+
+[dependency-groups]
+dev = [
+    "ty>=0.0.16",
+]
+
+[tool.ty.src]
+exclude = [
+    "grader_scripts/",  # example/template scripts with broken runtime calls
+]
+
+[tool.ty.environment]
+python-version = "3.10"
+
+[tool.ty.analysis]
+# flask is an optional dependency (server extra)
+allowed-unresolved-imports = ["flask"]

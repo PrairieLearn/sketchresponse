@@ -67,6 +67,7 @@ class MultipleSplinesFunction(MultiFunction):  # noqa: PLR0904
 
     def create_from_path_info(self, path_info):
         self.functions = []
+        self.points = []
         xvals = []
         toolid = self.current_tool
         submission_data = self.submission["gradeable"][toolid]  # CHECK

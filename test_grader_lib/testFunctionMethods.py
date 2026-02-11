@@ -1,4 +1,3 @@
-
 # from ..sketchinput import GradeableCollection
 import unittest
 

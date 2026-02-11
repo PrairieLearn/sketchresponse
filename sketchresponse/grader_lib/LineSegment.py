@@ -195,6 +195,8 @@ class LineSegments(Gradeable):  # noqa: PLR0904
         return True
 
     def has_value_at(self, y, x, tolerance=None):
+        if tolerance is None:
+            tolerance = self.tolerance["pixel"]
         if x is None:
             return self.defined_at_y(y, tolerance)
         if y is None:

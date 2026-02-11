@@ -124,12 +124,12 @@ class Function(Tag, Tagable):  # noqa: PLR0904
     def get_domain(self):
         raise NotImplementedError("The get_domain method is not implemented by this class.")
 
-    def does_not_exist_between(self, x1, x2, tolerance):
+    def does_not_exist_between(self, xmin, xmax, tolerance=0):
         raise NotImplementedError(
             "The does_not_exist_between method is not implemented by this class."
         )
 
-    def get_sample_points(self, num, xmin, xmax):
+    def get_sample_points(self, numPoints, xmin, xmax):
         raise NotImplementedError("The get_sample_points method is not implemented by this class.")
 
     # Grader functions ###

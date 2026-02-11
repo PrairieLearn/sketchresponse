@@ -1,4 +1,3 @@
-
 import base64
 import inspect
 import json
@@ -57,7 +56,7 @@ def grader(func):
                 all_gradeables[identifier] = GradeableCollection(identifier, config, data)
 
         # filter gradeables for what the grader script is expecting
-        (args, varargs, keywords, defaults) = inspect.getargspec(func)
+        args = list(inspect.signature(func).parameters.keys())
         gradeables = {validkey: all_gradeables[validkey] for validkey in args}
 
         result = func(**gradeables)  # run the user-provided grading function
