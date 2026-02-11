@@ -1,6 +1,8 @@
 {
   "private": true,
-  "workspaces": ["sketch_tool"],
+  "workspaces": [
+    "sketch_tool"
+  ],
   "scripts": {
     "changeset": "changeset",
     "version": "changeset version",
