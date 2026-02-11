@@ -1,6 +1,6 @@
 {
   "name": "@prairielearn/sketchresponse",
-  "version": "0.0.1",
+  "version": "0.0.2",
   "description": "A configurable JavaScript front-end drawing tool with plugin components - adapted for use in PrairieLearn",
   "private": false,
   "license": "LGPL-2.1",
