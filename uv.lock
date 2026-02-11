@@ -1033,18 +1033,16 @@ dependencies = [
 ]
 
 [package.optional-dependencies]
-dev = [
-    { name = "matplotlib" },
-    { name = "pandas" },
-    { name = "pytest" },
-    { name = "ruff" },
-]
 server = [
     { name = "flask" },
 ]
 
 [package.dev-dependencies]
 dev = [
+    { name = "matplotlib" },
+    { name = "pandas" },
+    { name = "pytest" },
+    { name = "ruff" },
     { name = "ty" },
 ]
 
@@ -1052,17 +1050,19 @@ dev = [
 requires-dist = [
     { name = "flask", marker = "extra == 'server'", specifier = ">=2.0.0" },
     { name = "future", specifier = ">=0.18.0" },
-    { name = "matplotlib", marker = "extra == 'dev'", specifier = ">=3.0.0" },
     { name = "numpy", specifier = ">=1.20.0" },
-    { name = "pandas", marker = "extra == 'dev'", specifier = ">=1.0.0" },
-    { name = "pytest", marker = "extra == 'dev'", specifier = ">=7.0.0" },
-    { name = "ruff", marker = "extra == 'dev'", specifier = ">=0.8.0" },
     { name = "sympy", specifier = ">=1.9" },
 ]
-provides-extras = ["dev", "server"]
+provides-extras = ["server"]
 
 [package.metadata.requires-dev]
-dev = [{ name = "ty", specifier = ">=0.0.16" }]
+dev = [
+    { name = "matplotlib", specifier = ">=3.0.0" },
+    { name = "pandas", specifier = ">=1.0.0" },
+    { name = "pytest", specifier = ">=7.0.0" },
+    { name = "ruff", specifier = ">=0.8.0" },
+    { name = "ty", specifier = ">=0.0.16" },
+]
 
 [[package]]
 name = "sympy"
