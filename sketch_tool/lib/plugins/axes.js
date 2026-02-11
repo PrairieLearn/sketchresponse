@@ -1,5 +1,5 @@
-/* eslint-disable max-classes-per-file */
-/* eslint-disable key-spacing */
+ 
+ 
 import deepExtend from 'deep-extend';
 import z from '../util/zdom';
 
@@ -152,7 +152,7 @@ export default class Axes {
   generateDefaultParams(params) {
     this.params = DEFAULT_PARAMS;
     const keys = ['name', 'width', 'height', 'xrange', 'yrange', 'xscale', 'yscale', 'coordinates'];
-    // eslint-disable-next-line no-restricted-syntax
+     
     for (const key of keys) {
       this.params[key] = params[key];
     }

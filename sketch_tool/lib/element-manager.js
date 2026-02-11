@@ -103,7 +103,7 @@ export default class ElementManager {
     if (className && className.substring(0, 9) === 'invisible') {
       const classNamePrefix = className.substring(9);
       // IE and Edge do not have getElementsByClassName on SVG elements, use polyfill instead
-      // eslint-disable-next-line prefer-template
+       
       visibleElements = getElementsByClassName(element.parentNode, 'visible' + classNamePrefix);
     }
     if (this.isDragging) {

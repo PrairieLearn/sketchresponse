@@ -43,15 +43,15 @@ export default class SelectionManager {
     }
   }
 
-  // eslint-disable-next-line class-methods-use-this
+   
   select(element, mode) {
     element.setAttributeNS(null, SELECTED_ATTR, mode === 'override' ? 'override' : 'default');
   }
 
-  // eslint-disable-next-line class-methods-use-this
+   
   deselect(element) { element.removeAttributeNS(null, SELECTED_ATTR); }
 
-  // eslint-disable-next-line class-methods-use-this
+   
   isSelected(element) { return element.getAttributeNS(null, SELECTED_ATTR) !== null; }
 
   toggleSelected(element, mode) {

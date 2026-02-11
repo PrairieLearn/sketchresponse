@@ -38,7 +38,7 @@ export default class VerticalLine extends BasePlugin {
     const yvals = [
       0,
       Math.round(this.params.height / 3),
-      // eslint-disable-next-line no-mixed-operators
+       
       Math.round(2 * this.params.height / 3),
       this.params.height,
     ];
@@ -110,7 +110,7 @@ export default class VerticalLine extends BasePlugin {
     z.render(this.el,
       // Draw visible line, under invisible line
       z.each(this.state, (position, positionIndex) =>
-        // eslint-disable-next-line prefer-template, no-useless-concat
+         
         z('line.visible-' + positionIndex + '.vertical-line' + '.plugin-id-' + this.id, {
           x1: position.x,
           y1: 0,
@@ -125,7 +125,7 @@ export default class VerticalLine extends BasePlugin {
       ),
       // Draw invisible and selectable line
       z.each(this.state, (position, positionIndex) =>
-        // eslint-disable-next-line prefer-template
+         
         z('line.invisible-' + positionIndex + this.readOnlyClass(), {
           x1: position.x,
           y1: 0,
@@ -182,7 +182,7 @@ export default class VerticalLine extends BasePlugin {
     return x >= this.bounds.xmin && x <= this.bounds.xmax;
   }
 
-  // eslint-disable-next-line class-methods-use-this
+   
   inBoundsY() {
     return true;
   }

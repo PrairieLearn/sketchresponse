@@ -13,7 +13,7 @@ export default class Group {
   constructor(params, app, lowPriority = false) {
     if (app.debug) {
       if (typeof params.label !== 'string') {
-        // eslint-disable-next-line no-param-reassign
+         
         params.label = 'Group'; // Default value
       }
     }
@@ -42,7 +42,7 @@ export default class Group {
     this.app.registerToolbarItem(this.menuItem);
   }
 
-  // eslint-disable-next-line class-methods-use-this
+   
   createPlugin(name, params, app) {
     switch (name) {
       case 'freeform':

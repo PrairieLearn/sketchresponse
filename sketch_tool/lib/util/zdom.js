@@ -1,5 +1,5 @@
-/* eslint-disable no-param-reassign */
-/* eslint-disable max-classes-per-file */
+ 
+ 
 const namespaces = {
   xmlns: 'http://www.w3.org/2000/xmlns/',
   xhtml: 'http://www.w3.org/1999/xhtml',
@@ -244,7 +244,7 @@ function z(tagName, props, ...children) {
   return new ZElement(tagName, props, ...children);
 }
 
-// eslint-disable-next-line camelcase
+ 
 z.if = function z_if(condition, ...children) {
   if (!condition) return new ZNodeCollection();
 
@@ -254,7 +254,7 @@ z.if = function z_if(condition, ...children) {
   );
 };
 
-// eslint-disable-next-line camelcase
+ 
 z.each = function z_each(items = [], callback) {
   return new ZNodeCollection(...items.map(callback));
 };
@@ -272,7 +272,7 @@ function renderCallback(targetEl) {
   targetEl.__zPending__ = null;
 }
 
-// eslint-disable-next-line camelcase
+ 
 z.render = function z_render(targetEl, ...children) {
   if (!targetEl.__zPending__) {
     // Note: RAF is async, so __zPending__ is set below before renderCallback executes

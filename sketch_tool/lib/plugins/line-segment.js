@@ -306,7 +306,7 @@ export default class LineSegment extends BasePlugin {
   }
 
   pointClass(ptIndex) {
-    // eslint-disable-next-line prefer-template, no-useless-concat
+     
     return (ptIndex === this.state.length - 1) && (ptIndex % 2 === 0) ? '.line-segment-point' + '.plugin-id-' + this.id : '';
   }
 
@@ -367,7 +367,7 @@ export default class LineSegment extends BasePlugin {
       // Draw visible line, under invisible line and endpoints
       z.each(this.state, (pt, ptIndex) =>
         z.if(this.lineIsDefined(ptIndex), () =>
-          // eslint-disable-next-line prefer-template, no-useless-concat
+           
           z('line.visible-' + ptIndex + '.line-segment' + '.plugin-id-' + this.id, {
             x1: this.state[ptIndex].x,
             y1: this.state[ptIndex].y,
@@ -385,7 +385,7 @@ export default class LineSegment extends BasePlugin {
       // Draw invisible and selectable line, under invisible endpoints
       z.each(this.state, (pt, ptIndex) =>
         z.if(this.lineIsDefined(ptIndex), () =>
-          // eslint-disable-next-line prefer-template
+           
           z('line.invisible-' + ptIndex + this.readOnlyClass(), {
             x1: this.state[ptIndex].x,
             y1: this.state[ptIndex].y,
@@ -419,12 +419,12 @@ export default class LineSegment extends BasePlugin {
       ),
       // Draw invisible and selectable line endpoints
       z.each(this.state, (pt, ptIndex) =>
-      // eslint-disable-next-line prefer-template, no-useless-concat
+       
         z('circle.invisible-' + (ptIndex % 2 === 0 ? ptIndex : (ptIndex - 1).toString()) + this.pointClass(ptIndex) + this.readOnlyClass(), {
           cx: this.state[ptIndex].x,
           cy: this.state[ptIndex].y,
           r: this.pointRadius(ptIndex),
-          // eslint-disable-next-line prefer-template
+           
           style: `
             fill: ${this.params.color};
             stroke-width: 0;

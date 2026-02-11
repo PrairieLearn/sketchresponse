@@ -25,7 +25,7 @@ export default class StateManager {
   }
 
   setPluginState(state) {
-    // eslint-disable-next-line no-param-reassign
+     
     state = deepCopy(state); // Use deepCopy to keep plugin state isolated
     this.registry.forEach((entry) => {
       // eslint-disable-next-line no-prototype-builtins

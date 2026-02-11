@@ -116,7 +116,7 @@ export default class Stamp extends BasePlugin {
   render() {
     z.render(this.el,
       z.each(this.state, (position, positionIndex) =>
-        // eslint-disable-next-line prefer-template, no-useless-concat
+         
         z('image.stamp' + '.plugin-id-' + this.id + '.state-index-' + positionIndex + this.readOnlyClass(), {
           x: 0,
           y: 0,

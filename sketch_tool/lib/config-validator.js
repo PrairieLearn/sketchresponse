@@ -1,5 +1,5 @@
-/* eslint-disable no-console */
-/* eslint-disable key-spacing */
+ 
+ 
 import validator from 'is-my-json-valid';
 import deepExtend from 'deep-extend';
 import deepCopy from './util/deep-copy';
@@ -286,7 +286,7 @@ deepExtend(verticalLine, {
 });
 
 const schemas = {
-  /* eslint-disable quote-props */
+   
   'main': main,
   'axes': axes,
   'freeform': freeform,
@@ -299,18 +299,18 @@ const schemas = {
   'spline': spline,
   'stamp': stamp,
   'vertical-line': verticalLine,
-  /* eslint-disable quote-props */
+   
 };
 
 function validateParams(params, name) {
   const validateSchema = validator(schemas[name], { greedy: true, verbose: true });
   const valid = validateSchema(params);
-  // eslint-disable-next-line no-useless-concat
+   
   const idStr = params.id ? ' id ' + `'${params.id}'` : '';
   console.log(`%c${name}${idStr}`, 'color: blue; font-weight: bold;');
   if (!valid) {
     const { errors } = validateSchema;
-    // eslint-disable-next-line no-restricted-syntax
+     
     for (const error of errors) {
       if (error.message === 'has additional properties') {
         console.warn(`${error.value.replace('data', '')} is not a valid key`);

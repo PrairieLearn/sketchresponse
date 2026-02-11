@@ -16,7 +16,7 @@ export class AttributeList {
     if (!this.cache.has(element)) this.cache.set(element, new Set());
     const attrCache = this.cache.get(element);
 
-    // eslint-disable-next-line no-param-reassign
+     
     if (arguments.length === 2) condition = !attrCache.has(attrName); // no third argument passed
 
     // Return early if nothing has changed to avoid unnecessary DOM manipulation
@@ -54,7 +54,7 @@ export function injectStyleSheet(innerHTML) {
 export function injectSVGDefs(id, xmlStr) {
   const canvas = document.getElementById(`${id}-si-canvas`);
   const defs = document.createElementNS('http://www.w3.org/2000/svg', 'defs');
-  // eslint-disable-next-line prefer-template, no-param-reassign
+   
   xmlStr = '<svg xmlns=\'http://www.w3.org/2000/svg\'>' + xmlStr + '</svg>';
   const svgDocElement = new DOMParser().parseFromString(xmlStr, 'text/xml').documentElement;
   // Do not use svgDocElement.children, no support on Safari & Edge:

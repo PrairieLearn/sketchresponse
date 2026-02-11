@@ -1,6 +1,3 @@
-/* eslint-disable key-spacing */
-/* eslint-disable no-multi-spaces */
-// eslint-disable-next-line no-unused-vars
 function loadConfig(configId) {
   const configs = {
     initialState: {

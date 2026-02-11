@@ -28,7 +28,7 @@ export default class DragManager {
         const classNamePrefix = className.substring(9);
         // IE and Edge do not have getElementsByClassName on SVG elements, use polyfill instead
         this.visibleElements = getElementsByClassName(
-          // eslint-disable-next-line prefer-template
+           
           element.parentNode, 'visible' + classNamePrefix,
         );
         if (this.visibleElements) {

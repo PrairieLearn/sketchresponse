@@ -52,6 +52,7 @@
   ],
   "scripts": {
     "start": "webpack serve --open --config webpack.development.js",
-    "build": "webpack --config webpack.production.js"
+    "build": "webpack --config webpack.production.js",
+    "lint": "eslint ."
   }
 }
