@@ -51,6 +51,18 @@ class TestAsymptoteMethods(TestData.TestData):
             va = Asymptote.VerticalAsymptotes(args.grader, args.submission, args.tool_id)
             self.assertFalse(va.has_asym_at_value(-5))
 
+    def test_true_asym_greater_less_than(self):
+        # test using data from the hw4A-8-1 csv
+        data = self.load_as_gradeable_collections("hw4A-tab8-problem1.anon.csv")
+        for d in data:
+            args = d["ha"]
+            ha = Asymptote.HorizontalAsymptotes(args.grader, args.submission, args.tool_id)
+            self.assertTrue(ha.has_asym_at_value(0))
+            self.assertTrue(ha.is_greater_than_y_between(-1, -4.5, 4.5, 10))
+            self.assertTrue(ha.is_less_than_y_between(1, -4.5, 4.5, 10))
+            self.assertFalse(ha.is_greater_than_y_between(1, -4.5, 4.5, 10))
+            self.assertFalse(ha.is_less_than_y_between(-1, -4.5, 4.5, 10))
+
     def test_get_number_of_asyms(self):
         # test using data from the hw4A-8-1 csv
         data = self.load_as_gradeable_collections("hw4A-tab8-problem1.anon.csv")
