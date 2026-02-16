@@ -36,6 +36,9 @@ Repository = "https://github.com/PrairieLearn/sketchresponse"
 [tool.hatch.version]
 source = "vcs"
 
+[tool.hatch.version.raw-options]
+git_describe_command = ["git", "describe", "--dirty", "--tags", "--long", "--match", "v*"]
+
 [tool.hatch.build.hooks.vcs]
 version-file = "sketchresponse/_version.py"
 
