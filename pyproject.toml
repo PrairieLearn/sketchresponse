@@ -35,7 +35,9 @@ Repository = "https://github.com/PrairieLearn/sketchresponse"
 
 [tool.hatch.version]
 source = "vcs"
-tag-regex = "^v(?P<version>\\d+\\.\\d+\\.\\d+)$"
+
+[tool.hatch.version.raw-options]
+tag_regex = "^v(?P<version>\\d+\\.\\d+\\.\\d+)$"
 
 [tool.hatch.build.hooks.vcs]
 version-file = "sketchresponse/_version.py"
