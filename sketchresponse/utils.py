@@ -11,7 +11,7 @@ from .grader_lib import (
 )
 from .grader_lib.fit_curve import fitCurve
 from .grader_lib.GradeableFunction import function_to_spline
-from .types import SketchCanvasSize, SketchGrader, SketchDrawing, SketchTool
+from .types import SketchCanvasSize, SketchDrawing, SketchGrader, SketchTool
 
 
 def parse_function_string(s: str) -> Callable[[float], float]:
