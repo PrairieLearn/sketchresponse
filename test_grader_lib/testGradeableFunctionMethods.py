@@ -144,7 +144,7 @@ class TestGradeableFunctionMethods(TestData.TestData):
             self.assertEqual(cp.get_number_of_points(), 2)
 
     def test_function_to_spline(self):
-        range_data : SketchCanvasSize = {
+        range_data: SketchCanvasSize = {
             "x_start": -2,
             "x_end": 5,
             "y_start": -5,
@@ -264,7 +264,7 @@ class TestGradeableFunctionMethods(TestData.TestData):
         )
 
     def test_function_to_spline_broken(self):
-        range_data : SketchCanvasSize = {
+        range_data: SketchCanvasSize = {
             "x_start": -2,
             "x_end": 5,
             "y_start": -5,
