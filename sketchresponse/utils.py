@@ -11,7 +11,7 @@ from .grader_lib import (
 )
 from .grader_lib.fit_curve import fitCurve
 from .grader_lib.GradeableFunction import function_to_spline
-from .types import SketchCanvasSize, SketchGrader, SketchInitial, SketchTool
+from .types import SketchCanvasSize, SketchGrader, SketchDrawing, SketchTool
 
 
 def parse_function_string(s: str) -> Callable[[float], float]:
@@ -367,7 +367,7 @@ def in_range(val: float, start: float, end: float, tolerance: float = 0) -> bool
 
 
 def format_initials(
-    initials: list[SketchInitial], tool: SketchTool, ranges: SketchCanvasSize
+    initials: list[SketchDrawing], tool: SketchTool, ranges: SketchCanvasSize
 ) -> list:
     """
     Convert initial drawing data for one sketching tool into the data format that is used by the client.

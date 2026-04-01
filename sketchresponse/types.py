@@ -52,7 +52,7 @@ class SketchCanvasSize(TypedDict):
     width: int
 
 
-class SketchInitial(TypedDict):
+class SketchDrawing(TypedDict):
     toolid: str
     fun: str | None
     xrange: list[float]
