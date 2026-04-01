@@ -1,5 +1,5 @@
-import unittest
 import math
+import unittest
 
 from sketchresponse.grader_lib import GradeableFunction, Point
 from test_grader_lib import TestData
