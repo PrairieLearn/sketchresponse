@@ -83,27 +83,11 @@ def graph_to_screen(start: float, end: float, canvas_size: int, value: float) ->
 
 
 def graph_to_screen_submission(
-    submission: dict, use_xaxis: bool, distance: bool, value: float
+    submission: dict, config: dict, use_xaxis: bool, distance: bool, value: float
 ) -> float:
-    start = (
-        0
-        if distance
-        else (
-            submission["meta"]["config"]["xrange"][0]
-            if use_xaxis
-            else submission["meta"]["config"]["yrange"][1]
-        )
-    )
-    end = (
-        submission["meta"]["config"]["xrange"][1]
-        if use_xaxis
-        else submission["meta"]["config"]["yrange"][0]
-    )
-    canvas_size = (
-        submission["meta"]["config"]["width"]
-        if use_xaxis
-        else submission["meta"]["config"]["height"]
-    )
+    start = 0 if distance else (config["xrange"][0] if use_xaxis else config["yrange"][1])
+    end = config["xrange"][1] if use_xaxis else config["yrange"][0]
+    canvas_size = config["width"] if use_xaxis else config["height"]
 
     return graph_to_screen(start, end, canvas_size, value)
 
@@ -113,37 +97,23 @@ def screen_to_graph(start: float, end: float, canvas_size: int, value: float) ->
 
 
 def screen_to_graph_submission(
-    submission: dict, use_xaxis: bool, distance: bool, value: float
+    submission: dict, config: dict, use_xaxis: bool, distance: bool, value: float
 ) -> float:
-    start = (
-        0
-        if distance
-        else (
-            submission["meta"]["config"]["xrange"][0]
-            if use_xaxis
-            else submission["meta"]["config"]["yrange"][1]
-        )
-    )
-    end = (
-        submission["meta"]["config"]["xrange"][1]
-        if use_xaxis
-        else submission["meta"]["config"]["yrange"][0]
-    )
-    canvas_size = (
-        submission["meta"]["config"]["width"]
-        if use_xaxis
-        else submission["meta"]["config"]["height"]
-    )
+    start = 0 if distance else (config["xrange"][0] if use_xaxis else config["yrange"][1])
+    end = config["xrange"][1] if use_xaxis else config["yrange"][0]
+    canvas_size = config["width"] if use_xaxis else config["height"]
 
     return screen_to_graph(start, end, canvas_size, value)
 
 
-def get_gap_length_px(rd: list[list[float]], x1: float, x2: float, submission: dict) -> float:
+def get_gap_length_px(
+    rd: list[list[float]], x1: float, x2: float, submission: dict, config: dict
+) -> float:
     if rd == []:
-        return graph_to_screen_submission(submission, True, False, (x2 - x1))
+        return graph_to_screen_submission(submission, config, True, False, (x2 - x1))
     gap_total = 0
-    rstart = [float("-inf"), submission["meta"]["config"]["xrange"][0]]
-    rend = [submission["meta"]["config"]["xrange"][1], float("inf")]
+    rstart = [float("-inf"), config["xrange"][0]]
+    rend = [config["xrange"][1], float("inf")]
     rd.insert(0, rstart)
     rd.append(rend)
     for i in range(len(rd) - 1):
@@ -157,13 +127,14 @@ def get_gap_length_px(rd: list[list[float]], x1: float, x2: float, submission: d
         if r[1] > x1 and r_next[0] < x2:
             gap_total += r_next[0] - r[1]
 
-    gap_total_px = graph_to_screen_submission(submission, True, True, gap_total)
+    gap_total_px = graph_to_screen_submission(submission, config, True, True, gap_total)
     return gap_total_px
 
 
 def get_coverage_length_px(
     grader: SketchGrader,
     submission: dict,
+    config: dict,
     tools_to_check: list[str],
     tool_dict: dict[str, SketchTool],
     x1: float,
@@ -178,15 +149,15 @@ def get_coverage_length_px(
     for toolid in tools_to_check:
         tool_used = tool_dict[toolid]["name"]
         if tool_used == "polygon":
-            tool_grader = Polygon.Polygons(grader, submission, toolid)
+            tool_grader = Polygon.Polygons(grader, submission, config, toolid)
         elif tool_used in gf_tools:
-            tool_grader = GradeableFunction.GradeableFunction(grader, submission, toolid)
+            tool_grader = GradeableFunction.GradeableFunction(grader, submission, config, toolid)
         elif tool_used == "horizontal-line":
-            tool_grader = Asymptote.HorizontalAsymptotes(grader, submission, toolid)
+            tool_grader = Asymptote.HorizontalAsymptotes(grader, submission, config, toolid)
         elif tool_used == "vertical-line":
-            tool_grader = Asymptote.VerticalAsymptotes(grader, submission, toolid)
+            tool_grader = Asymptote.VerticalAsymptotes(grader, submission, config, toolid)
         else:  # line-segment
-            tool_grader = LineSegment.LineSegments(grader, submission, toolid)
+            tool_grader = LineSegment.LineSegments(grader, submission, config, toolid)
         # add tool's range to all ranges
         if tool_grader:
             xrange += tool_grader.get_range_defined()
@@ -196,9 +167,9 @@ def get_coverage_length_px(
 
     rd = tool_grader.collapse_ranges(xrange)
 
-    gap_length = get_gap_length_px(rd, x1, x2, submission)
+    gap_length = get_gap_length_px(rd, x1, x2, submission, config)
 
-    width_px = graph_to_screen_submission(submission, True, True, (x2 - x1))
+    width_px = graph_to_screen_submission(submission, config, True, True, (x2 - x1))
     return width_px - gap_length
 
 
@@ -224,6 +195,7 @@ def get_num_in_bound_occurrences(
     toolid: str,
     tool_dict: dict[str, SketchTool],
     submission: dict,
+    config: dict,
     x1: float,
     x2: float,
 ) -> int:
@@ -234,7 +206,7 @@ def get_num_in_bound_occurrences(
     if tool_used == "point":
         for point in data:
             if point["point"] not in occs and point_in_range(
-                point["point"], x1, x2, submission, pix=True
+                point["point"], x1, x2, submission, config, pix=True
             ):
                 occs.append(point["point"])
     else:
@@ -244,6 +216,7 @@ def get_num_in_bound_occurrences(
                 x1,
                 x2,
                 submission,
+                config,
                 pix=True,
                 vl=(tool_used == "vertical-line"),
                 hl=(tool_used == "horizontal-line"),
@@ -257,13 +230,14 @@ def spline_in_range(
     x1: float,
     x2: float,
     submission: dict,
+    config: dict,
     pix: bool = False,
     hl: bool = False,
     vl: bool = False,
 ) -> bool:
     real_points = [spline[i] for i in range(len(spline)) if i % 3 == 0]
     for point in real_points:
-        if point_in_range(point, x1, x2, submission, pix=pix, hl=hl, vl=vl):
+        if point_in_range(point, x1, x2, submission, config, pix=pix, hl=hl, vl=vl):
             return True
     return False
 
@@ -273,14 +247,15 @@ def point_in_range(
     x1: float,
     x2: float,
     submission: dict,
+    config: dict,
     pix: bool = False,
     hl: bool = False,
     vl: bool = False,
 ) -> bool:
-    xrange = submission["meta"]["config"]["xrange"]
-    yrange = submission["meta"]["config"]["yrange"]
-    width = submission["meta"]["config"]["width"]
-    height = submission["meta"]["config"]["height"]
+    xrange = config["xrange"]
+    yrange = config["yrange"]
+    width = config["width"]
+    height = config["height"]
 
     if pix:  # convert to graph coordinates
         x = screen_to_graph(xrange[0], xrange[1], width, point[0])
@@ -293,16 +268,17 @@ def point_in_range(
     return in_range(point[1], yrange[0], yrange[1]) and in_range(point[0], x1, x2)
 
 
-def flip_grader_data(submission: dict) -> dict:
+def flip_grader_data(submission: dict, config: dict) -> tuple[dict, dict]:
     range_data: SketchCanvasSize = {
-        "x_start": submission["meta"]["config"]["xrange"][0],
-        "x_end": submission["meta"]["config"]["xrange"][1],
-        "y_start": submission["meta"]["config"]["yrange"][0],
-        "y_end": submission["meta"]["config"]["yrange"][1],
-        "width": submission["meta"]["config"]["width"],
-        "height": submission["meta"]["config"]["height"],
+        "x_start": config["xrange"][0],
+        "x_end": config["xrange"][1],
+        "y_start": config["yrange"][0],
+        "y_end": config["yrange"][1],
+        "width": config["width"],
+        "height": config["height"],
     }
     submission_new = copy.deepcopy(submission)
+    config_new = copy.deepcopy(config)
     submission_data = submission_new["gradeable"]
     for toolid in submission_data:
         for i in range(len(submission_data[toolid])):
@@ -315,18 +291,18 @@ def flip_grader_data(submission: dict) -> dict:
                 submission_data[toolid][i]["point"] = flip_point(
                     submission_data[toolid][i]["point"], range_data
                 )
-    submission_new["meta"]["config"]["xrange"] = [
+    config_new["xrange"] = [
         range_data["y_start"],
         range_data["y_end"],
     ]
-    submission_new["meta"]["config"]["yrange"] = [
+    config_new["yrange"] = [
         range_data["x_start"],
         range_data["x_end"],
     ]
-    submission_new["meta"]["config"]["width"] = range_data["height"]
-    submission_new["meta"]["config"]["height"] = range_data["width"]
+    config_new["width"] = range_data["height"]
+    config_new["height"] = range_data["width"]
 
-    return submission_new
+    return submission_new, config_new
 
 
 def flip_point(
@@ -366,11 +342,11 @@ def in_range(val: float, start: float, end: float, tolerance: float = 0) -> bool
     return bool(val >= start + tolerance and val <= end - tolerance)
 
 
-def format_initials(
+def format_drawing(
     initials: list[SketchDrawing], tool: SketchTool, ranges: SketchCanvasSize
 ) -> list:
     """
-    Convert initial drawing data for one sketching tool into the data format that is used by the client.
+    Convert drawing data for one sketching tool into the data format that is used by the client.
     Note that this function does not validate the inputs and assumes that attribute combinations are all
     appropriate for the given tool type.
 

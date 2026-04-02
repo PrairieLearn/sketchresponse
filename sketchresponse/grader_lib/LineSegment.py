@@ -8,8 +8,8 @@ from .Tag import Tag
 
 
 class LineSegments(Gradeable):  # noqa: PLR0904
-    def __init__(self, grader, submission, current_tool, tolerance=None):
-        super().__init__(grader, submission, current_tool, tolerance)
+    def __init__(self, grader, submission, config, current_tool, tolerance=None):
+        super().__init__(grader, submission, config, current_tool, tolerance)
 
         self.set_default_tolerance(
             "line_distance", grader["tolerance"]

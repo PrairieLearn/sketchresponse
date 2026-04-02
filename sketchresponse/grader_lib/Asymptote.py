@@ -20,8 +20,8 @@ class Asymptotes(Gradeable):
     #        VerticalAsymptotes or the HorizontalAsymptotes class to use the
     #        grading functions below.
     #    """
-    def __init__(self, grader, submission, current_tool, tolerance=None):
-        super().__init__(grader, submission, current_tool, tolerance)
+    def __init__(self, grader, submission, config, current_tool, tolerance=None):
+        super().__init__(grader, submission, config, current_tool, tolerance)
 
         self.set_default_tolerance(
             "asym_distance", 20
@@ -186,8 +186,8 @@ class VerticalAsymptotes(Asymptotes):
         function you are grading.
     """
 
-    def __init__(self, grader, submission, current_tool):
-        Asymptotes.__init__(self, grader, submission, current_tool)
+    def __init__(self, grader, submission, config, current_tool):
+        Asymptotes.__init__(self, grader, submission, config, current_tool)
         self.scale = self.xscale
 
     def value_from_spline(self, spline):
@@ -213,8 +213,8 @@ class HorizontalAsymptotes(Asymptotes):
         function you are grading.
     """
 
-    def __init__(self, grader, submission, current_tool):
-        Asymptotes.__init__(self, grader, submission, current_tool)
+    def __init__(self, grader, submission, config, current_tool):
+        Asymptotes.__init__(self, grader, submission, config, current_tool)
         self.scale = self.yscale
 
     def value_from_spline(self, spline):
