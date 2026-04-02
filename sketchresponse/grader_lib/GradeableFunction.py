@@ -700,7 +700,7 @@ def function_to_spline(
             y = f(x)
             if type(y) is complex:
                 raise ArithmeticError
-            y_screen = (-y - y_start) * height / (y_end - y_start)
+            y_screen = height - (y - y_start) * height / (y_end - y_start)
             spline.append([x_screen, y_screen])
         except Exception:
             return spline, True, x + 0.001
