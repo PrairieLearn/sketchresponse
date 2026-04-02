@@ -9,7 +9,7 @@ from .Tag import Tagable
 
 class Gradeable(Tagable):
     def __init__(
-        self, grader, submission, current_tool, tolerance=None
+        self, grader, submission, config, current_tool, tolerance=None
     ):  # gradeable_info : {"grader": grader, "submission": submission}
         super().__init__()
         if tolerance is None:
@@ -17,7 +17,6 @@ class Gradeable(Tagable):
         self.grader = grader
         self.submission = submission
         self.current_tool = current_tool
-        config = submission["meta"]["config"]
         xaxis = Axis(config["xrange"], config["width"])
         yaxis = Axis(config["yrange"][::-1], config["height"])
         self.xaxis = xaxis

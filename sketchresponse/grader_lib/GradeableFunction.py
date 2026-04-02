@@ -12,8 +12,7 @@ from .SplineFunction import SplineFunction
 
 
 class GradeableFunction(MultipleSplinesFunction):  # noqa: PLR0904
-    def __init__(self, grader, submission, current_tool, tolerance=None):
-        config = submission["meta"]["config"]
+    def __init__(self, grader, submission, config, current_tool, tolerance=None):
         xaxis = Axis(config["xrange"], config["width"])
         yaxis = Axis(config["yrange"][::-1], config["height"])
         super().__init__(
