@@ -85,25 +85,9 @@ def graph_to_screen(start: float, end: float, canvas_size: int, value: float) ->
 def graph_to_screen_submission(
     submission: dict, config: dict, use_xaxis: bool, distance: bool, value: float
 ) -> float:
-    start = (
-        0
-        if distance
-        else (
-            config["xrange"][0]
-            if use_xaxis
-            else config["yrange"][1]
-        )
-    )
-    end = (
-        config["xrange"][1]
-        if use_xaxis
-        else config["yrange"][0]
-    )
-    canvas_size = (
-        config["width"]
-        if use_xaxis
-        else config["height"]
-    )
+    start = 0 if distance else (config["xrange"][0] if use_xaxis else config["yrange"][1])
+    end = config["xrange"][1] if use_xaxis else config["yrange"][0]
+    canvas_size = config["width"] if use_xaxis else config["height"]
 
     return graph_to_screen(start, end, canvas_size, value)
 
@@ -115,30 +99,16 @@ def screen_to_graph(start: float, end: float, canvas_size: int, value: float) ->
 def screen_to_graph_submission(
     submission: dict, config: dict, use_xaxis: bool, distance: bool, value: float
 ) -> float:
-    start = (
-        0
-        if distance
-        else (
-            config["xrange"][0]
-            if use_xaxis
-            else config["yrange"][1]
-        )
-    )
-    end = (
-        config["xrange"][1]
-        if use_xaxis
-        else config["yrange"][0]
-    )
-    canvas_size = (
-        config["width"]
-        if use_xaxis
-        else config["height"]
-    )
+    start = 0 if distance else (config["xrange"][0] if use_xaxis else config["yrange"][1])
+    end = config["xrange"][1] if use_xaxis else config["yrange"][0]
+    canvas_size = config["width"] if use_xaxis else config["height"]
 
     return screen_to_graph(start, end, canvas_size, value)
 
 
-def get_gap_length_px(rd: list[list[float]], x1: float, x2: float, submission: dict, config: dict) -> float:
+def get_gap_length_px(
+    rd: list[list[float]], x1: float, x2: float, submission: dict, config: dict
+) -> float:
     if rd == []:
         return graph_to_screen_submission(submission, config, True, False, (x2 - x1))
     gap_total = 0

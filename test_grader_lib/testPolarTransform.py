@@ -9,11 +9,17 @@ class TestPolarTransform(TestDataPolar.TestDataPolar):
         data = self.loadData("test_grader_lib/polar_points_true.csv")
         for d in data:
             args1 = d["pt1"]
-            pt1 = GradeableFunction.GradeableFunction(args1.grader, args1.submission, args1.submission["meta"]["config"], args1.tool_id)
+            pt1 = GradeableFunction.GradeableFunction(
+                args1.grader, args1.submission, args1.submission["meta"]["config"], args1.tool_id
+            )
             args2 = d["pt2"]
-            pt2 = GradeableFunction.GradeableFunction(args2.grader, args2.submission, args2.submission["meta"]["config"], args2.tool_id)
+            pt2 = GradeableFunction.GradeableFunction(
+                args2.grader, args2.submission, args2.submission["meta"]["config"], args2.tool_id
+            )
             args3 = d["pt3"]
-            pt3 = GradeableFunction.GradeableFunction(args3.grader, args3.submission, args3.submission["meta"]["config"], args3.tool_id)
+            pt3 = GradeableFunction.GradeableFunction(
+                args3.grader, args3.submission, args3.submission["meta"]["config"], args3.tool_id
+            )
 
             self.assertTrue(pt1.has_point_at(x=(11 * pi / 6), y=2, distTolerance=20))
             self.assertTrue(pt2.has_point_at(x=(5 * pi / 4), y=sqrt(2), distTolerance=20))
@@ -23,11 +29,17 @@ class TestPolarTransform(TestDataPolar.TestDataPolar):
         data = self.loadData("test_grader_lib/polar_points_false.txt")
         for d in data:
             args1 = d["pt1"]
-            pt1 = GradeableFunction.GradeableFunction(args1.grader, args1.submission, args1.submission["meta"]["config"], args1.tool_id)
+            pt1 = GradeableFunction.GradeableFunction(
+                args1.grader, args1.submission, args1.submission["meta"]["config"], args1.tool_id
+            )
             args2 = d["pt2"]
-            pt2 = GradeableFunction.GradeableFunction(args2.grader, args2.submission, args2.submission["meta"]["config"], args2.tool_id)
+            pt2 = GradeableFunction.GradeableFunction(
+                args2.grader, args2.submission, args2.submission["meta"]["config"], args2.tool_id
+            )
             args3 = d["pt3"]
-            pt3 = GradeableFunction.GradeableFunction(args3.grader, args3.submission, args3.submission["meta"]["config"], args3.tool_id)
+            pt3 = GradeableFunction.GradeableFunction(
+                args3.grader, args3.submission, args3.submission["meta"]["config"], args3.tool_id
+            )
 
             isCorrect = True
             isCorrect = isCorrect and pt1.has_point_at(x=(11 * pi / 6), y=2, distTolerance=20)
@@ -40,7 +52,9 @@ class TestPolarTransform(TestDataPolar.TestDataPolar):
         data = self.loadData("test_grader_lib/polar_quartercircle_true.txt")
         for d in data:
             args = d["f"]
-            f = GradeableFunction.GradeableFunction(args.grader, args.submission, args.submission["meta"]["config"], args.tool_id)
+            f = GradeableFunction.GradeableFunction(
+                args.grader, args.submission, args.submission["meta"]["config"], args.tool_id
+            )
             self.assertTrue(f.is_straight_between(pi, (3 * pi / 2)))
             self.assertFalse(f.does_exist_between(0, pi))
             self.assertFalse(f.does_exist_between((3 * pi / 2), 2 * pi))
@@ -49,7 +63,9 @@ class TestPolarTransform(TestDataPolar.TestDataPolar):
         data = self.loadData("test_grader_lib/polar_quartercircle_false.txt")
         for d in data:
             args = d["f"]
-            f = GradeableFunction.GradeableFunction(args.grader, args.submission, args.submission["meta"]["config"], args.tool_id)
+            f = GradeableFunction.GradeableFunction(
+                args.grader, args.submission, args.submission["meta"]["config"], args.tool_id
+            )
 
             isCorrect = True
             isCorrect = isCorrect and f.is_straight_between(pi, (3 * pi / 2))
@@ -62,7 +78,9 @@ class TestPolarTransform(TestDataPolar.TestDataPolar):
         data = self.loadData("test_grader_lib/polar_threelobe_true.txt")
         for d in data:
             args = d["f"]
-            f = GradeableFunction.GradeableFunction(args.grader, args.submission, args.submission["meta"]["config"], args.tool_id)
+            f = GradeableFunction.GradeableFunction(
+                args.grader, args.submission, args.submission["meta"]["config"], args.tool_id
+            )
             allowedFails = 4
 
             self.assertTrue(f.is_increasing_between(0, (pi / 6), failureTolerance=allowedFails))
@@ -86,7 +104,9 @@ class TestPolarTransform(TestDataPolar.TestDataPolar):
         data = self.loadData("test_grader_lib/polar_threelobe_false.txt")
         for d in data:
             args = d["f"]
-            f = GradeableFunction.GradeableFunction(args.grader, args.submission, args.submission["meta"]["config"], args.tool_id)
+            f = GradeableFunction.GradeableFunction(
+                args.grader, args.submission, args.submission["meta"]["config"], args.tool_id
+            )
             allowedFails = 4
 
             # This curve has wrong monotonicity - it's not a proper three-lobe shape
