@@ -1,5 +1,7 @@
 import deepExtend from 'deep-extend';
+
 import z from '../util/zdom';
+
 import BasePlugin from './base-plugin';
 import fitCurve from './freeform/fitcurve';
 import splineSvg from './spline/spline-icon.svg';
@@ -83,7 +85,7 @@ export default class Spline extends BasePlugin {
   }
 
   deleteSplines() {
-    if (this.delIndices.length !== 0) {
+    if (this.delIndices.length > 0) {
       this.delIndices = [...new Set(this.delIndices)];
       this.delIndices.sort();
       for (let i = this.delIndices.length - 1; i >= 0; i--) {
@@ -148,7 +150,9 @@ export default class Spline extends BasePlugin {
   }
 
   splineStrokeWidth(index) {
-    return index === this.state.length - 1 ? `${this.params.strokeWidth+1}px` : `${this.params.strokeWidth}px`;
+    return index === this.state.length - 1
+      ? `${this.params.strokeWidth + 1}px`
+      : `${this.params.strokeWidth}px`;
   }
 
   render() {
@@ -173,22 +177,15 @@ export default class Spline extends BasePlugin {
         !this.params.readonly,
         z.each(this.state, (spline, splineIndex) =>
           z.each(spline, (pt, ptIndex) =>
-            z(
-              'circle.visible-' +
-                splineIndex +
-                '.spline' +
-                '.plugin-id-' +
-                this.id,
-              {
-                cx: this.state[splineIndex][ptIndex].x,
-                cy: this.state[splineIndex][ptIndex].y,
-                r: 3,
-                style: `
+            z('circle.visible-' + splineIndex + '.spline' + '.plugin-id-' + this.id, {
+              cx: this.state[splineIndex][ptIndex].x,
+              cy: this.state[splineIndex][ptIndex].y,
+              r: 3,
+              style: `
               fill: ${this.params.color};
               stroke: none;
             `,
-              },
-            ),
+            }),
           ),
         ),
       ),
@@ -257,10 +254,8 @@ export default class Spline extends BasePlugin {
                   this.state[splineIndex][ptIndex].y += dy;
                   this.render();
                 },
-                inBoundsX: (dx) =>
-                  this.inBoundsX(this.state[splineIndex][ptIndex].x + dx),
-                inBoundsY: (dy) =>
-                  this.inBoundsY(this.state[splineIndex][ptIndex].y + dy),
+                inBoundsX: (dx) => this.inBoundsX(this.state[splineIndex][ptIndex].x + dx),
+                inBoundsY: (dy) => this.inBoundsY(this.state[splineIndex][ptIndex].y + dy),
               });
             },
           }),
@@ -269,9 +264,7 @@ export default class Spline extends BasePlugin {
       // Tags, regular or rendered by Katex
       z.each(this.state, (spline, splineIndex) =>
         z.if(
-          this.hasTag &&
-            this.state[splineIndex].length > 0 &&
-            this.state[splineIndex][0].tag,
+          this.hasTag && this.state[splineIndex].length > 0 && this.state[splineIndex][0].tag,
           () =>
             z(
               this.latex ? 'foreignObject.tag' : 'text.tag',
