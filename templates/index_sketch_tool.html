@@ -1,160 +1,185 @@
-<!DOCTYPE html>
+<!doctype html>
 <html>
-<head>
-  <title>SketchResponse Development Server</title>
-  <link rel="shortcut icon" href="/static/favicon.ico" type="image/x-icon">
-  <link rel="icon" href="/static/favicon.ico" type="image/x-icon">
-  <style type="text/css">
-    #container {
-      width: 800px;
-    }
-    #app-frame {
-      display: block;
-      width: 100%;
-      height: 550px;
-      border: none;
-    }
-    button {
-      width: 120px;
-      height: 25px;
-    }
-    input {
-      height: 19px;
-      width : 250px;
-    }
-    #save-state-button {
-      margin-left: 40px;
-    }
-    #correctness-image {
-      vertical-align: middle;
-    }
-    #initial-state-title {
-      color: blue;
-    }
-    .text-areas {
-      display: block;
-      width: 800px;
-      margin-top: 10px;
-      font-family: Sans-Serif;
-      font-size: 0.9em;
-    }
-  </style>
-  <script type="text/javascript" src="/static/jschannel.js"></script>
-</head>
-<body>
-  <div id="container">
-    <iframe id="app-frame" src="/static/sketch_tool_dist/index.html#{{hash}}"></iframe>
-    <button id="check-button" onclick="check()">Check</button>
-    <img id="correctness-image" src="/static/unanswered-icon.png">
-    <button id="save-state-button" onclick="saveState()">Save State ></button>
-    <input id="state-text-input" type="text" placeholder="(Paste state here)">
-    <button id="load-state-button" onclick="loadState()" disabled>> Load State</button>
-    <div id="message-area" class="text-areas"></div>
-    <div id="initial-state-title" class="text-areas">INITIAL STATE:</div>
-    <textarea id="initial-state-text" class="text-areas" rows="25"></textarea>
-  </div>
-  <script type="text/javascript">
-    var DATA_URI_PREAMBLE = 'data:application/json;base64,';
-    var appFrame = document.getElementById('app-frame');
-    var checkButton = document.getElementById('check-button');
-    var correctnessImage = document.getElementById('correctness-image');
-    var messageArea = document.getElementById('message-area');
-    var stateTextInput = document.getElementById('state-text-input');
-    var loadStateButton = document.getElementById('load-state-button');
-    var initialStateText = document.getElementById('initial-state-text');
-
-    var channel = Channel.build({
-      window: appFrame.contentWindow,
-      origin: '*',
-      scope: 'JSInput'
-    });
-
-    stateTextInput.addEventListener('input', function(event) {
-      loadStateButton.disabled = (stateTextInput.value === '');
-    });
-
-    function setUI(info) {
-      if (info.checking === true) checkButton.textContent = 'Checking...';
-      else if (info.checking === false) checkButton.textContent = 'Check';
-
-      if (info.correct === true) correctnessImage.src = '/static/correct-icon.png';
-      else if (info.correct === false) correctnessImage.src = '/static/incorrect-icon.png';
-      else if (info.correct === null) correctnessImage.src = '/static/unanswered-icon.png';
-
-      if (info.message !== undefined) {
-        messageArea.textContent = info.message;
+  <head>
+    <title>SketchResponse Development Server</title>
+    <link rel="shortcut icon" href="/static/favicon.ico" type="image/x-icon" />
+    <link rel="icon" href="/static/favicon.ico" type="image/x-icon" />
+    <style type="text/css">
+      #container {
+        width: 800px;
       }
-    }
-
-    function check() {
-      setUI({checking: true, correct: null, message: ''});
-      var data, req, response, graderScript = window.location.pathname;
-
-      graderScript = graderScript === '/' ? '/default_grader' : graderScript;
-      req = new XMLHttpRequest();
-      req.open('POST', graderScript + '/check', true);
-      req.setRequestHeader('Content-Type', 'application/json; charset=UTF-8');
-      req.onload = function () {
-        if (req.status == 200) {
-          response = JSON.parse(req.responseText);
-          setUI({checking: false, correct: response.ok, message: response.msg});
-          console.log('Server responded with data: ', response);
-        }
-        else {
-          setUI({checking: false, correct: null, message: ''});
-          console.log('Server responded with status ' + req.status);
-        }
+      #app-frame {
+        display: block;
+        width: 100%;
+        height: 550px;
+        border: none;
       }
+      button {
+        width: 120px;
+        height: 25px;
+      }
+      input {
+        height: 19px;
+        width: 250px;
+      }
+      #save-state-button {
+        margin-left: 40px;
+      }
+      #correctness-image {
+        vertical-align: middle;
+      }
+      #initial-state-title {
+        color: blue;
+      }
+      .text-areas {
+        display: block;
+        width: 800px;
+        margin-top: 10px;
+        font-family: Sans-Serif;
+        font-size: 0.9em;
+      }
+    </style>
+    <script type="text/javascript" src="/static/jschannel.js"></script>
+  </head>
+  <body>
+    <div id="container">
+      <iframe
+        id="app-frame"
+        src="/static/sketch_tool_dist/index.html#{{hash}}"
+      ></iframe>
+      <button id="check-button" onclick="check()">Check</button>
+      <img id="correctness-image" src="/static/unanswered-icon.png" />
+      <button id="save-state-button" onclick="saveState()">Save State ></button>
+      <input
+        id="state-text-input"
+        type="text"
+        placeholder="(Paste state here)"
+      />
+      <button id="load-state-button" onclick="loadState()" disabled>
+        > Load State
+      </button>
+      <div id="message-area" class="text-areas"></div>
+      <div id="initial-state-title" class="text-areas">INITIAL STATE:</div>
+      <textarea id="initial-state-text" class="text-areas" rows="25"></textarea>
+    </div>
+    <script type="text/javascript">
+      var DATA_URI_PREAMBLE = "data:application/json;base64,";
+      var appFrame = document.getElementById("app-frame");
+      var checkButton = document.getElementById("check-button");
+      var correctnessImage = document.getElementById("correctness-image");
+      var messageArea = document.getElementById("message-area");
+      var stateTextInput = document.getElementById("state-text-input");
+      var loadStateButton = document.getElementById("load-state-button");
+      var initialStateText = document.getElementById("initial-state-text");
 
-      console.log('Getting grade function data');
-      channel.call({
-        method: 'getGrade',
-        params: '',
-        success: function(gradeableData) {
-          console.log('Sending data to server');
-          req.send(JSON.stringify({
-            answer: gradeableData
-          }));
-        }
+      var channel = Channel.build({
+        window: appFrame.contentWindow,
+        origin: "*",
+        scope: "JSInput",
       });
-    }
 
-    function saveState() {
-      channel.call({
-        method: 'getState',
-        params: '',
-        success: function(state) {
-          stateTextInput.value = state;
-          loadStateButton.disabled = false;
-          messageArea.textContent = 'Saved current state'
-          displayInitialState(state);
+      stateTextInput.addEventListener("input", function (event) {
+        loadStateButton.disabled = stateTextInput.value === "";
+      });
+
+      function setUI(info) {
+        if (info.checking === true) checkButton.textContent = "Checking...";
+        else if (info.checking === false) checkButton.textContent = "Check";
+
+        if (info.correct === true)
+          correctnessImage.src = "/static/correct-icon.png";
+        else if (info.correct === false)
+          correctnessImage.src = "/static/incorrect-icon.png";
+        else if (info.correct === null)
+          correctnessImage.src = "/static/unanswered-icon.png";
+
+        if (info.message !== undefined) {
+          messageArea.textContent = info.message;
         }
-      })
-    }
+      }
 
-    function loadState() {
-      channel.call({
-        method: 'setState',
-        params: stateTextInput.value,
-        success: function() {
-          messageArea.textContent = 'Loaded new state'
-        }
-      })
-    }
+      function check() {
+        setUI({ checking: true, correct: null, message: "" });
+        var data,
+          req,
+          response,
+          graderScript = window.location.pathname;
 
-    function displayInitialState(state) {
-      var stateStr = atob(state.slice(DATA_URI_PREAMBLE.length));
-      var data = JSON.parse(stateStr).data;
-      var initialState = {}, prop;
-      for (prop in data) {
-        if(data.hasOwnProperty(prop) && prop !== '$__history' && prop !== '$__toolbar') {
-          if (data[prop].length !== 0) {
-            initialState[prop] = data[prop]
+        graderScript = graderScript === "/" ? "/default_grader" : graderScript;
+        req = new XMLHttpRequest();
+        req.open("POST", graderScript + "/check", true);
+        req.setRequestHeader("Content-Type", "application/json; charset=UTF-8");
+        req.onload = function () {
+          if (req.status == 200) {
+            response = JSON.parse(req.responseText);
+            setUI({
+              checking: false,
+              correct: response.ok,
+              message: response.msg,
+            });
+            console.log("Server responded with data: ", response);
+          } else {
+            setUI({ checking: false, correct: null, message: "" });
+            console.log("Server responded with status " + req.status);
+          }
+        };
+
+        console.log("Getting grade function data");
+        channel.call({
+          method: "getGrade",
+          params: "",
+          success: function (gradeableData) {
+            console.log("Sending data to server");
+            req.send(
+              JSON.stringify({
+                answer: gradeableData,
+              }),
+            );
+          },
+        });
+      }
+
+      function saveState() {
+        channel.call({
+          method: "getState",
+          params: "",
+          success: function (state) {
+            stateTextInput.value = state;
+            loadStateButton.disabled = false;
+            messageArea.textContent = "Saved current state";
+            displayInitialState(state);
+          },
+        });
+      }
+
+      function loadState() {
+        channel.call({
+          method: "setState",
+          params: stateTextInput.value,
+          success: function () {
+            messageArea.textContent = "Loaded new state";
+          },
+        });
+      }
+
+      function displayInitialState(state) {
+        var stateStr = atob(state.slice(DATA_URI_PREAMBLE.length));
+        var data = JSON.parse(stateStr).data;
+        var initialState = {},
+          prop;
+        for (prop in data) {
+          if (
+            data.hasOwnProperty(prop) &&
+            prop !== "$__history" &&
+            prop !== "$__toolbar"
+          ) {
+            if (data[prop].length !== 0) {
+              initialState[prop] = data[prop];
+            }
           }
         }
+        initialStateText.value = JSON.stringify(initialState, undefined, 2);
       }
-      initialStateText.value = JSON.stringify(initialState, undefined, 2);
-    }
-  </script>
-</body>
+    </script>
+  </body>
 </html>

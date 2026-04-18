@@ -55,5 +55,3 @@ If your workflow involves importing an XML course, you may still need to follow 
 ### Notes
 
 Unlike most other input types, you cannot combine SketchResponse problems with other input types (or other SketchResponse inputs) in a single <problem> tag; doing so will lead to students losing attempts and other unexpected behavior.
-
-

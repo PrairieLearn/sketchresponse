@@ -7,7 +7,7 @@ A grader script template can be see below. There are two components of the grade
 
 The details of each of these components are examined in greater detail in the [simple](simple_grader.md) and complex(complex_grader.md) grading script examples. The template is provided here for reference.
 
-You can also find a copy in */grader_scripts/grader_template.py*.
+You can also find a copy in _/grader_scripts/grader_template.py_.
 
 ```python
 from .. import sketchresponse

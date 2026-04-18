@@ -177,16 +177,23 @@ export default class Polyline extends BasePlugin {
       z.each(this.state, (polyline, polylineIndex) =>
         // Draw visible polyline under invisible polyline
 
-        z('path.visible-' + polylineIndex + '.polyline' + '.plugin-id-' + this.id, {
-          d: polylinePathData(this.state[polylineIndex], this.params.closed),
-          style: `
+        z(
+          'path.visible-' +
+            polylineIndex +
+            '.polyline' +
+            '.plugin-id-' +
+            this.id,
+          {
+            d: polylinePathData(this.state[polylineIndex], this.params.closed),
+            style: `
                 stroke: ${this.params.color};
                 stroke-width: ${this.polylineStrokeWidth(polylineIndex)};
                 stroke-dasharray: ${this.computeDashArray(this.params.dashStyle, this.polylineStrokeWidth(polylineIndex))};
                 fill: ${this.params.fillColor};
                 opacity: ${this.params.opacity};
               `,
-        }),
+          },
+        ),
       ),
       z.each(this.state, (polyline, polylineIndex) =>
         // Draw invisible and selectable polyline under invisible points
@@ -253,8 +260,10 @@ export default class Polyline extends BasePlugin {
                   this.state[polylineIndex][ptIndex].y += dy;
                   this.render();
                 },
-                inBoundsX: (dx) => this.inBoundsX(this.state[polylineIndex][ptIndex].x + dx),
-                inBoundsY: (dy) => this.inBoundsY(this.state[polylineIndex][ptIndex].y + dy),
+                inBoundsX: (dx) =>
+                  this.inBoundsX(this.state[polylineIndex][ptIndex].x + dx),
+                inBoundsY: (dy) =>
+                  this.inBoundsY(this.state[polylineIndex][ptIndex].y + dy),
               });
             },
           }),
@@ -263,7 +272,9 @@ export default class Polyline extends BasePlugin {
       // Tags, regular or rendered by Katex
       z.each(this.state, (polyline, polylineIndex) =>
         z.if(
-          this.hasTag && this.state[polylineIndex].length > 0 && this.state[polylineIndex][0].tag,
+          this.hasTag &&
+            this.state[polylineIndex].length > 0 &&
+            this.state[polylineIndex][0].tag,
           () =>
             z(
               this.latex ? 'foreignObject.tag' : 'text.tag',
