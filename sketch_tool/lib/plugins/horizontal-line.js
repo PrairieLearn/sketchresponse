@@ -10,12 +10,19 @@ const DEFAULT_PARAMS = {
   label: 'Horizontal line',
   color: 'dimgray',
   dashStyle: 'solid',
+  overlay: false,
+  strokeWidth: 2,
+  opacity: 1,
 };
 
 export default class HorizontalLine extends BasePlugin {
   constructor(params, app) {
     const hlParams = BasePlugin.generateDefaultParams(DEFAULT_PARAMS, params);
     deepExtend(hlParams, params);
+    if (hlParams.overlay) {
+      hlParams.strokeWidth = 5;
+      hlParams.opacity = 0.5;
+    }
     // Add params that are specific to this plugin
     hlParams.icon = {
       src: horizontalLineSvg,
@@ -127,8 +134,9 @@ export default class HorizontalLine extends BasePlugin {
             y2: position.y,
             style: `
             stroke: ${this.params.color};
-            stroke-width: 2px;
+            stroke-width: ${this.params.strokeWidth}px;
             stroke-dasharray: ${this.computeDashArray(this.params.dashStyle, 2)};
+            opacity: ${this.params.opacity};
           `,
           },
         ),

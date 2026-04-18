@@ -39,8 +39,7 @@
     <div id="si-container">
       <div id="si-placeholder">Loading SketchInput...</div>
     </div>
-    <script src="vendors.min.js"></script>
-    <script src="application.min.js"></script>
+    <script src="sketchresponse.min.js"></script>
     <script src="debugConfigs.js"></script>
     <script>
       (function () {
@@ -120,9 +119,10 @@
         }
 
         function loadApp() {
-          window.si = new window.SketchInput.default(
+          window.si = new window.sketchresponse.default(
             document.getElementById('si-container'),
-            config,
+            'debug',
+            window.config,
           );
 
           window.si.messageBus.on('ready', function () {

@@ -17,6 +17,9 @@ const ROUNDING_PRESCALER = 100; // e.g., Math.round(value * ROUNDING_PRESCALER) 
 const DEFAULT_PARAMS = {
   label: 'Freeform',
   color: 'dimgray',
+  overlay: false,
+  strokeWidth: 3,
+  opacity: 1,
 };
 
 function cubicSplinePathData(points) {
@@ -155,6 +158,10 @@ export default class Freeform extends BasePlugin {
   constructor(params, app) {
     const fParams = BasePlugin.generateDefaultParams(DEFAULT_PARAMS, params);
     deepExtend(fParams, params);
+    if (fParams.overlay) {
+      fParams.strokeWidth = 5;
+      fParams.opacity = 0.5;
+    }
     // Add params that are specific to this plugin
     fParams.icon = {
       src: freeformSvg,
@@ -311,7 +318,7 @@ export default class Freeform extends BasePlugin {
           'path.visible-' + splineIndex + '.freeform' + '.plugin-id-' + this.id,
           {
             d: cubicSplinePathData(spline),
-            style: `stroke: ${this.params.color}; stroke-width: 3px; fill: none;`,
+            style: `stroke: ${this.params.color}; stroke-width: ${this.params.strokeWidth}px; fill: none; opacity: ${this.params.opacity};`,
           },
         ),
       ),

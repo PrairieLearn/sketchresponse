@@ -1,66 +1,64 @@
 ## grader_lib.Asymptote module[¶](submodules.md#module-grader_lib.Asymptote) {#grader-lib-asymptote-module}
 
-*   _class_ `grader_lib.Asymptote.``Asymptotes`(_info_, _tolerance={}_)[¶](#grader_lib.Asymptote.Asymptotes)
-*   Bases: `grader_lib.Gradeable.Gradeable`
+- _class_ `grader_lib.Asymptote.``Asymptotes`(_info_, _tolerance={}_)[¶](#grader_lib.Asymptote.Asymptotes)
+- Bases: `grader_lib.Gradeable.Gradeable`
 
-    Asymptote.
+  Asymptote.
 
-    Note
+  Note
 
-    Asymptotes is a generic class. You must instantiate either the VerticalAsymptotes or the HorizontalAsymptotes class to use the grading functions below.
+  Asymptotes is a generic class. You must instantiate either the VerticalAsymptotes or the HorizontalAsymptotes class to use the grading functions below.
+  - `closest_asym_to_value`(_v_)[¶](#grader_lib.Asymptote.Asymptotes.closest_asym_to_value)
+  - Return the absolute distance between v and the closest asymptote and the x or y axis value of that asymptote.
 
-    *   `closest_asym_to_value`(_v_)[¶](#grader_lib.Asymptote.Asymptotes.closest_asym_to_value)
-    *   Return the absolute distance between v and the closest asymptote and the x or y axis value of that asymptote.
+    | Parameters: | **v** – a value in the range of the x or y axis. |
+    | ----------- | ------------------------------------------------ |
+    | Returns:    |
+    - minDistance: the absolute difference between v and the asymptote,
+    - or float(‘inf’) if no asymptote exists.
+    - closestAsym: the value of the closest asymptote to the value v,
+    - or None if no asymptote exists.
 
-        | Parameters: | **v** – a value in the range of the x or y axis. |
-        | --- | --- |
-        | Returns: | 
+    |
+    | Return type: | float, float |
 
-        *   minDistance: the absolute difference between v and the asymptote,
-        *   or float(‘inf’) if no asymptote exists.
-        *   closestAsym: the value of the closest asymptote to the value v,
-        *   or None if no asymptote exists.
+  - `get_asym_at_value`(_v_)[¶](#grader_lib.Asymptote.Asymptotes.get_asym_at_value)
+  - Return the asymptote at the value v, or None.
 
-         |
-        | Return type: | float, float |
+    | Parameters:  | **v** – a value in the range of the x or y axis.                                                         |
+    | ------------ | -------------------------------------------------------------------------------------------------------- |
+    | Returns:     | the value of an asymptote that is within tolerances of the value v, or None if no such asymptote exists. |
+    | Return type: | float                                                                                                    |
 
-    *   `get_asym_at_value`(_v_)[¶](#grader_lib.Asymptote.Asymptotes.get_asym_at_value)
-    *   Return the asymptote at the value v, or None.
+  - `get_number_of_asyms`()[¶](#grader_lib.Asymptote.Asymptotes.get_number_of_asyms)
+  - Return the number of asymptotes declared in the function.
 
-        | Parameters: | **v** – a value in the range of the x or y axis. |
-        | --- | --- |
-        | Returns: | the value of an asymptote that is within tolerances of the value v, or None if no such asymptote exists. |
-        | Return type: | float |
+    | Returns:     | the number of asymptotes declared in the function. |
+    | ------------ | -------------------------------------------------- |
+    | Return type: | int                                                |
 
-    *   `get_number_of_asyms`()[¶](#grader_lib.Asymptote.Asymptotes.get_number_of_asyms)
-    *   Return the number of asymptotes declared in the function.
+  - `has_asym_at_value`(_v_)[¶](#grader_lib.Asymptote.Asymptotes.has_asym_at_value)
+  - Return whether an asymtote is declared at the given value.
 
-        | Returns: | the number of asymptotes declared in the function. |
-        | --- | --- |
-        | Return type: | int |
+    | Parameters:  | **v** – a value in the range of the x or y axis.                                             |
+    | ------------ | -------------------------------------------------------------------------------------------- |
+    | Returns:     | true if there is an asymptote declared within tolerances of the value v, or false otherwise. |
+    | Return type: | bool                                                                                         |
 
-    *   `has_asym_at_value`(_v_)[¶](#grader_lib.Asymptote.Asymptotes.has_asym_at_value)
-    *   Return whether an asymtote is declared at the given value.
+- _class_ `grader_lib.Asymptote.``HorizontalAsymptotes`(_info_)[¶](#grader_lib.Asymptote.HorizontalAsymptotes)
+- Bases: [`grader_lib.Asymptote.Asymptotes`](#grader_lib.Asymptote.Asymptotes)
 
-        | Parameters: | **v** – a value in the range of the x or y axis. |
-        | --- | --- |
-        | Returns: | true if there is an asymptote declared within tolerances of the value v, or false otherwise. |
-        | Return type: | bool |
+  Horizontal Asymptote.
 
-*   _class_ `grader_lib.Asymptote.``HorizontalAsymptotes`(_info_)[¶](#grader_lib.Asymptote.HorizontalAsymptotes)
-*   Bases: [`grader_lib.Asymptote.Asymptotes`](#grader_lib.Asymptote.Asymptotes)
+  Note
 
-    Horizontal Asymptote.
+  Use this class to interact with any horizontal asymptotes in the function you are grading.
 
-    Note
+- _class_ `grader_lib.Asymptote.``VerticalAsymptotes`(_info_)[¶](#grader_lib.Asymptote.VerticalAsymptotes)
+- Bases: [`grader_lib.Asymptote.Asymptotes`](#grader_lib.Asymptote.Asymptotes)
 
-    Use this class to interact with any horizontal asymptotes in the function you are grading.
+  Vertical Asymptote.
 
-*   _class_ `grader_lib.Asymptote.``VerticalAsymptotes`(_info_)[¶](#grader_lib.Asymptote.VerticalAsymptotes)
-*   Bases: [`grader_lib.Asymptote.Asymptotes`](#grader_lib.Asymptote.Asymptotes)
+  Note
 
-    Vertical Asymptote.
-
-    Note
-
-    Use this class to interact with any vertical asymptotes in the function you are grading.
+  Use this class to interact with any vertical asymptotes in the function you are grading.

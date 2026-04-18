@@ -1,5 +1,7 @@
 import deepExtend from 'deep-extend';
+
 import z from '../util/zdom';
+
 import BasePlugin from './base-plugin';
 import fitCurve from './freeform/fitcurve';
 import polylineClosedSvg from './polyline/polyline-closed-icon.svg';
@@ -18,6 +20,9 @@ const DEFAULT_PARAMS = {
   closed: false,
   fillColor: 'none',
   opacity: 1,
+  overlay: false,
+  strokeWidth: 2,
+  lineOpacity: 1,
 };
 
 function polylinePathData(points, closed) {
@@ -40,6 +45,10 @@ export default class Polyline extends BasePlugin {
   constructor(params, app) {
     const plParams = BasePlugin.generateDefaultParams(DEFAULT_PARAMS, params);
     deepExtend(plParams, params);
+    if (plParams.overlay) {
+      plParams.strokeWidth = 5;
+      plParams.lineOpacity = 0.5;
+    }
     const iconSrc = plParams.closed ? polylineClosedSvg : polylineOpenSvg;
     // Add params that are specific to this plugin
     plParams.icon = {
@@ -82,7 +91,7 @@ export default class Polyline extends BasePlugin {
   }
 
   deletePolylines() {
-    if (this.delIndices.length !== 0) {
+    if (this.delIndices.length > 0) {
       this.delIndices.sort();
       for (let i = this.delIndices.length - 1; i >= 0; i--) {
         this.state.splice(this.delIndices[i], 1);
@@ -149,7 +158,9 @@ export default class Polyline extends BasePlugin {
   }
 
   polylineStrokeWidth(index) {
-    return index === this.state.length - 1 ? '3px' : '2px';
+    return index === this.state.length - 1
+      ? `${this.params.strokeWidth + 1}px`
+      : `${this.params.strokeWidth}px`;
   }
 
   pointRadius(polylineIndex) {

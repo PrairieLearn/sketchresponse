@@ -1,6 +1,6 @@
 # Using SketchResponse
 
-Using SketchResponse means writing python scripts to provide a configuration for the Sketch Tool front-end and an implementation of the grader method using the Grader Library back-end [API](api/README.md). We call these *grading scripts*.
+Using SketchResponse means writing python scripts to provide a configuration for the Sketch Tool front-end and an implementation of the grader method using the Grader Library back-end [API](api/README.md). We call these _grading scripts_.
 
 ## What is a grading script
 

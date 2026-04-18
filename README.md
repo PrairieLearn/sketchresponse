@@ -1,5 +1,4 @@
-SketchResponse
-===========
+# SketchResponse
 
 **Note: This is a forked copy of [`sketchresponse/SketchResponse`](https://github.com/SketchResponse/sketchresponse) adapted for [PrairieLearn](https://www.prairielearn.com/). This library is used as the backing for the [`pl-sketch`](https://prairielearn.readthedocs.io/en/latest/elements/pl-sketch/) element.**
 
@@ -12,28 +11,27 @@ mathematical functions. It was designed for use with the edX online
 courseware platform. However, it is a self-contained application that can be
 integrated into other web platforms.
 
-Features
---------
+## Features
 
 - Sketch Tool - configurable Javascript front-end with plugin components to provide different
-function drawing and annotation capabilities. See [Sketch-Tool Usage](docs/sketch_tool_usage.md) for a description of the non-configurable interface elements of the sketch tool. See
-[Sketch-Tool Plugin Configuration](docs/probconfig_plugins.md) for a description of the available
-plugins.
+  function drawing and annotation capabilities. See [Sketch-Tool Usage](docs/sketch_tool_usage.md) for a description of the non-configurable interface elements of the sketch tool. See
+  [Sketch-Tool Plugin Configuration](docs/probconfig_plugins.md) for a description of the available
+  plugins.
 - Grader Library - python back-end that provides an API of function grading methods that
-can be composed to construct custom grading scripts. See
-[Create a Simple Grading Script](docs/simple_grader.md) for a tutorial on building
-a simple grading script.
+  can be composed to construct custom grading scripts. See
+  [Create a Simple Grading Script](docs/simple_grader.md) for a tutorial on building
+  a simple grading script.
 
-Installation
-------------
+## Installation
 
-* Clone this repository to the directory of your choice:
-  * By using HTTPS:
+- Clone this repository to the directory of your choice:
+  - By using HTTPS:
 
     ```sh
     $ git clone https://github.com/SketchResponse/sketchresponse.git
     ```
-  * By using SSH:
+
+  - By using SSH:
 
     ```sh
     $ git clone git@github.com:SketchResponse/sketchresponse.git
@@ -47,19 +45,19 @@ You'll need to have [Node.js](http://nodejs.org) and npm (which is now packaged 
 
 ### Installation
 
-* Change to the *sketch_tool* directory:
+- Change to the _sketch_tool_ directory:
 
   ```sh
   $ cd sketch_tool
   ```
 
-* Install dependencies listed in *package.json*:
+- Install dependencies listed in _package.json_:
 
   ```sh
   $ npm ci
   ```
 
-* Build a local distribution of the *sketch_tool*:
+- Build a local distribution of the _sketch_tool_:
 
   ```sh
   $ npm run build
@@ -69,8 +67,8 @@ You'll need to have [Node.js](http://nodejs.org) and npm (which is now packaged 
 
 The SketchResponse grader backend has only two third party package requirements:
 
-* [flask](http://flask.pocoo.org/)
-* [numpy](http://www.numpy.org/)
+- [flask](http://flask.pocoo.org/)
+- [numpy](http://www.numpy.org/)
 
 Install them by running the following command in the root directory:
 
@@ -80,10 +78,10 @@ $ pip install -r requirements.txt
 
 Flask is only required if you want to run a local server for convenience when implementing and testing new grading scripts. See the Tutorial [Test a Grading Script on a Local Server](docs/local_test.md) for details.
 
-Usage Guides
------------
+## Usage Guides
 
 ### Examples and Tutorials
+
 - [Grading Script Template](grader_scripts/grader_template.py)
 - [Running & Building the Sketch Tool Front-end](docs/sketch_tool_dev_usage.md)
 - [Testing a Grading Script on a Local Server](docs/local_test.md)
@@ -94,12 +92,12 @@ Usage Guides
 - Tutorial - [edX Quick Start Deployment Guide](docs/edx_quickstart.md)
 
 ### Reference Information
+
 - [Sketch-Tool Plugin Configuration](docs/probconfig_plugins.md)
 - [Grader-Library API](https://SketchResponse.github.io/sketchresponse)
 - [Gradeable Data Format](docs/gradeable_data_format.md)
 
-Contribute
-----------
+## Contribute
 
 Contributions to this project are very welcome! If you'd like to contribute, please open a GitHub issue and we'll get in touch.
 
@@ -119,13 +117,10 @@ $ python -m unittest discover -t . test_grader_lib/
 
 As this project evolves, the current documentation will no longer match the existing codebase. Follow the instructions in [HowTo Build the Docs](docs/howto_build_docs.md) to rebuild as needed.
 
-
-Support
--------
+## Support
 
 If you are having issues or encounter a bug, please [create a GitHub issue](https://github.com/SketchResponse/sketchresponse/issues) and we'll try to help!
 
-License
--------
+## License
 
 Please refer to the [LICENSE file](LICENSE) in the root of the SketchResponse repository.
