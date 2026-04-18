@@ -10,12 +10,19 @@ const DEFAULT_PARAMS = {
   label: 'Vertical line',
   color: 'dimgray',
   dashStyle: 'solid',
+  overlay: false,
+  strokeWidth: 2,
+  opacity: 1,
 };
 
 export default class VerticalLine extends BasePlugin {
   constructor(params, app) {
     const vlParams = BasePlugin.generateDefaultParams(DEFAULT_PARAMS, params);
     deepExtend(vlParams, params);
+    if (vlParams.overlay) {
+      vlParams.strokeWidth = 5;
+      vlParams.opacity = 0.5;
+    }
     // Add params that are specific to this plugin
     vlParams.icon = {
       src: verticalLineSvg,
@@ -128,8 +135,9 @@ export default class VerticalLine extends BasePlugin {
             y2: this.params.height,
             style: `
             stroke: ${this.params.color};
-            stroke-width: 2px;
+            stroke-width: ${this.params.strokeWidth}px;
             stroke-dasharray: ${this.computeDashArray(this.params.dashStyle, 2)};
+            opacity: ${this.params.opacity};
           `,
           },
         ),

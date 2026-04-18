@@ -13,6 +13,9 @@ const ROUNDING_PRESCALER = 100;
 const DEFAULT_PARAMS = {
   label: 'Spline',
   color: 'dimgray',
+  overlay: false,
+  strokeWidth: 2,
+  opacity: 1,
 };
 
 function splineData(points) {
@@ -35,6 +38,10 @@ export default class Spline extends BasePlugin {
   constructor(params, app) {
     const sParams = BasePlugin.generateDefaultParams(DEFAULT_PARAMS, params);
     deepExtend(sParams, params);
+    if (sParams.overlay) {
+      sParams.strokeWidth = 5;
+      sParams.opacity = 0.5;
+    }
     const iconSrc = splineSvg;
     // Add params that are specific to this plugin
     sParams.icon = {
@@ -141,7 +148,7 @@ export default class Spline extends BasePlugin {
   }
 
   splineStrokeWidth(index) {
-    return index === this.state.length - 1 ? '3px' : '2px';
+    return index === this.state.length - 1 ? `${this.params.strokeWidth+1}px` : `${this.params.strokeWidth}px`;
   }
 
   render() {
@@ -157,6 +164,7 @@ export default class Spline extends BasePlugin {
               stroke-width: ${this.splineStrokeWidth(splineIndex)};
               stroke-dasharray: ${this.computeDashArray(this.params.dashStyle, this.splineStrokeWidth(splineIndex))};
               fill: none;
+              opacity: ${this.params.opacity};
             `,
         }),
       ),

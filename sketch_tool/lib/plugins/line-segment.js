@@ -12,12 +12,19 @@ const DEFAULT_PARAMS = {
   label: 'Line segment',
   color: 'dimgray',
   dashStyle: 'solid',
+  overlay: false,
+  strokeWidth: 2,
+  opacity: 1,
 };
 
 export default class LineSegment extends BasePlugin {
   constructor(params, app) {
     const lsParams = BasePlugin.generateDefaultParams(DEFAULT_PARAMS, params);
     deepExtend(lsParams, params);
+    if (lsParams.overlay) {
+      lsParams.strokeWidth = 5;
+      lsParams.opacity = 0.5;
+    }
     let iconSrc;
     // Add params that are specific to this plugin
     if (lsParams.arrowHead) {
@@ -27,7 +34,7 @@ export default class LineSegment extends BasePlugin {
         app.id,
         `
         <marker id="arrowhead-${params.id}" markerWidth="${length}" markerHeight="${base}" refX="${length}" refY="${refY}" orient="auto">
-          <polygon points="0 0, ${length} ${refY}, 0 ${base}" style="fill: ${params.color}; stroke: ${params.color}; stroke-width: 1;"/>
+          <polygon points="0 0, ${length} ${refY}, 0 ${base}" style="fill: ${params.color}; stroke: ${params.color}; stroke-width: ${params.strokeWidth}; opacity: ${params.opacity}"/>
         </marker>`,
       );
       iconSrc = arrowSvg;
@@ -412,9 +419,10 @@ export default class LineSegment extends BasePlugin {
               y2: this.state[ptIndex + 1].y,
               style: `
               stroke: ${this.params.color};
-              stroke-width: 2px;
+              stroke-width: ${this.params.strokeWidth}px;
               stroke-dasharray: ${this.computeDashArray(this.params.dashStyle, 2)};
               marker-end: ${this.arrowHead()};
+              opacity: ${this.params.opacity};
             `,
             },
           ),

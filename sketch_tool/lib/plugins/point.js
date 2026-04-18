@@ -12,12 +12,18 @@ const DEFAULT_PARAMS = {
   color: 'dimgray',
   size: 15,
   hollow: false,
+  overlay: false,
+  opacity: 1,
 };
 
 export default class Point extends BasePlugin {
   constructor(params, app) {
     const pParams = BasePlugin.generateDefaultParams(DEFAULT_PARAMS, params);
     deepExtend(pParams, params);
+    if (pParams.overlay) {
+      pParams.size *= 1.5;
+      pParams.opacity = 0.5;
+    }
     // Add params that are specific to this plugin
     const iconSrc = pParams.hollow ? pointHollowSvg : pointSvg;
     pParams.icon = {
@@ -134,6 +140,7 @@ export default class Point extends BasePlugin {
             fill-opacity: ${this.fillOpacity};
             stroke: ${this.params.color};
             stroke-width: ${this.strokeWidth};
+            opacity: ${this.params.opacity};
           `,
             onmount: (el) => {
               this.app.registerElement({
