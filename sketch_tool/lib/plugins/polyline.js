@@ -181,6 +181,7 @@ export default class Polyline extends BasePlugin {
           'path.visible-' +
             polylineIndex +
             '.polyline' +
+            (this.params.overlay ? '.overlay' : '') +
             '.plugin-id-' +
             this.id,
           {
@@ -197,7 +198,6 @@ export default class Polyline extends BasePlugin {
       ),
       z.each(this.state, (polyline, polylineIndex) =>
         // Draw invisible and selectable polyline under invisible points
-
         z('path.invisible-' + polylineIndex + this.readOnlyClass(), {
           d: polylinePathData(this.state[polylineIndex], this.params.closed),
           style: `

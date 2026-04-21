@@ -410,6 +410,7 @@ export default class LineSegment extends BasePlugin {
             'line.visible-' +
               ptIndex +
               '.line-segment' +
+              (this.params.overlay ? '.overlay' : '') +
               '.plugin-id-' +
               this.id,
             {

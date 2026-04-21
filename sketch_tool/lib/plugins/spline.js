@@ -161,16 +161,24 @@ export default class Spline extends BasePlugin {
       // Draw visible elements under invisible elements
       z.each(this.state, (spline, splineIndex) =>
         // Draw spline
-        z('path.visible-' + splineIndex + '.spline' + '.plugin-id-' + this.id, {
-          d: splinePathData(this.state[splineIndex]),
-          style: `
+        z(
+          'path.visible-' +
+            splineIndex +
+            '.spline' +
+            (this.params.overlay ? '.overlay' : '') +
+            '.plugin-id-' +
+            this.id,
+          {
+            d: splinePathData(this.state[splineIndex]),
+            style: `
               stroke: ${this.params.color};
               stroke-width: ${this.splineStrokeWidth(splineIndex)};
               stroke-dasharray: ${this.computeDashArray(this.params.dashStyle, this.splineStrokeWidth(splineIndex))};
               fill: none;
               opacity: ${this.params.opacity};
             `,
-        }),
+          },
+        ),
       ),
       // Draw points
       z.if(
@@ -181,6 +189,7 @@ export default class Spline extends BasePlugin {
               'circle.visible-' +
                 splineIndex +
                 '.spline' +
+                (this.params.overlay ? '.overlay' : '') +
                 '.plugin-id-' +
                 this.id,
               {

@@ -315,7 +315,12 @@ export default class Freeform extends BasePlugin {
       z.each(this.state, (spline, splineIndex) =>
         // Draw visible spline under invisible spline
         z(
-          'path.visible-' + splineIndex + '.freeform' + '.plugin-id-' + this.id,
+          'path.visible-' +
+            splineIndex +
+            '.freeform' +
+            (this.params.overlay ? '.overlay' : '') +
+            '.plugin-id-' +
+            this.id,
           {
             d: cubicSplinePathData(spline),
             style: `stroke: ${this.params.color}; stroke-width: ${this.params.strokeWidth}px; fill: none; opacity: ${this.params.opacity};`,
