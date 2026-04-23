@@ -126,6 +126,7 @@ export default class VerticalLine extends BasePlugin {
           'line.visible-' +
             positionIndex +
             '.vertical-line' +
+            (this.params.overlay ? '.overlay' : '') +
             '.plugin-id-' +
             this.id,
           {

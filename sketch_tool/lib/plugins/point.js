@@ -126,6 +126,7 @@ export default class Point extends BasePlugin {
       z.each(this.state, (position, positionIndex) =>
         z(
           'circle.point' +
+            (this.params.overlay ? '.overlay' : '') +
             '.plugin-id-' +
             this.id +
             '.state-index-' +

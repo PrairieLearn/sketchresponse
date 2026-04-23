@@ -125,6 +125,7 @@ export default class HorizontalLine extends BasePlugin {
           'line.visible-' +
             positionIndex +
             '.horizontal-line' +
+            (this.params.overlay ? '.overlay' : '') +
             '.plugin-id-' +
             this.id,
           {
