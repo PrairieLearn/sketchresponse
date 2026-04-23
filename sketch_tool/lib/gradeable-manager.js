@@ -23,6 +23,8 @@ export default class GradeableManager {
       };
 
       this.registry.forEach((entry) => {
+        // Ignore plugins with overlay config set to true
+        if (entry.overlay) return;
         response.data[entry.id] = entry.getGradeable();
         response.meta.dataVersions[entry.id] = entry.version; // TODO: versioning
       });

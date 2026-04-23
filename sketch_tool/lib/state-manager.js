@@ -19,6 +19,8 @@ export default class StateManager {
   getPluginState() {
     const state = {};
     this.registry.forEach((entry) => {
+      // Ignore plugins with overlay config set to true
+      if (entry.overlay) return;
       state[entry.id] = entry.getState();
     });
     return deepCopy(state); // Use deepCopy to keep plugin state isolated
@@ -27,6 +29,8 @@ export default class StateManager {
   setPluginState(state) {
     state = deepCopy(state); // Use deepCopy to keep plugin state isolated
     this.registry.forEach((entry) => {
+      // Ignore plugins with overlay config set to true
+      if (entry.overlay) return;
       // eslint-disable-next-line no-prototype-builtins
       if (state.hasOwnProperty(entry.id)) entry.setState(state[entry.id]);
     });
@@ -44,6 +48,8 @@ export default class StateManager {
       };
 
       this.registry.forEach((entry) => {
+        // Ignore plugins with overlay config set to true
+        if (entry.overlay) return;
         // TODO: only save state when plugins actually have state
         response.data[entry.id] = entry.getState();
         response.meta.dataVersions[entry.id] = entry.dataVersion;
@@ -62,6 +68,8 @@ export default class StateManager {
       // TODO: format version checking
 
       this.registry.forEach((entry) => {
+        // Ignore plugins with overlay config set to true
+        if (entry.overlay) return;
         // TODO: plugin version checking?
         // eslint-disable-next-line no-prototype-builtins
         if (state.data.hasOwnProperty(entry.id))
@@ -78,6 +86,8 @@ export default class StateManager {
   loadInitialState() {
     try {
       this.registry.forEach((entry) => {
+        // Ignore plugins with overlay config set to true
+        if (entry.overlay) return;
         // eslint-disable-next-line no-prototype-builtins
         if (this.initialState.hasOwnProperty(entry.id))
           entry.setState(this.initialState[entry.id]);

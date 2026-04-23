@@ -194,7 +194,8 @@ class MultiFunction(Function):
 
         return bool(max_dist < 0.4 * self.tolerance["straight_line"] * length)
 
-    def collapse_ranges(self, ranges: list[list[float]]) -> list[list[float]]:
+    @staticmethod
+    def collapse_ranges(ranges: list[list[float]]) -> list[list[float]]:
         all_ranges = ranges
         if len(ranges) == 1:
             return ranges

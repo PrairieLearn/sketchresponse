@@ -56,6 +56,7 @@ export default class BasePlugin {
     app.registerState({
       id: this.params.id,
       dataVersion: this.params.version,
+      overlay: this.params.overlay || false,
       getState: () => this.state,
       setState: (state) => {
         this.state = state;
@@ -66,6 +67,7 @@ export default class BasePlugin {
     app.registerGradeable({
       id: this.params.id,
       version: this.params.gradeableVersion,
+      overlay: this.params.overlay || false,
       getGradeable: () => this.getGradeable(),
     });
     // Only add a button to toolbar is the plugin is not readonly
