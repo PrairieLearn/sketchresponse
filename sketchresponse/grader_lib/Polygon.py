@@ -6,7 +6,7 @@ from typing import Any, cast
 from sympy.geometry import Line, Point, Segment, intersection
 from sympy.geometry import Polygon as SymPyPolygon
 
-from ..types import SketchConfig, SketchGrader, SketchSubmission, TernaryResult
+from ..types import SketchConfig, SketchGrader, SketchItem, SketchSubmission, TernaryResult
 from .Gradeable import Gradeable
 from .LineSegment import LineSegment
 from .Point import Point as SR_Point
@@ -43,13 +43,12 @@ class Polygons(Gradeable):  # noqa: PLR0904
         self.range_defined = None
 
         # self.version = self.get_plugin_version(info)
-        submission_data = submission["gradeable"][current_tool]
+        submission_data = cast("list[SketchItem | None]", submission["gradeable"][current_tool])
         for spline in submission_data:
+            if spline is None:
+                continue
             points = self.convert_to_real_points(spline["spline"])
             if len(points) > 0:
-                polygon = Polygon(
-                    points
-                )  # does creating this separately create some kind of copying issue?
                 self.polygons.append(Polygon(points))
                 if "tag" in spline:
                     self.polygons[-1].set_tag(spline["tag"])

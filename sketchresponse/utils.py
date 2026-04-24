@@ -169,7 +169,7 @@ def get_coverage_length_px(
     x2: float,
 ) -> float:
     if len(tools_to_check) == 0:
-        return True
+        return 0.0
 
     gf_tools = ["spline", "freeform", "polyline", "point"]
     xrange: list[list[float]] = []
