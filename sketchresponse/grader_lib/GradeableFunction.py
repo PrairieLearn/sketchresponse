@@ -141,7 +141,7 @@ class GradeableFunction(MultipleSplinesFunction):  # noqa: PLR0904
             "width": self.xaxis.pixels,
             "height": self.yaxis.pixels,
         }
-        values: list[SplinePoints] = []
+        values = []
         while True:  # handle function breaks
             x_y_vals, broken, new_start = function_to_spline(func, xmin, xmax, range_data)
             if len(x_y_vals) > 0:
@@ -151,7 +151,7 @@ class GradeableFunction(MultipleSplinesFunction):  # noqa: PLR0904
                 xmin = new_start
             else:
                 break
-        splines: list[SplineFunction] = []
+        splines = []
         for s in values:
             spline = SplineFunction(
                 self.xaxis,
@@ -164,10 +164,10 @@ class GradeableFunction(MultipleSplinesFunction):  # noqa: PLR0904
         return splines
 
     def sample_points(self) -> list[list[list[float]]]:
-        spline_samples: list[list[list[float]]] = []
+        spline_samples = []
 
         for f in self.functions:
-            curve_samples: list[list[float]] = []
+            curve_samples = []
             # these are the spline function objects
             for curve in f.functions:
                 # these are the curve function objects
@@ -180,7 +180,7 @@ class GradeableFunction(MultipleSplinesFunction):  # noqa: PLR0904
         return spline_samples
 
     def sample_x_and_y(self, curve: CurveFunction, step: float) -> list[list[float]]:
-        samples: list[list[float]] = []
+        samples = []
         x_t = curve.x
         y_t = curve.y
 
@@ -202,8 +202,8 @@ class GradeableFunction(MultipleSplinesFunction):  # noqa: PLR0904
     def create_from_path_info(self, path_info: SplinePoints | None) -> None:
         dtol = 100
         self.functions = []
-        self.points: list[Point] = []
-        xvals: list[list[float]] = []
+        self.points = []
+        xvals = []
 
         submission_data = self.submission["gradeable"][self.current_tool]
         for i in range(len(submission_data)):

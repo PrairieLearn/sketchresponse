@@ -68,7 +68,7 @@ class Polygons(Gradeable):  # noqa: PLR0904
     def convert_to_real_points(self, points: list[list[float]]) -> list[tuple[float, float]]:
         # input is a list of points [[x1,y1], [x2,y2], ...]
         # convert the points from pixel values to real values
-        pointList: list[tuple[float, float]] = []
+        pointList = []
         for i, (px_x, px_y) in enumerate(points):
             # every 3rd point is a vertex of the polygon
             # version 0.1 is just the polygon vertices #Don't know if this check is needed anymore
@@ -119,7 +119,7 @@ class Polygons(Gradeable):  # noqa: PLR0904
                         cast("SymPyPolygon", upper_segment), intersection_y_val
                     )
             else:
-                new_polys: list[list[list[float]]] = []
+                new_polys = []
             rg = []
             for p in new_polys:
                 bounds = self.min_max_defined_x_vals(p)
@@ -132,7 +132,7 @@ class Polygons(Gradeable):  # noqa: PLR0904
             return
 
     def init_range_defined(self) -> list[list[float]]:
-        all_ranges: list[list[float]] = []
+        all_ranges = []
         for polygon in self.polygons:
             all_ranges += polygon.range_defined if polygon.range_defined is not None else []
         rd = self.collapse_ranges(all_ranges)
@@ -147,7 +147,7 @@ class Polygons(Gradeable):  # noqa: PLR0904
         points = [[p[0], p[1]] for p in vertices]
         intersections = [point for point in points if point[1] == intersection_y_val]
         intersections = sorted(intersections, key=lambda p: p[0])
-        pgs: list[list[list[float]]] = []
+        pgs = []
 
         while len(points) > 5:  # two distinct polygons must have at least 6 points
             # shuffle points list so that it starts with an intersection point
@@ -221,9 +221,7 @@ class Polygons(Gradeable):  # noqa: PLR0904
         else:
             return test_index == ref_index - 1
 
-    def min_max_defined_x_vals(
-        self, points: list[list[float]]
-    ) -> tuple[float, float] | None:
+    def min_max_defined_x_vals(self, points: list[list[float]]) -> tuple[float, float] | None:
         filtered_points = [(x, y) for x, y in points if self.within_y_range(y)]
         sorted_points = sorted(filtered_points, key=lambda x: x[0], reverse=False)
         if len(sorted_points) == 0:
@@ -240,13 +238,13 @@ class Polygons(Gradeable):  # noqa: PLR0904
     ) -> TernaryResult:
         tol = tolerance / self.yscale
         polygons = self.get_polygons_within_range(x1, x2)
-        segments: list[Segment] = []
+        segments = []
         for p in polygons:
             segments += self.get_segments(p)
         filtered_seg = [seg for seg in segments if self.segment_in_range(seg, x1, x2)]
         cut_segs = [self.cut_segment(seg, x1, x2) for seg in filtered_seg]
         cut_segs = [seg for seg in cut_segs if seg is not None]
-        points: list[Any] = []
+        points = []
         for seg in cut_segs:
             points.extend((seg.points[0], seg.points[1]))
         if len(points) == 0:
@@ -272,13 +270,13 @@ class Polygons(Gradeable):  # noqa: PLR0904
     ) -> TernaryResult:
         tol = tolerance / self.yscale
         polygons = self.get_polygons_within_range(x1, x2)
-        segments: list[Segment] = []
+        segments = []
         for p in polygons:
             segments += self.get_segments(p)
         filtered_seg = [seg for seg in segments if self.segment_in_range(seg, x1, x2)]
         cut_segs = [self.cut_segment(seg, x1, x2) for seg in filtered_seg]
         cut_segs = [seg for seg in cut_segs if seg is not None]
-        points: list[Any] = []
+        points = []
         for seg in cut_segs:
             points.extend((seg.points[0], seg.points[1]))
         if len(points) == 0:
@@ -379,13 +377,13 @@ class Polygons(Gradeable):  # noqa: PLR0904
         tolerance: int,
     ) -> TernaryResult:
         polygons = self.get_polygons_within_range(x1, x2)
-        segments: list[Segment] = []
+        segments = []
         for p in polygons:
             segments += self.get_segments(p)
         filtered_seg = [seg for seg in segments if self.segment_in_range(seg, x1, x2)]
         cut_segs = [self.cut_segment(seg, x1, x2) for seg in filtered_seg]
         cut_segs = [seg for seg in cut_segs if seg is not None]
-        points: list[Any] = []
+        points = []
         for seg in cut_segs:
             points.extend((seg.points[0], seg.points[1]))
         if len(points) == 0:
@@ -727,7 +725,7 @@ class Polygons(Gradeable):  # noqa: PLR0904
         return None
 
     def get_segments(self, polygon: Polygon) -> list[Segment]:
-        segments: list[Segment] = []
+        segments = []
         for i, pt in enumerate(polygon.points):
             if i < len(polygon.points) - 1:
                 pt2 = polygon.points[i + 1]
@@ -808,7 +806,7 @@ class Polygons(Gradeable):  # noqa: PLR0904
             A list of lists of intersection points [x,y] for each polygon
             in the grader.
         """
-        intersections: list[list[list[float]]] = []
+        intersections = []
         if isinstance(line_segment, LineSegment):
             point1 = line_segment.getStartPoint()
             point2 = line_segment.getEndPoint()
@@ -819,7 +817,7 @@ class Polygons(Gradeable):  # noqa: PLR0904
         in_seg = Segment(Point(*point1), Point(*point2))
 
         for polygon in self.polygons:
-            p_intersections: list[list[float]] = []
+            p_intersections = []
             for i, pt in enumerate(polygon.points):
                 if i < len(polygon.points) - 1:
                     pt2 = polygon.points[i + 1]
@@ -856,7 +854,7 @@ class Polygons(Gradeable):  # noqa: PLR0904
             list:
             A list of intersection points [x,y].
         """
-        intersections: list[list[float]] = []
+        intersections = []
         if isinstance(line_segment, LineSegment):
             point1 = line_segment.getStartPoint()
             point2 = line_segment.getEndPoint()
@@ -886,7 +884,7 @@ class Polygons(Gradeable):  # noqa: PLR0904
         return intersections
 
     def get_polygons_within_range(self, xmin: float, xmax: float) -> list[Polygon]:
-        polygons: list[Polygon] = []
+        polygons = []
         for polygon in self.polygons:
             range_defined = polygon.range_defined if polygon.range_defined is not None else []
             range_detected = False
@@ -924,7 +922,7 @@ class Polygons(Gradeable):  # noqa: PLR0904
         end_point: list[float] | tuple[float, float] | Point,
         tolerance: float | None = None,
     ) -> list[list[float]]:
-        filtered: list[list[float]] = []
+        filtered = []
         for i in intersections:
             isStart = self.point_within_tolerance(start_point, i, tolerance=tolerance)
             isEnd = self.point_within_tolerance(end_point, i, tolerance=tolerance)

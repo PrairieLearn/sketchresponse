@@ -883,9 +883,7 @@ class LineSegments(Gradeable):  # noqa: PLR0904
 
         return segmentsBetweenStrict
 
-    def get_percent_overlap_of_range(
-        self, segment: LineSegment, xmin: float, xmax: float
-    ) -> float:
+    def get_percent_overlap_of_range(self, segment: LineSegment, xmin: float, xmax: float) -> float:
         # make sure start and min are less than end and max
         xmin, xmax = self.swap(xmin, xmax)
 
@@ -965,9 +963,7 @@ class LineSegments(Gradeable):  # noqa: PLR0904
             x2 = temp
         return (x1, x2)
 
-    def swap_eps(
-        self, p1: list[float], p2: list[float]
-    ) -> tuple[list[float], list[float]]:
+    def swap_eps(self, p1: list[float], p2: list[float]) -> tuple[list[float], list[float]]:
         if p1[0] > p2[0]:
             return p2, p1
         else:

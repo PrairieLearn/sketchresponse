@@ -142,9 +142,7 @@ class Function(Tag, Tagable):  # noqa: PLR0904
         )
 
     def is_defined_at(self, xval: float) -> bool:
-        raise NotImplementedError(
-            "The is_defined_at method is not implemented by this class."
-        )
+        raise NotImplementedError("The is_defined_at method is not implemented by this class.")
 
     def get_domain(self) -> FunctionDomain:
         raise NotImplementedError("The get_domain method is not implemented by this class.")

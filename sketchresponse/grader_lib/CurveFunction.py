@@ -125,9 +125,7 @@ class CurveFunction(Function):
 
         return t_filtered
 
-    def get_t_extrema_between(
-        self, xmin: float, xmax: float, p: np.ndarray
-    ) -> list[float]:
+    def get_t_extrema_between(self, xmin: float, xmax: float, p: np.ndarray) -> list[float]:
         # gets the t vals of the roots of p between xmin and xmax
         # used for finding extrema between xmin and xmax
         # assumes xmin and xmax are within the domain

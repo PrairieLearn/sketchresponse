@@ -402,9 +402,7 @@ class PolarTransform:
 
         return [minTheta, maxTheta]
 
-    def filterSplines(
-        self, transformed_samples: list[PolarCurve], rmax: float
-    ) -> list[PolarCurve]:
+    def filterSplines(self, transformed_samples: list[PolarCurve], rmax: float) -> list[PolarCurve]:
         # 1. remove all sample points near the origin (define: near)
         # transformed_samples = self.filterNearOrigin(transformed_samples, rmax)
 
@@ -416,9 +414,7 @@ class PolarTransform:
 
         return transformed_samples
 
-    def filterNearOrigin(
-        self, points: list[PolarCurve], max_value: float
-    ) -> list[PolarCurve]:
+    def filterNearOrigin(self, points: list[PolarCurve], max_value: float) -> list[PolarCurve]:
         # print max_value
         filtered = []
         for ps in points:
@@ -436,9 +432,7 @@ class PolarTransform:
 
         return filtered
 
-    def filterVerticalRegions(
-        self, points: list[PolarCurve], rmax: float
-    ) -> list[PolarCurve]:
+    def filterVerticalRegions(self, points: list[PolarCurve], rmax: float) -> list[PolarCurve]:
         filtered = []
         for ps in points:
             subfiltered = []
