@@ -1,5 +1,11 @@
+from __future__ import annotations
+
+from typing import Any
+
 import numpy as np
 
+from ..types import SketchGrader
+from .Axis import Axis
 from .Function import Function
 
 # TODO: correctly handle multiple vertical values
@@ -17,7 +23,15 @@ class CurveFunction(Function):
     # self.dxdt, self.dydt
     # self.ddx, self.ddy
 
-    def __init__(self, xaxis, yaxis, path_info, grader, current_tool, tolerance=None):
+    def __init__(
+        self,
+        xaxis: Axis,
+        yaxis: Axis,
+        path_info: Any,
+        grader: SketchGrader,
+        current_tool: str,
+        tolerance: dict[str, float] | None = None,
+    ) -> None:
         super().__init__(xaxis, yaxis, path_info, grader, current_tool, tolerance)
 
         self.set_default_tolerance(

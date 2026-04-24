@@ -1,11 +1,16 @@
+from __future__ import annotations
+
+
 class Tag:
-    def __init__(self):
+    tag: str
+
+    def __init__(self) -> None:
         self.tag = ""
 
-    def set_tag(self, tag):
+    def set_tag(self, tag: str) -> None:
         self.tag = tag
 
-    def get_tag(self):
+    def get_tag(self) -> str:
         """Get the value of the tag.
 
         Returns:
@@ -14,7 +19,7 @@ class Tag:
         """
         return self.tag
 
-    def tag_equals(self, to_compare, ignore_case=False):
+    def tag_equals(self, to_compare: str, ignore_case: bool = False) -> bool:
         """Returns whether the given string is equal to the object's tag value.
 
         Args:
@@ -36,13 +41,15 @@ class Tag:
 
 
 class Tagable:
-    def __init__(self):
+    tags: list[Tag] | None
+
+    def __init__(self) -> None:
         self.tags = None
 
-    def set_tagables(self, tags):
+    def set_tagables(self, tags: list[Tag] | None) -> None:
         self.tags = tags
 
-    def contains_tag(self, to_compare, ignore_case=False):
+    def contains_tag(self, to_compare: str, ignore_case: bool = False) -> Tag | None:
         """Return a reference to the first object found with the given tag value.
 
         Args:

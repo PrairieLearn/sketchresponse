@@ -1,3 +1,6 @@
+from __future__ import annotations
+
+from ..types import SketchConfig, SketchGrader, SketchSubmission
 from .Gradeable import Gradeable
 from .Tag import Tag
 
@@ -7,7 +10,9 @@ class Asymptote(Tag):
     the vertical or horizontal asymptote.
     """
 
-    def __init__(self, value):
+    value: float
+
+    def __init__(self, value: float) -> None:
         super().__init__()
         self.value = value
 
@@ -20,7 +25,14 @@ class Asymptotes(Gradeable):
     #        VerticalAsymptotes or the HorizontalAsymptotes class to use the
     #        grading functions below.
     #    """
-    def __init__(self, grader, submission, config, current_tool, tolerance=None):
+    def __init__(
+        self,
+        grader: SketchGrader,
+        submission: SketchSubmission,
+        config: SketchConfig,
+        current_tool: str,
+        tolerance: dict[str, float] | None = None,
+    ) -> None:
         super().__init__(grader, submission, config, current_tool, tolerance)
 
         self.set_default_tolerance(
@@ -186,11 +198,17 @@ class VerticalAsymptotes(Asymptotes):
         function you are grading.
     """
 
-    def __init__(self, grader, submission, config, current_tool):
+    def __init__(
+        self,
+        grader: SketchGrader,
+        submission: SketchSubmission,
+        config: SketchConfig,
+        current_tool: str,
+    ) -> None:
         Asymptotes.__init__(self, grader, submission, config, current_tool)
         self.scale = self.xscale
 
-    def value_from_spline(self, spline):
+    def value_from_spline(self, spline: list[list[float]]) -> tuple[float, float]:
         # gets x coordinate of first point
         px = spline[0][0]
         x = self._px_to_xval(px)
@@ -213,11 +231,17 @@ class HorizontalAsymptotes(Asymptotes):
         function you are grading.
     """
 
-    def __init__(self, grader, submission, config, current_tool):
+    def __init__(
+        self,
+        grader: SketchGrader,
+        submission: SketchSubmission,
+        config: SketchConfig,
+        current_tool: str,
+    ) -> None:
         Asymptotes.__init__(self, grader, submission, config, current_tool)
         self.scale = self.yscale
 
-    def value_from_spline(self, spline):
+    def value_from_spline(self, spline: list[list[float]]) -> tuple[float, float]:
         # gets y coordinate of first point
         px = spline[0][1]
         y = self._px_to_yval(px)

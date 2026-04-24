@@ -1,5 +1,8 @@
+from __future__ import annotations
+
 import copy
 import math
+from typing import Any
 
 import numpy as np
 
@@ -11,7 +14,7 @@ class PolarTransform:
     FIT_TOLERANCE = 5
     STEP = 0.02
 
-    def __init__(self, functionData, gradeableFunction):
+    def __init__(self, functionData: Any, gradeableFunction: Any) -> None:
         #        print gradeable
         #        print gradeable.params
 

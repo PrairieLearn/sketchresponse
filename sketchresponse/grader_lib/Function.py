@@ -1,3 +1,9 @@
+from __future__ import annotations
+
+from typing import Any
+
+from ..types import SketchGrader
+from .Axis import Axis
 from .Debugger import Debugger
 from .Tag import Tag, Tagable
 
@@ -10,7 +16,15 @@ class Function(Tag, Tagable):  # noqa: PLR0904
     # establishes the axes, the size (from the axes), and the tolerance, with default tolerance of 20 pixels
     # Function info will be stored in terms of the function itself, not the pixel information
     # the actual path is yet to be specified
-    def __init__(self, xaxis, yaxis, path_info, grader, current_tool, tolerance=None):
+    def __init__(
+        self,
+        xaxis: Axis,
+        yaxis: Axis,
+        path_info: Any,
+        grader: SketchGrader,
+        current_tool: str,
+        tolerance: dict[str, float] | None = None,
+    ) -> None:
         super().__init__()
         if tolerance is None:
             tolerance = {}
@@ -36,35 +50,35 @@ class Function(Tag, Tagable):  # noqa: PLR0904
 
     # helper methods for constructor
 
-    def set_default_tolerance(self, key, default_value):
+    def set_default_tolerance(self, key: str, default_value: float) -> None:
         if key not in self.tolerance:
             self.tolerance[key] = default_value
 
-    def set_tolerance(self, key, value):
+    def set_tolerance(self, key: str, value: float) -> None:
         self.tolerance[key] = value
 
     # sets the variables related to the path, and finds the domain
-    def create_from_path_info(self, path_info):
+    def create_from_path_info(self, path_info: Any) -> None:
         self.domain = []
 
     # methods to handle pixel <-> math conversions
 
-    def _xval_to_px(self, xval):
+    def _xval_to_px(self, xval: float) -> float:
         return self.xaxis.coord_to_pixel(xval)
 
-    def _px_to_xval(self, px):
+    def _px_to_xval(self, px: float) -> float:
         return self.xaxis.pixel_to_coord(px)
 
-    def _yval_to_px(self, yval):
+    def _yval_to_px(self, yval: float) -> float:
         return self.yaxis.coord_to_pixel(yval)
 
-    def _px_to_yval(self, px):
+    def _px_to_yval(self, px: float) -> float:
         return self.yaxis.pixel_to_coord(px)
 
     # methods for getting various properties of the function at certain locations
     # done in math space, not pixel space
 
-    def is_between(self, xmin, xmax):
+    def is_between(self, xmin: float, xmax: float) -> bool:
         dom = self.domain
         dom_start = dom[0]
         dom_end = dom[-1]
@@ -72,7 +86,9 @@ class Function(Tag, Tagable):  # noqa: PLR0904
         xright = dom_end[-1]
         return not (xleft > xmax or xright < xmin)
 
-    def within_y_range(self, y_val, negative_tolerance=0, positive_tolerance=0):
+    def within_y_range(
+        self, y_val: float | None, negative_tolerance: float = 0, positive_tolerance: float = 0
+    ) -> bool:
         if y_val is None:
             return False
         yrange = self.yaxis.domain
@@ -82,7 +98,9 @@ class Function(Tag, Tagable):  # noqa: PLR0904
         g_pos_t = positive_tolerance * scale
         return y_val <= (yrange[0] - g_neg_t + g_pos_t) and y_val >= (yrange[1] + g_neg_t - g_pos_t)
 
-    def within_x_range(self, x_val, negative_tolerance=0, positive_tolerance=0):
+    def within_x_range(
+        self, x_val: float | None, negative_tolerance: float = 0, positive_tolerance: float = 0
+    ) -> bool:
         if x_val is None:
             return False
         xrange = self.xaxis.domain

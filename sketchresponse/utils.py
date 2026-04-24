@@ -1,7 +1,10 @@
+from __future__ import annotations
+
 import ast
 import copy
 import math
 from collections.abc import Callable
+from typing import Any
 
 from .grader_lib import (
     Asymptote,
@@ -11,7 +14,14 @@ from .grader_lib import (
 )
 from .grader_lib.fit_curve import fitCurve
 from .grader_lib.GradeableFunction import function_to_spline
-from .types import SketchCanvasSize, SketchDrawing, SketchGrader, SketchTool
+from .types import (
+    SketchCanvasSize,
+    SketchConfig,
+    SketchDrawing,
+    SketchGrader,
+    SketchSubmission,
+    SketchTool,
+)
 
 
 def parse_function_string(s: str) -> Callable[[float], float]:
@@ -83,7 +93,11 @@ def graph_to_screen(start: float, end: float, canvas_size: int, value: float) ->
 
 
 def graph_to_screen_submission(
-    submission: dict, config: dict, use_xaxis: bool, distance: bool, value: float
+    submission: SketchSubmission,
+    config: SketchConfig,
+    use_xaxis: bool,
+    distance: bool,
+    value: float,
 ) -> float:
     start = 0 if distance else (config["xrange"][0] if use_xaxis else config["yrange"][1])
     end = config["xrange"][1] if use_xaxis else config["yrange"][0]
@@ -97,7 +111,11 @@ def screen_to_graph(start: float, end: float, canvas_size: int, value: float) ->
 
 
 def screen_to_graph_submission(
-    submission: dict, config: dict, use_xaxis: bool, distance: bool, value: float
+    submission: SketchSubmission,
+    config: SketchConfig,
+    use_xaxis: bool,
+    distance: bool,
+    value: float,
 ) -> float:
     start = 0 if distance else (config["xrange"][0] if use_xaxis else config["yrange"][1])
     end = config["xrange"][1] if use_xaxis else config["yrange"][0]
@@ -107,7 +125,11 @@ def screen_to_graph_submission(
 
 
 def get_gap_length_px(
-    rd: list[list[float]], x1: float, x2: float, submission: dict, config: dict
+    rd: list[list[float]],
+    x1: float,
+    x2: float,
+    submission: SketchSubmission,
+    config: SketchConfig,
 ) -> float:
     if rd == []:
         return graph_to_screen_submission(submission, config, True, False, (x2 - x1))
@@ -133,8 +155,8 @@ def get_gap_length_px(
 
 def get_coverage_length_px(
     grader: SketchGrader,
-    submission: dict,
-    config: dict,
+    submission: SketchSubmission,
+    config: SketchConfig,
     tools_to_check: list[str],
     tool_dict: dict[str, SketchTool],
     x1: float,
@@ -175,7 +197,7 @@ def get_coverage_length_px(
 
 def get_tools_to_check(
     grader: SketchGrader,
-    submission: dict,
+    submission: SketchSubmission,
     not_allowed: list[str] | None = None,
 ) -> list[str]:
     if not_allowed is None:
@@ -194,8 +216,8 @@ def get_tools_to_check(
 def get_num_in_bound_occurrences(
     toolid: str,
     tool_dict: dict[str, SketchTool],
-    submission: dict,
-    config: dict,
+    submission: SketchSubmission,
+    config: SketchConfig,
     x1: float,
     x2: float,
 ) -> int:
@@ -226,11 +248,11 @@ def get_num_in_bound_occurrences(
 
 
 def spline_in_range(
-    spline: list[tuple[float, float]],
+    spline: list[list[float]],
     x1: float,
     x2: float,
-    submission: dict,
-    config: dict,
+    submission: SketchSubmission,
+    config: SketchConfig,
     pix: bool = False,
     hl: bool = False,
     vl: bool = False,
@@ -243,11 +265,11 @@ def spline_in_range(
 
 
 def point_in_range(
-    point: tuple[float, float],
+    point: list[float],
     x1: float,
     x2: float,
-    submission: dict,
-    config: dict,
+    submission: SketchSubmission,
+    config: SketchConfig,
     pix: bool = False,
     hl: bool = False,
     vl: bool = False,
@@ -260,7 +282,7 @@ def point_in_range(
     if pix:  # convert to graph coordinates
         x = screen_to_graph(xrange[0], xrange[1], width, point[0])
         y = screen_to_graph(yrange[1], yrange[0], height, point[1])
-        point = (x, y)
+        point = [x, y]
     if hl:
         return in_range(point[1], yrange[0], yrange[1])
     elif vl:
@@ -268,7 +290,9 @@ def point_in_range(
     return in_range(point[1], yrange[0], yrange[1]) and in_range(point[0], x1, x2)
 
 
-def flip_grader_data(submission: dict, config: dict) -> tuple[dict, dict]:
+def flip_grader_data(
+    submission: SketchSubmission, config: SketchConfig
+) -> tuple[SketchSubmission, SketchConfig]:
     range_data: SketchCanvasSize = {
         "x_start": config["xrange"][0],
         "x_end": config["xrange"][1],
@@ -305,9 +329,7 @@ def flip_grader_data(submission: dict, config: dict) -> tuple[dict, dict]:
     return submission_new, config_new
 
 
-def flip_point(
-    point: tuple[float, float], range_data: SketchCanvasSize
-) -> tuple[float, float]:  # point = [x,y]
+def flip_point(point: list[float], range_data: SketchCanvasSize) -> list[float]:  # point = [x,y]
     x, y = point
     # convert the point back to a graph coordinate
     x_g = screen_to_graph(
@@ -335,7 +357,7 @@ def flip_point(
         range_data["width"],
         x_g,
     )
-    return (x_s, y_s)
+    return [x_s, y_s]
 
 
 def in_range(val: float, start: float, end: float, tolerance: float = 0) -> bool:
@@ -344,7 +366,7 @@ def in_range(val: float, start: float, end: float, tolerance: float = 0) -> bool
 
 def format_drawing(
     initials: list[SketchDrawing], tool: SketchTool, ranges: SketchCanvasSize
-) -> list:
+) -> list[dict[str, Any]] | list[list[dict[str, float]]]:
     """
     Convert drawing data for one sketching tool into the data format that is used by the client.
     Note that this function does not validate the inputs and assumes that attribute combinations are all
@@ -353,7 +375,7 @@ def format_drawing(
     Returns:
         A list that can be converted into JSON for the client
     """
-    new_format = []
+    new_format: list[Any] = []
     if tool["name"] in ["horizontal-line", "vertical-line"]:
         coordinates = []
         for initial in initials:

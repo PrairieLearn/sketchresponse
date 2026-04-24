@@ -1,14 +1,24 @@
+from __future__ import annotations
+
 import math
 
 import numpy as np
 
+from ..types import SketchConfig, SketchGrader, SketchSubmission
 from .Gradeable import Gradeable
 from .Point import Point
 from .Tag import Tag
 
 
 class LineSegments(Gradeable):  # noqa: PLR0904
-    def __init__(self, grader, submission, config, current_tool, tolerance=None):
+    def __init__(
+        self,
+        grader: SketchGrader,
+        submission: SketchSubmission,
+        config: SketchConfig,
+        current_tool: str,
+        tolerance: dict[str, float] | None = None,
+    ) -> None:
         super().__init__(grader, submission, config, current_tool, tolerance)
 
         self.set_default_tolerance(
@@ -1376,7 +1386,10 @@ class LineSegment(Tag):
     start point and the end point of the segment.
     """
 
-    def __init__(self, point1, point2):
+    start: Point
+    end: Point
+
+    def __init__(self, point1: Point, point2: Point) -> None:
         super().__init__()
         self.start = point1
         self.end = point2

@@ -1,5 +1,11 @@
+from __future__ import annotations
+
+from typing import Any
+
 import numpy as np
 
+from ..types import SketchGrader
+from .Axis import Axis
 from .Function import Function
 
 # "interface" for Functions that are composed of multiple Functions
@@ -13,14 +19,14 @@ class MultiFunction(Function):
     # will use functions if they exist
     def __init__(
         self,
-        xaxis,
-        yaxis,
-        path_info,
-        grader,
-        current_tool,
-        functions=None,
-        tolerance=None,
-    ):
+        xaxis: Axis,
+        yaxis: Axis,
+        path_info: Any,
+        grader: SketchGrader,
+        current_tool: str,
+        functions: Any = None,
+        tolerance: dict[str, float] | None = None,
+    ) -> None:
         super().__init__(xaxis, yaxis, path_info, grader, current_tool, tolerance)
         self.set_default_tolerance("straight_line", 0.1)  # threshold for straight lines
         self.set_default_tolerance(

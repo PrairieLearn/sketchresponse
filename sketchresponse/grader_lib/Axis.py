@@ -1,5 +1,5 @@
 class Axis:
-    def __init__(self, domain, pixels):  # TODO: support non-linear axis types
+    def __init__(self, domain, pixels) -> None:  # TODO: support non-linear axis types
         self.domain = domain
         self.pixels = pixels
 

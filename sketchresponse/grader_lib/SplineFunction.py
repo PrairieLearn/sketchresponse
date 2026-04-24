@@ -1,5 +1,11 @@
+from __future__ import annotations
+
+from typing import Any
+
 import numpy as np
 
+from ..types import SketchGrader
+from .Axis import Axis
 from .CurveFunction import CurveFunction
 from .MultiFunction import MultiFunction
 
@@ -12,15 +18,15 @@ class SplineFunction(MultiFunction):
     # only provide path_info or curves, not both
     def __init__(
         self,
-        xaxis,
-        yaxis,
-        path_info,
-        grader,
-        current_tool,
-        functions=None,
-        tolerance=None,
-    ):
-        super().__init__(xaxis, yaxis, path_info, grader, current_tool, tolerance)
+        xaxis: Axis,
+        yaxis: Axis,
+        path_info: Any,
+        grader: SketchGrader,
+        current_tool: str,
+        functions: Any = None,
+        tolerance: dict[str, float] | None = None,
+    ) -> None:
+        super().__init__(xaxis, yaxis, path_info, grader, current_tool, tolerance=tolerance)
         # self.tolerance['straight_line'] = 0.1 # threshold for straight lines
         if functions:
             self.functions = functions

@@ -1,6 +1,9 @@
+from __future__ import annotations
+
 from sympy.geometry import Line, Point, Segment, intersection
 from sympy.geometry import Polygon as SymPyPolygon
 
+from ..types import SketchConfig, SketchGrader, SketchSubmission
 from .Gradeable import Gradeable
 from .LineSegment import LineSegment
 from .Point import Point as SR_Point
@@ -8,7 +11,14 @@ from .Tag import Tag
 
 
 class Polygons(Gradeable):  # noqa: PLR0904
-    def __init__(self, grader, submission, config, current_tool, tolerance=None):
+    def __init__(
+        self,
+        grader: SketchGrader,
+        submission: SketchSubmission,
+        config: SketchConfig,
+        current_tool: str,
+        tolerance: dict[str, float] | None = None,
+    ) -> None:
         super().__init__(grader, submission, config, current_tool, tolerance)
         self.set_default_tolerance(
             "point_distance", grader["tolerance"]
@@ -826,7 +836,10 @@ class Polygon(Tag):
     vertices of the polygon.
     """
 
-    def __init__(self, points):
+    points: list[tuple[float, float]]
+    range_defined: list[list[float]] | None
+
+    def __init__(self, points: list[tuple[float, float]]) -> None:
         super().__init__()
         self.points = points
         self.range_defined = None

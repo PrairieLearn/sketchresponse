@@ -1,8 +1,10 @@
+from __future__ import annotations
+
 from collections.abc import Callable
 
 import numpy as np
 
-from sketchresponse.types import SketchCanvasSize
+from sketchresponse.types import SketchCanvasSize, SketchConfig, SketchGrader, SketchSubmission
 
 from .Axis import Axis
 from .fit_curve import fitCurve
@@ -12,7 +14,14 @@ from .SplineFunction import SplineFunction
 
 
 class GradeableFunction(MultipleSplinesFunction):  # noqa: PLR0904
-    def __init__(self, grader, submission, config, current_tool, tolerance=None):
+    def __init__(
+        self,
+        grader: SketchGrader,
+        submission: SketchSubmission,
+        config: SketchConfig,
+        current_tool: str,
+        tolerance: dict[str, float] | None = None,
+    ) -> None:
         xaxis = Axis(config["xrange"], config["width"])
         yaxis = Axis(config["yrange"][::-1], config["height"])
         super().__init__(
@@ -22,7 +31,7 @@ class GradeableFunction(MultipleSplinesFunction):  # noqa: PLR0904
             grader,
             submission,
             current_tool,
-            tolerance,
+            tolerance=tolerance,
         )
         self.set_default_tolerance(
             "point_distance_squared",

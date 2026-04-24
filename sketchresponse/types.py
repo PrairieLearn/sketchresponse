@@ -1,3 +1,14 @@
+"""Type definitions for the sketchresponse package.
+
+These TypedDicts describe the dict shapes that flow between the JavaScript
+sketch tool and the Python grader backend. They are advisory (nothing
+validates them at runtime) and are intended to help downstream consumers —
+such as PrairieLearn's `pl-sketch` element — type-check the configuration
+dicts they build and the answer JSON they receive.
+"""
+
+from __future__ import annotations
+
 from typing import TypedDict
 
 
@@ -57,3 +68,82 @@ class SketchDrawing(TypedDict):
     fun: str | None
     xrange: list[float]
     coordinates: list[float]
+
+
+class SketchItem(TypedDict, total=False):
+    """A single gradeable item produced by a drawing tool.
+
+    Spline-based tools (spline, freeform, polyline, horizontal-line,
+    vertical-line, line-segment, polygon) populate `spline`; point-based
+    tools populate `point`. `tag` is optionally set by the user.
+    """
+
+    spline: list[list[float]]  # list of [x_px, y_px] control points
+    point: list[float]  # [x_px, y_px]
+    tag: str
+
+
+SketchGradeableData = dict[str, list[SketchItem]]
+
+
+class SketchSubmission(TypedDict, total=False):
+    """The `submission` dict constructed on the backend from the answer JSON.
+
+    Only `gradeable` is guaranteed to be present; other keys may be added by
+    frontends or wrappers. `total=False` keeps the type usable by callers that
+    construct submissions with extra metadata.
+    """
+
+    gradeable: SketchGradeableData
+
+
+class SketchConfig(TypedDict, total=False):
+    """The configuration dict for a sketch problem.
+
+    The same shape is used at three levels — the top-level problem config,
+    per-plugin config entries inside `plugins`, and the runtime config dict
+    the `@grader` decorator passes to `GradeableCollection`. Because the
+    required keys differ between levels, all keys are `NotRequired`.
+
+    Canvas / axis keys:
+        `xrange`, `yrange`: `[min, max]` graph-space bounds
+        `width`, `height`: canvas size in pixels
+    Plugin keys:
+        `id`: unique identifier for a plugin instance (toolid)
+        `name`: plugin type (e.g. "spline", "point", "group")
+        `plugins`: nested plugin configs (top-level and "group" plugins)
+        `coordinates`: "polar" to transform to polar space
+    Runtime-added keys:
+        `dataVersions`: injected by the grader from the answer JSON
+    """
+
+    # Canvas / axis
+    xrange: list[float]
+    yrange: list[float]
+    width: int
+    height: int
+    # Plugin
+    id: str
+    name: str
+    plugins: list[SketchConfig]
+    coordinates: str
+    # Runtime
+    dataVersions: dict[str, str]
+
+
+class SketchMeta(TypedDict):
+    config: SketchConfig
+    dataVersions: dict[str, str]
+
+
+class SketchAnswer(TypedDict):
+    apiVersion: str
+    meta: SketchMeta
+    data: SketchGradeableData
+
+
+class GraderResult(TypedDict, total=False):
+    """The dict returned from a grader function (or from the decorator)."""
+
+    ok: bool | str | float
+    msg: str

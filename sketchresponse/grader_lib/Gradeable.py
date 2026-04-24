@@ -1,7 +1,10 @@
+from __future__ import annotations
+
 from collections.abc import Callable
 
 import numpy as np
 
+from ..types import SketchConfig, SketchGrader, SketchSubmission
 from .Axis import Axis
 from .Debugger import Debugger
 from .Tag import Tagable
@@ -9,8 +12,13 @@ from .Tag import Tagable
 
 class Gradeable(Tagable):
     def __init__(
-        self, grader, submission, config, current_tool, tolerance=None
-    ):  # gradeable_info : {"grader": grader, "submission": submission}
+        self,
+        grader: SketchGrader,
+        submission: SketchSubmission,
+        config: SketchConfig,
+        current_tool: str,
+        tolerance: dict[str, float] | None = None,
+    ) -> None:
         super().__init__()
         if tolerance is None:
             tolerance = {}
@@ -36,25 +44,27 @@ class Gradeable(Tagable):
                 grader["tolerance"],
             )
 
-    def set_default_tolerance(self, key, default_value):
+    def set_default_tolerance(self, key: str, default_value: float) -> None:
         if key not in self.tolerance:
             self.tolerance[key] = default_value
 
     # value <-> pixel conversions ##
 
-    def _xval_to_px(self, xval):
+    def _xval_to_px(self, xval: float) -> float:
         return self.xaxis.coord_to_pixel(xval)
 
-    def _px_to_xval(self, px):
+    def _px_to_xval(self, px: float) -> float:
         return self.xaxis.pixel_to_coord(px)
 
-    def _yval_to_px(self, yval):
+    def _yval_to_px(self, yval: float) -> float:
         return self.yaxis.coord_to_pixel(yval)
 
-    def _px_to_yval(self, px):
+    def _px_to_yval(self, px: float) -> float:
         return self.yaxis.pixel_to_coord(px)
 
-    def within_y_range(self, y_val, negative_tolerance=0, positive_tolerance=0):
+    def within_y_range(
+        self, y_val: float | None, negative_tolerance: float = 0, positive_tolerance: float = 0
+    ) -> bool:
         if y_val is None:
             return False
         yrange = self.yaxis.domain
@@ -64,7 +74,9 @@ class Gradeable(Tagable):
         g_pos_t = positive_tolerance * scale
         return y_val <= (yrange[0] - g_neg_t + g_pos_t) and y_val >= (yrange[1] + g_neg_t - g_pos_t)
 
-    def within_x_range(self, x_val, negative_tolerance=0, positive_tolerance=0):
+    def within_x_range(
+        self, x_val: float | None, negative_tolerance: float = 0, positive_tolerance: float = 0
+    ) -> bool:
         if x_val is None:
             return False
         xrange = self.xaxis.domain
@@ -74,7 +86,7 @@ class Gradeable(Tagable):
         g_pos_t = positive_tolerance * scale
         return x_val >= (xrange[0] + g_neg_t - g_pos_t) and x_val <= (xrange[1] - g_neg_t + g_pos_t)
 
-    def add_debug(self, str):
+    def add_debug(self, str: str) -> None:
         self.debug_message += "\n"
         self.debug_message += str
 
