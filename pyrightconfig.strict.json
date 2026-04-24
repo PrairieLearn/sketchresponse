@@ -1,0 +1,17 @@
+{
+  "include": ["sketchresponse"],
+  "exclude": ["**/__pycache__", "grader_scripts"],
+  "pythonVersion": "3.10",
+  "typeCheckingMode": "strict",
+  "reportTypedDictNotRequiredAccess": "none",
+  "reportIncompatibleVariableOverride": "none",
+  "reportUnknownMemberType": "none",
+  "reportUnknownVariableType": "none",
+  "reportUnknownArgumentType": "none",
+  "reportUnknownLambdaType": "none",
+  "reportMissingTypeStubs": "none",
+  "reportPrivateUsage": "none",
+  "reportUnusedCallResult": "none",
+  "reportImplicitOverride": "none",
+  "reportImportCycles": "none"
+}

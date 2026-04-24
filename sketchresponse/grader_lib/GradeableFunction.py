@@ -14,19 +14,20 @@ from sketchresponse.types import (
 )
 
 from .Axis import Axis
+from .CurveFunction import CurveFunction
 from .fit_curve import fitCurve
 from .MultipleSplinesFunction import MultipleSplinesFunction
 from .Point import Point
-from .PolarTransform import _PolarParams
+from .PolarTransform import PolarParams
 from .SplineFunction import SplineFunction
 
 
 class FunctionDataWrapper(list[SketchItem]):
     """List of spline/point dicts with a `params` attribute (for PolarTransform)."""
 
-    params: _PolarParams
+    params: PolarParams
 
-    def __init__(self, gradeable_data: list[SketchItem], params: _PolarParams) -> None:
+    def __init__(self, gradeable_data: list[SketchItem], params: PolarParams) -> None:
         super().__init__(gradeable_data)
         self.params = params
 
@@ -87,7 +88,13 @@ class GradeableFunction(MultipleSplinesFunction):  # noqa: PLR0904
             # Resample splines in the new coordinate space
             self.pt.resampleNewSplines()
 
-    def covers_function_domain(self, function, xmin, xmax, tolerance):
+    def covers_function_domain(
+        self,
+        function: Callable[[float], float],
+        xmin: float,
+        xmax: float,
+        tolerance: float,
+    ) -> bool:
         """Return whether the submission covers the entire domain of the function (90%).
 
         Args:
@@ -120,7 +127,12 @@ class GradeableFunction(MultipleSplinesFunction):  # noqa: PLR0904
             self.debugger.add(f"Lowest allowed is {tolerance * 100}%.")
         return (coverage / total_coverage_needed) >= tolerance
 
-    def get_spline_graders_from_function(self, func, xmin, xmax):
+    def get_spline_graders_from_function(
+        self,
+        func: Callable[[float], float],
+        xmin: float,
+        xmax: float,
+    ) -> list[SplineFunction]:
         range_data: SketchCanvasSize = {
             "x_start": self.xaxis.domain[0],
             "x_end": self.xaxis.domain[1],
@@ -129,7 +141,7 @@ class GradeableFunction(MultipleSplinesFunction):  # noqa: PLR0904
             "width": self.xaxis.pixels,
             "height": self.yaxis.pixels,
         }
-        values = []
+        values: list[SplinePoints] = []
         while True:  # handle function breaks
             x_y_vals, broken, new_start = function_to_spline(func, xmin, xmax, range_data)
             if len(x_y_vals) > 0:
@@ -139,7 +151,7 @@ class GradeableFunction(MultipleSplinesFunction):  # noqa: PLR0904
                 xmin = new_start
             else:
                 break
-        splines = []
+        splines: list[SplineFunction] = []
         for s in values:
             spline = SplineFunction(
                 self.xaxis,
@@ -151,11 +163,11 @@ class GradeableFunction(MultipleSplinesFunction):  # noqa: PLR0904
             splines.append(spline)
         return splines
 
-    def sample_points(self):
-        spline_samples = []
+    def sample_points(self) -> list[list[list[float]]]:
+        spline_samples: list[list[list[float]]] = []
 
         for f in self.functions:
-            curve_samples = []
+            curve_samples: list[list[float]] = []
             # these are the spline function objects
             for curve in f.functions:
                 # these are the curve function objects
@@ -167,23 +179,23 @@ class GradeableFunction(MultipleSplinesFunction):  # noqa: PLR0904
 
         return spline_samples
 
-    def sample_x_and_y(self, curve, step):
-        samples = []
+    def sample_x_and_y(self, curve: CurveFunction, step: float) -> list[list[float]]:
+        samples: list[list[float]] = []
         x_t = curve.x
         y_t = curve.y
 
         for t in np.arange(0, 1, step):
             # interpolate the x and y values
-            x = np.polyval(x_t, t)
-            y = np.polyval(y_t, t)
+            x = float(np.polyval(x_t, t))
+            y = float(np.polyval(y_t, t))
 
             samples.append([x, y])
 
         return samples
 
-    def sample_last_t_1(self, curve):
-        x = np.polyval(curve.x, 1)
-        y = np.polyval(curve.y, 1)
+    def sample_last_t_1(self, curve: CurveFunction) -> list[float]:
+        x = float(np.polyval(curve.x, 1))
+        y = float(np.polyval(curve.y, 1))
 
         return [x, y]
 
@@ -228,7 +240,13 @@ class GradeableFunction(MultipleSplinesFunction):  # noqa: PLR0904
             self.set_tagables(self.points)
 
     # Grader Functions ##
-    def has_point_at(self, x, y, distTolerance, point=None):
+    def has_point_at(
+        self,
+        x: float | None,
+        y: float | None,
+        distTolerance: float,
+        point: Point | None = None,
+    ) -> bool:
         """Return whether a point is declared at the given value.
 
         Args:
@@ -251,6 +269,7 @@ class GradeableFunction(MultipleSplinesFunction):  # noqa: PLR0904
             argument(s), false otherwise.
         """
         if point is None and y is None:
+            assert x is not None
             dist, point = self.closest_point_to_x(x)
             tol = distTolerance / self.xscale
             if dist < tol:
@@ -263,6 +282,7 @@ class GradeableFunction(MultipleSplinesFunction):  # noqa: PLR0904
 
             return False
         if point is None and x is None:
+            assert y is not None
             dist, point = self.closest_point_to_y(y)
             tol = distTolerance / self.yscale
             if dist < tol:
@@ -275,16 +295,23 @@ class GradeableFunction(MultipleSplinesFunction):  # noqa: PLR0904
             return False
         return self.get_point_at(point=point, x=x, y=y, distTolerance=distTolerance) is not None
 
-    def points_less_than_y(self, y, x1, x2, tolerance):
+    def points_less_than_y(self, y: float, x1: float, x2: float, tolerance: float) -> bool:
         """Returns whether all the points in range x1, x2 are below the line f(x)=y"""
         return self.points_ltgt_y(y, x1, x2, False, tolerance)
 
-    def points_greater_than_y(self, y, x1, x2, tolerance):
+    def points_greater_than_y(self, y: float, x1: float, x2: float, tolerance: float) -> bool:
         """Returns whether all the points in range x1, x2 are above the line f(x)=y"""
         return self.points_ltgt_y(y, x1, x2, True, tolerance)
 
     # main helper for points_less_than_y and points_greater_than_y
-    def points_ltgt_y(self, y, x1, x2, greater, tolerance):
+    def points_ltgt_y(
+        self,
+        y: float,
+        x1: float,
+        x2: float,
+        greater: bool,
+        tolerance: float,
+    ) -> bool:
         points = self.get_points_in_range(x1, x2)
         if len(points) == 0:
             if self.debug:
@@ -309,8 +336,15 @@ class GradeableFunction(MultipleSplinesFunction):  # noqa: PLR0904
                     f"Point {no_pass[0].x, no_pass[0].y} is {round((y - no_pass[0].y) * self.yscale, 3)} pixels above y = {y}."
                 )
                 self.debugger.add(f"Max allowed is {tolerance} pixels.")
+        return False
 
-    def matches_function(self, func, x1, x2, tolerance):
+    def matches_function(
+        self,
+        func: Callable[[float], float],
+        x1: float,
+        x2: float,
+        tolerance: int,
+    ) -> bool:
         """Returns whether all the points in range x1, x2 are on the function"""
         if self.functions:
             if self.does_not_exist_between(x1, x2, tolerance=2):
@@ -350,16 +384,27 @@ class GradeableFunction(MultipleSplinesFunction):  # noqa: PLR0904
                     count_incorrect += 1
         return count_incorrect <= max_incorrect
 
-    def lt_function(self, func, x1, x2, tolerance):
+    def lt_function(
+        self, func: Callable[[float], float], x1: float, x2: float, tolerance: int
+    ) -> bool:
         """Returns whether all the points in range x1, x2 are less than the function"""
         return self.ltgt_func(func, x1, x2, tolerance, greater=False)
 
-    def gt_function(self, func, x1, x2, tolerance):
+    def gt_function(
+        self, func: Callable[[float], float], x1: float, x2: float, tolerance: int
+    ) -> bool:
         """Returns whether all the points in range x1, x2 are greater than the function"""
         return self.ltgt_func(func, x1, x2, tolerance, greater=True)
 
     # main helper for lt_function and gt_function
-    def ltgt_func(self, func, x1, x2, tolerance, greater):
+    def ltgt_func(
+        self,
+        func: Callable[[float], float],
+        x1: float,
+        x2: float,
+        tolerance: int,
+        greater: bool,
+    ) -> bool:
         if not self.points:
             if self.does_not_exist_between(x1, x2, tolerance=10):
                 if self.debug:
@@ -388,15 +433,21 @@ class GradeableFunction(MultipleSplinesFunction):  # noqa: PLR0904
         return count_incorrect <= max_incorrect
 
     # Helper Functions ##
-    def get_number_of_points(self):
+    def get_number_of_points(self) -> int:
         """Return the number of points declared in the function."""
         return len(self.points)
 
-    def get_points_in_range(self, xmin, xmax):
+    def get_points_in_range(self, xmin: float, xmax: float) -> list[Point]:
         """Return the number of points declared in the function between xmin and xmax."""
         return [point for point in self.points if point.x >= xmin and point.x <= xmax]
 
-    def get_point_at(self, distTolerance, point=None, x=None, y=None):
+    def get_point_at(
+        self,
+        distTolerance: float,
+        point: Point | None = None,
+        x: float | None = None,
+        y: float | None = None,
+    ) -> Point | None:
         """Return a reference to the Point declared at the given value.
 
         Args:
@@ -446,7 +497,9 @@ class GradeableFunction(MultipleSplinesFunction):  # noqa: PLR0904
 
         return None
 
-    def closest_point_to_point(self, point, squared=False):
+    def closest_point_to_point(
+        self, point: Point, squared: bool = False
+    ) -> tuple[float, Point | None]:
         """Return the square pixel distance or euclidean distance to the closest point
            and a Point instance.
 
@@ -474,7 +527,7 @@ class GradeableFunction(MultipleSplinesFunction):  # noqa: PLR0904
         return min_distance, min_point
 
     # returns the distance and the point
-    def closest_point_to_x(self, x):
+    def closest_point_to_x(self, x: float) -> tuple[float, Point | None]:
         """Return the distance to the closest point and a Point instance.
 
         Args:
@@ -497,7 +550,7 @@ class GradeableFunction(MultipleSplinesFunction):  # noqa: PLR0904
 
         return min_distance, min_point
 
-    def closest_point_to_y(self, y):
+    def closest_point_to_y(self, y: float) -> tuple[float, Point | None]:
         """Return the distance to the closest point and a Point instance.
 
         Args:

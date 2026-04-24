@@ -10,10 +10,18 @@ from . import Axis
 from . import fit_curve as fitCurves
 
 if TYPE_CHECKING:
+    from .CurveFunction import CurveFunction
     from .GradeableFunction import FunctionDataWrapper
+    from .Point import Point
+    from .SplineFunction import SplineFunction
+
+# A point in transformed [theta, r] pixel space (2-element list).
+PolarPoint = list[float]
+# A sampled curve in transformed space — sequence of [theta, r] points.
+PolarCurve = list[PolarPoint]
 
 
-class _PolarParams(TypedDict):
+class PolarParams(TypedDict):
     xrange: list[float]
     yrange: list[float]
     width: int
@@ -23,8 +31,8 @@ class _PolarParams(TypedDict):
 class _GradeableLike(Protocol):
     """Holder of points and spline functions consumed by PolarTransform."""
 
-    points: list
-    functions: list
+    points: list[Point]
+    functions: list[SplineFunction]
 
 
 class PolarTransform:
@@ -98,20 +106,20 @@ class PolarTransform:
         # and transformed space parameters
         self.updateFunctionData(rmax, transPoints, transSplines)
 
-    def getTransformedFunctionData(self):
+    def getTransformedFunctionData(self) -> FunctionDataWrapper:
         return self.f
 
-    def getTransformedPoints(self):
+    def getTransformedPoints(self) -> list[PolarCurve]:
         return self.transformedSplines
 
-    def getTransformedAxes(self):
+    def getTransformedAxes(self) -> list[list[float]]:
         axes1 = self.f.params["xrange"]
         axes1.extend(self.f.params["yrange"])
-        axes2 = [0, self.f.params["width"]]
+        axes2: list[float] = [0, self.f.params["width"]]
         axes2.extend([0, self.f.params["height"]])
         return [axes1, axes2]
 
-    def transformPoints(self):
+    def transformPoints(self) -> list[PolarPoint]:
         points = self.g.points
         transPoints = []
         width = self.f.params["width"]
@@ -125,7 +133,7 @@ class PolarTransform:
 
         return transPoints
 
-    def transformSplines(self):
+    def transformSplines(self) -> list[PolarCurve]:
         # sample the spline functions
         spline_samples = []
         for f in self.g.functions:
@@ -148,7 +156,7 @@ class PolarTransform:
 
         return transformed_samples
 
-    def resampleNewSplines(self):
+    def resampleNewSplines(self) -> None:
         spline_samples = []
         for f in self.g.functions:
             curve_samples = []
@@ -173,7 +181,7 @@ class PolarTransform:
 
         self.transformedSplines = spline_samples
 
-    def segmentSplines(self, transformed_samples):
+    def segmentSplines(self, transformed_samples: list[PolarCurve]) -> list[PolarCurve]:
         segmented_samples = []
         for ts in transformed_samples:
             minima = self.findMinima(ts)
@@ -197,7 +205,7 @@ class PolarTransform:
 
         return segmented_samples
 
-    def reorderSplines(self, transformed_samples):
+    def reorderSplines(self, transformed_samples: list[PolarCurve]) -> list[PolarCurve]:
         reordered = []
         for ts in transformed_samples:
             # print ts
@@ -217,7 +225,7 @@ class PolarTransform:
                 dec = 0
                 for i, (theta, _r) in enumerate(ts):
                     if i < len(ts) - 1:
-                        theta_n, r_n = ts[i + 1]
+                        theta_n, _r_n = ts[i + 1]
                         if theta_n >= theta:
                             inc += 1
                         else:
@@ -229,10 +237,10 @@ class PolarTransform:
 
         return reordered
 
-    def filterEmptySplines(self, transformed_samples):
+    def filterEmptySplines(self, transformed_samples: list[PolarCurve]) -> list[PolarCurve]:
         return [ts for ts in transformed_samples if not len(ts) <= 10]
 
-    def splitWrappingCurves(self, curves):
+    def splitWrappingCurves(self, curves: list[PolarCurve]) -> list[PolarCurve]:
         # now segment any curves that wrap around theta=0/2pi boundary
         width = self.f.params["width"]
         minTen = width // 10
@@ -260,7 +268,7 @@ class PolarTransform:
 
         return wrap_segmented
 
-    def removeCurveOverlaps(self, curves):
+    def removeCurveOverlaps(self, curves: list[PolarCurve]) -> list[PolarCurve]:
         #        return curves
         filtered = []
         for i, curve in enumerate(curves):
@@ -285,7 +293,9 @@ class PolarTransform:
 
         return filtered
 
-    def curvesOverlap(self, curve1, curve2):
+    def curvesOverlap(
+        self, curve1: PolarCurve, curve2: PolarCurve
+    ) -> tuple[PolarCurve, PolarCurve, PolarCurve, PolarCurve]:
         range1 = self.getThetaRange(curve1)
         range2 = self.getThetaRange(curve2)
 
@@ -294,8 +304,8 @@ class PolarTransform:
         post = []
         overlap2 = []
 
-        overlapMin = None
-        overlapMax = None
+        overlapMin: float | None = None
+        overlapMax: float | None = None
 
         overlap = False
         if (
@@ -338,6 +348,7 @@ class PolarTransform:
         if not overlap:
             pre = curve1
         else:
+            assert overlapMin is not None and overlapMax is not None
             # print 'Overlaps: '
             # print range1
             # print range2
@@ -363,7 +374,7 @@ class PolarTransform:
 
         return (pre, overlap1, post, overlap2)
 
-    def removeOverlap(self, curve1, curve2):
+    def removeOverlap(self, curve1: PolarCurve, curve2: PolarCurve) -> PolarCurve:
         # remove overlapping points from curve1
         filtered = []
         for theta, r in curve1:
@@ -379,7 +390,7 @@ class PolarTransform:
 
         return filtered
 
-    def getThetaRange(self, curve):
+    def getThetaRange(self, curve: PolarCurve) -> list[float]:
         minTheta = float("inf")
         maxTheta = float("-inf")
 
@@ -391,7 +402,9 @@ class PolarTransform:
 
         return [minTheta, maxTheta]
 
-    def filterSplines(self, transformed_samples, rmax):
+    def filterSplines(
+        self, transformed_samples: list[PolarCurve], rmax: float
+    ) -> list[PolarCurve]:
         # 1. remove all sample points near the origin (define: near)
         # transformed_samples = self.filterNearOrigin(transformed_samples, rmax)
 
@@ -403,7 +416,9 @@ class PolarTransform:
 
         return transformed_samples
 
-    def filterNearOrigin(self, points, max_value):
+    def filterNearOrigin(
+        self, points: list[PolarCurve], max_value: float
+    ) -> list[PolarCurve]:
         # print max_value
         filtered = []
         for ps in points:
@@ -421,7 +436,9 @@ class PolarTransform:
 
         return filtered
 
-    def filterVerticalRegions(self, points, rmax):
+    def filterVerticalRegions(
+        self, points: list[PolarCurve], rmax: float
+    ) -> list[PolarCurve]:
         filtered = []
         for ps in points:
             subfiltered = []
@@ -442,7 +459,7 @@ class PolarTransform:
         return filtered
 
     #### DEPRECATED #####
-    def filterUnderCutRegions(self, points):
+    def filterUnderCutRegions(self, points: list[PolarCurve]) -> list[PolarCurve]:
         filtered = []
         for ps in points:
             subfiltered = []
@@ -453,7 +470,7 @@ class PolarTransform:
 
             for i, (theta, r) in enumerate(ps):
                 if i < len(ps) - 1:
-                    theta_n, r_n = ps[i + 1]
+                    theta_n, _r_n = ps[i + 1]
                     if theta_n > theta:
                         subfiltered.append([theta, r])
 
@@ -461,7 +478,7 @@ class PolarTransform:
 
         return filtered
 
-    def filterUnderCutRegions_projection(self, points):
+    def filterUnderCutRegions_projection(self, points: list[PolarCurve]) -> list[PolarCurve]:
         filtered = []
         for ps in points:
             subfiltered = []
@@ -470,14 +487,14 @@ class PolarTransform:
             if len(maxima) == 0:
                 # only increasing or decreasing
                 if ps[0][1] > ps[-1][1]:
-                    maxima = 0
+                    split_idx = 0
                 else:
-                    maxima = len(ps) - 1
+                    split_idx = len(ps) - 1
             else:
-                maxima = maxima[0]
+                split_idx = maxima[0]
 
-            left = ps[0:maxima]
-            right = ps[maxima:]
+            left = ps[0:split_idx]
+            right = ps[split_idx:]
 
             subfiltered.extend(self.filterUnderCutRegions_left(left))
             subfiltered.extend(self.filterUnderCutRegions_right(right))
@@ -486,7 +503,7 @@ class PolarTransform:
 
         return filtered
 
-    def filterUnderCutRegions_left(self, left):
+    def filterUnderCutRegions_left(self, left: PolarCurve) -> PolarCurve:
         if len(left) == 0:
             return left
 
@@ -502,7 +519,7 @@ class PolarTransform:
         filtered.reverse()
         return filtered
 
-    def filterUnderCutRegions_right(self, right):
+    def filterUnderCutRegions_right(self, right: PolarCurve) -> PolarCurve:
         if len(right) == 0:
             return right
 
@@ -516,7 +533,7 @@ class PolarTransform:
 
         return filtered
 
-    def refitSplines(self, transformed_samples):
+    def refitSplines(self, transformed_samples: list[PolarCurve]) -> list[PolarCurve]:
         # refit cubic splines to transformed sample points
         expanded_samples = []
         for t in transformed_samples:
@@ -552,7 +569,7 @@ class PolarTransform:
         #        print self.transformedSplines
         return expanded_samples
 
-    def duplicateCurvesToNeg2PI(self, curves):
+    def duplicateCurvesToNeg2PI(self, curves: list[PolarCurve]) -> list[PolarCurve]:
         duped_curves = []
         width = self.f.params["width"]
         for curve in curves:
@@ -565,7 +582,9 @@ class PolarTransform:
 
         return duped_curves
 
-    def updateFunctionData(self, rmax, points, splines):
+    def updateFunctionData(
+        self, rmax: float, points: list[PolarPoint], splines: list[PolarCurve]
+    ) -> None:
         # replace the the transformed data in the gradeable data struct
         # this only works for freeform only inputs
         del self.f[:]
@@ -600,27 +619,27 @@ class PolarTransform:
             p_flipped = [p[0], height - p[1]]
             self.f.append({"point": p_flipped})
 
-    def sample_x_and_y(self, curve, step):
+    def sample_x_and_y(self, curve: CurveFunction, step: float) -> list[list[float]]:
         samples = []
         x_t = curve.x
         y_t = curve.y
 
         for t in np.arange(0, 1, step):
             # interpolate the x and y values
-            x = np.polyval(x_t, t)
-            y = np.polyval(y_t, t)
+            x = float(np.polyval(x_t, t))
+            y = float(np.polyval(y_t, t))
 
             samples.append([x, y])
 
         return samples
 
-    def sample_last_t_1(self, curve):
-        x = np.polyval(curve.x, 1)
-        y = np.polyval(curve.y, 1)
+    def sample_last_t_1(self, curve: CurveFunction) -> list[float]:
+        x = float(np.polyval(curve.x, 1))
+        y = float(np.polyval(curve.y, 1))
 
         return [x, y]
 
-    def polar_transform(self, coords):
+    def polar_transform(self, coords: list[float]) -> PolarPoint:
         r = np.linalg.norm(coords)
 
         theta = np.arctan2(coords[1], coords[0])
@@ -633,7 +652,7 @@ class PolarTransform:
 
         return [theta, r]
 
-    def findMinima(self, curve):
+    def findMinima(self, curve: PolarCurve) -> list[int]:
         minima = []
         for i, v in enumerate(curve):
             if i > 0 and i < len(curve) - 1 and curve[i - 1][1] > v[1] and curve[i + 1][1] > v[1]:
@@ -641,7 +660,7 @@ class PolarTransform:
 
         return minima
 
-    def findMaxima(self, curve):
+    def findMaxima(self, curve: PolarCurve) -> list[int]:
         maxima = []
         for i, v in enumerate(curve):
             if i > 0 and i < len(curve) - 1 and curve[i - 1][1] < v[1] and curve[i + 1][1] < v[1]:
@@ -649,7 +668,7 @@ class PolarTransform:
 
         return maxima
 
-    def findMaximumValue(self, curve):
+    def findMaximumValue(self, curve: PolarCurve) -> float:
         maximum = float("-inf")
         for _theta, r in curve:
             if r > maximum:

@@ -9,6 +9,7 @@ from ..types import SketchGrader, SketchSubmission, SplinePoints, TernaryResult
 from .Axis import Axis
 from .Function import Function
 from .MultiFunction import MultiFunction
+from .Point import Point
 from .SplineFunction import SplineFunction
 
 # A comparer consumed by `always_comparer_at_points` — takes (a, b, delta) and
@@ -48,7 +49,7 @@ def greater_or_equal(a: float, b: float, delta: float = 0) -> float:
 class MultipleSplinesFunction(MultiFunction):  # noqa: PLR0904
     functions: list[SplineFunction]
     domain: list[list[float]]
-    points: list
+    points: list[Point]
 
     def __init__(
         self,
@@ -82,7 +83,7 @@ class MultipleSplinesFunction(MultiFunction):  # noqa: PLR0904
     def create_from_path_info(self, path_info: SplinePoints | None) -> None:
         self.functions = []
         self.points = []
-        xvals: list[list[float]] = []
+        xvals = []
         toolid = self.current_tool
         submission_data = self.submission["gradeable"][toolid]  # CHECK
         for i in range(len(submission_data)):
@@ -465,7 +466,7 @@ class MultipleSplinesFunction(MultiFunction):  # noqa: PLR0904
 
     def find_closest_yvals(self, yval: float) -> list[float]:
         # gets start and end vals for each spline, then sorts them to the left and right
-        yvals: list[float] = []
+        yvals = []
         for function in self.functions:
             min = function.get_min_value_between(self.xaxis.domain[0], self.xaxis.domain[1])
             max = function.get_max_value_between(self.xaxis.domain[0], self.xaxis.domain[1])
@@ -642,7 +643,7 @@ class MultipleSplinesFunction(MultiFunction):  # noqa: PLR0904
 
         # compares the expected angle (from the expected slope m) and the actual angle
         expectedAngle = np.arctan2(self.yscale * m, self.xscale * 1)
-        no_gap, actualAngle = self.get_angle_at_gap(x)
+        _, actualAngle = self.get_angle_at_gap(x)
         return abs(expectedAngle - actualAngle) < tolerance
 
     def has_constant_value_y_between(self, y: float, xmin: float, xmax: float) -> bool:
