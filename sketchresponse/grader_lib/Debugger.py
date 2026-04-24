@@ -4,7 +4,7 @@ from typing import Any
 class Debugger:
     """An class that allows you to store a debug message as well as optional vars that help construct the debug message."""
 
-    def __init__(self, grader_name: str, toolid: str, tolerance: int):
+    def __init__(self, grader_name: str, toolid: str, tolerance: int) -> None:
         self.message = (
             "Grader : " + grader_name + " | Tool : " + toolid + " | Tolerance: " + str(tolerance)
         )

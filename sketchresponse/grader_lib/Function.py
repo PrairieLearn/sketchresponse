@@ -1,3 +1,9 @@
+from __future__ import annotations
+
+from typing import cast
+
+from ..types import FunctionDomain, SketchGrader, SplinePoints, TernaryResult
+from .Axis import Axis
 from .Debugger import Debugger
 from .Tag import Tag, Tagable
 
@@ -10,7 +16,15 @@ class Function(Tag, Tagable):  # noqa: PLR0904
     # establishes the axes, the size (from the axes), and the tolerance, with default tolerance of 20 pixels
     # Function info will be stored in terms of the function itself, not the pixel information
     # the actual path is yet to be specified
-    def __init__(self, xaxis, yaxis, path_info, grader, current_tool, tolerance=None):
+    def __init__(
+        self,
+        xaxis: Axis,
+        yaxis: Axis,
+        path_info: SplinePoints | None,
+        grader: SketchGrader,
+        current_tool: str,
+        tolerance: dict[str, float] | None = None,
+    ) -> None:
         super().__init__()
         if tolerance is None:
             tolerance = {}
@@ -36,43 +50,47 @@ class Function(Tag, Tagable):  # noqa: PLR0904
 
     # helper methods for constructor
 
-    def set_default_tolerance(self, key, default_value):
+    def set_default_tolerance(self, key: str, default_value: float) -> None:
         if key not in self.tolerance:
             self.tolerance[key] = default_value
 
-    def set_tolerance(self, key, value):
+    def set_tolerance(self, key: str, value: float) -> None:
         self.tolerance[key] = value
 
     # sets the variables related to the path, and finds the domain
-    def create_from_path_info(self, path_info):
-        self.domain = []
+    def create_from_path_info(self, path_info: SplinePoints | None) -> None:
+        self.domain: FunctionDomain = []
 
     # methods to handle pixel <-> math conversions
 
-    def _xval_to_px(self, xval):
+    def _xval_to_px(self, xval: float) -> float:
         return self.xaxis.coord_to_pixel(xval)
 
-    def _px_to_xval(self, px):
+    def _px_to_xval(self, px: float) -> float:
         return self.xaxis.pixel_to_coord(px)
 
-    def _yval_to_px(self, yval):
+    def _yval_to_px(self, yval: float) -> float:
         return self.yaxis.coord_to_pixel(yval)
 
-    def _px_to_yval(self, px):
+    def _px_to_yval(self, px: float) -> float:
         return self.yaxis.pixel_to_coord(px)
 
     # methods for getting various properties of the function at certain locations
     # done in math space, not pixel space
 
-    def is_between(self, xmin, xmax):
-        dom = self.domain
+    def is_between(self, xmin: float, xmax: float) -> bool:
+        # Only called on functions whose domain has the nested list[[a, b], ...]
+        # shape — see MultiFunction.find_functions_between, the only caller.
+        dom = cast("list[list[float]]", self.domain)
         dom_start = dom[0]
         dom_end = dom[-1]
         xleft = dom_start[0]
         xright = dom_end[-1]
         return not (xleft > xmax or xright < xmin)
 
-    def within_y_range(self, y_val, negative_tolerance=0, positive_tolerance=0):
+    def within_y_range(
+        self, y_val: float | None, negative_tolerance: float = 0, positive_tolerance: float = 0
+    ) -> bool:
         if y_val is None:
             return False
         yrange = self.yaxis.domain
@@ -82,7 +100,9 @@ class Function(Tag, Tagable):  # noqa: PLR0904
         g_pos_t = positive_tolerance * scale
         return y_val <= (yrange[0] - g_neg_t + g_pos_t) and y_val >= (yrange[1] + g_neg_t - g_pos_t)
 
-    def within_x_range(self, x_val, negative_tolerance=0, positive_tolerance=0):
+    def within_x_range(
+        self, x_val: float | None, negative_tolerance: float = 0, positive_tolerance: float = 0
+    ) -> bool:
         if x_val is None:
             return False
         xrange = self.xaxis.domain
@@ -92,52 +112,63 @@ class Function(Tag, Tagable):  # noqa: PLR0904
         g_pos_t = positive_tolerance * scale
         return x_val >= (xrange[0] + g_neg_t - g_pos_t) and x_val <= (xrange[1] - g_neg_t + g_pos_t)
 
-    def get_value_at(self, xval):
+    def get_value_at(self, xval: float) -> float | None:
         raise NotImplementedError("The get_value_at method is not implemented by this class.")
 
-    def get_angle_at(self, xval):
+    def get_angle_at(self, xval: float) -> float | None:
         raise NotImplementedError("The get_angle_at method is not implemented by this class.")
 
-    def get_slope_at(self, xval):
+    def get_slope_at(self, xval: float) -> float | None:
         raise NotImplementedError("The get_slope_at method is not implemented by this class.")
 
-    def get_min_value_between(self, xmin, xmax):
+    def get_min_value_between(self, xmin: float, xmax: float) -> float | None:
         raise NotImplementedError(
             "The get_min_value_between method is not implemented by this class."
         )
 
-    def get_max_value_between(self, xmin, xmax):
+    def get_max_value_between(self, xmin: float, xmax: float) -> float | None:
         raise NotImplementedError(
             "The get_max_value_between method is not implemented by this class."
         )
 
-    def get_horizontal_line_crossings(self, yval):
+    def get_horizontal_line_crossings(self, yval: float) -> list[float]:
         raise NotImplementedError(
             "The get_horizontal_line_crossings method is not implemented by this class."
         )
 
-    def get_vertical_line_crossing(self, xval):
+    def get_vertical_line_crossings(self, xval: float) -> list[float]:
         raise NotImplementedError(
-            "The get_vertical_line_crossing method is not implemented by this class."
+            "The get_vertical_line_crossings method is not implemented by this class."
         )
 
-    def get_domain(self):
+    def is_defined_at(self, xval: float) -> bool:
+        raise NotImplementedError("The is_defined_at method is not implemented by this class.")
+
+    def get_domain(self) -> FunctionDomain:
         raise NotImplementedError("The get_domain method is not implemented by this class.")
 
-    def does_not_exist_between(self, xmin, xmax, tolerance=0):
+    def does_not_exist_between(self, xmin: float, xmax: float, tolerance: float = 0) -> bool:
         raise NotImplementedError(
             "The does_not_exist_between method is not implemented by this class."
         )
 
-    def get_sample_points(self, numPoints, xmin, xmax):
+    def get_sample_points(
+        self, numPoints: int, xmin: float, xmax: float
+    ) -> tuple[list[float], list[float], list[float]]:
         raise NotImplementedError("The get_sample_points method is not implemented by this class.")
 
     # Grader functions ###
 
-    def is_a_function(self):
+    def is_a_function(self) -> bool:
         raise NotImplementedError("The is_a_function method is not implemented by this class.")
 
-    def has_value_y_at_x(self, y, x, yTolerance=None, xTolerance=None):
+    def has_value_y_at_x(
+        self,
+        y: float,
+        x: float,
+        yTolerance: float | None = None,
+        xTolerance: float | None = None,
+    ) -> bool:
         """Return whether the function has the value y at x.
 
         Args:
@@ -192,7 +223,9 @@ class Function(Tag, Tagable):  # noqa: PLR0904
                 )
             return False
 
-    def is_zero_at_x_equals_zero(self, yTolerance=None, xTolerance=None):
+    def is_zero_at_x_equals_zero(
+        self, yTolerance: float | None = None, xTolerance: float | None = None
+    ) -> bool:
         """Return whether the function is zero at x equals zero.
 
         Args:
@@ -208,7 +241,9 @@ class Function(Tag, Tagable):  # noqa: PLR0904
         """
         return self.has_value_y_at_x(0, 0, yTolerance=yTolerance, xTolerance=xTolerance)
 
-    def is_greater_than_y_between(self, y, xmin, xmax, tolerance=None):
+    def is_greater_than_y_between(
+        self, y: float, xmin: float, xmax: float, tolerance: float | None = None
+    ) -> TernaryResult:
         """Return whether function is always greater than y in the range xmin to xmax.
 
         Args:
@@ -240,8 +275,11 @@ class Function(Tag, Tagable):  # noqa: PLR0904
                     f"Min value {min_val} is {(y - min_val) * self.yscale} pixels below y = {y}."
                 )
                 self.debugger.add(f"Max allowed is {tolerance * self.yscale} pixels.")
+            return False
 
-    def is_less_than_y_between(self, y, xmin, xmax, tolerance=None):
+    def is_less_than_y_between(
+        self, y: float, xmin: float, xmax: float, tolerance: float | None = None
+    ) -> TernaryResult:
         """Return whether function is always less than y in the range xmin to xmax.
 
         Args:
@@ -274,3 +312,4 @@ class Function(Tag, Tagable):  # noqa: PLR0904
                     f"Max value {max_val} is {(max_val - y) * self.yscale} pixels above y = {y}."
                 )
                 self.debugger.add(f"Max allowed is {tolerance * self.yscale} pixels.")
+            return False

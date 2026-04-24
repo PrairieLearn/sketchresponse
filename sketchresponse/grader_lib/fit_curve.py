@@ -5,12 +5,20 @@ by Philip J. Schneider
 Based on https://github.com/volkerp/fitCurves
 """
 
+from __future__ import annotations
+
+import numpy as np
 from numpy import array, dot, zeros
 from numpy.linalg import norm
+from numpy.typing import ArrayLike, NDArray
+
+from ..types import SplinePoints
+
+FloatArray = NDArray[np.float64]
 
 
 # Fit one (or more) Bezier curves to a set of points
-def fitCurve(rawPoints, maxError):
+def fitCurve(rawPoints: ArrayLike, maxError: float) -> SplinePoints:
     points = array(rawPoints)
     left_tangent = normalize(points[1] - points[0])
     right_tangent = normalize(points[-2] - points[-1])
@@ -18,7 +26,7 @@ def fitCurve(rawPoints, maxError):
     return [fit[0][0].tolist()] + [point.tolist() for curve in fit for point in curve[1:]]
 
 
-def q(ctrlPoly, t):
+def q(ctrlPoly: list[FloatArray], t: float) -> FloatArray:
     return (
         (1.0 - t) ** 3 * ctrlPoly[0]
         + 3 * (1.0 - t) ** 2 * t * ctrlPoly[1]
@@ -28,7 +36,7 @@ def q(ctrlPoly, t):
 
 
 # evaluates cubic bezier first derivative at t, return point
-def qprime(ctrlPoly, t):
+def qprime(ctrlPoly: list[FloatArray], t: float) -> FloatArray:
     return (
         3 * (1.0 - t) ** 2 * (ctrlPoly[1] - ctrlPoly[0])
         + 6 * (1.0 - t) * t * (ctrlPoly[2] - ctrlPoly[1])
@@ -37,13 +45,18 @@ def qprime(ctrlPoly, t):
 
 
 # evaluates cubic bezier second derivative at t, return point
-def qprimeprime(ctrlPoly, t):
+def qprimeprime(ctrlPoly: list[FloatArray], t: float) -> FloatArray:
     return 6 * (1.0 - t) * (ctrlPoly[2] - 2 * ctrlPoly[1] + ctrlPoly[0]) + 6 * (t) * (
         ctrlPoly[3] - 2 * ctrlPoly[2] + ctrlPoly[1]
     )
 
 
-def fitCubic(points, leftTangent, rightTangent, error):
+def fitCubic(
+    points: FloatArray,
+    leftTangent: FloatArray,
+    rightTangent: FloatArray,
+    error: float,
+) -> list[list[FloatArray]]:
     # Use heuristic if region only has two points in it
     if len(points) == 2:
         dist = norm(points[0] - points[1]) / 3.0
@@ -82,8 +95,13 @@ def fitCubic(points, leftTangent, rightTangent, error):
     return beziers
 
 
-def generateBezier(points, parameters, leftTangent, rightTangent):
-    bez_curve = [points[0], None, None, points[-1]]
+def generateBezier(
+    points: FloatArray,
+    parameters: list[float],
+    leftTangent: FloatArray,
+    rightTangent: FloatArray,
+) -> list[FloatArray]:
+    bez_curve: list[FloatArray] = [points[0], points[0], points[-1], points[-1]]
 
     # compute the A's
     a = zeros((len(parameters), 2, 2))
@@ -136,14 +154,18 @@ def generateBezier(points, parameters, leftTangent, rightTangent):
     return bez_curve
 
 
-def reparameterize(bezier, points, parameters):
+def reparameterize(
+    bezier: list[FloatArray],
+    points: FloatArray,
+    parameters: list[float],
+) -> list[float]:
     return [
         newtonRaphsonRootFind(bezier, point, u)
         for point, u in zip(points, parameters, strict=False)
     ]
 
 
-def newtonRaphsonRootFind(bez, point, u):
+def newtonRaphsonRootFind(bez: list[FloatArray], point: FloatArray, u: float) -> float:
     """
     Newton's root finding algorithm calculates f(x)=0 by reiterating
     x_n+1 = x_n - f(x_n)/f'(x_n)
@@ -169,7 +191,7 @@ def newtonRaphsonRootFind(bez, point, u):
         return u - numerator / denominator
 
 
-def chordLengthParameterize(points):
+def chordLengthParameterize(points: FloatArray) -> list[float]:
     u = [0.0]
     for i in range(1, len(points)):
         u.append(u[i - 1] + norm(points[i] - points[i - 1]))
@@ -180,9 +202,13 @@ def chordLengthParameterize(points):
     return u
 
 
-def computeMaxError(points, bez, parameters):
+def computeMaxError(
+    points: FloatArray,
+    bez: list[FloatArray],
+    parameters: list[float],
+) -> tuple[float, int]:
     max_dist = 0.0
-    split_point = len(points) / 2
+    split_point = len(points) // 2
     for i, (point, u) in enumerate(zip(points, parameters, strict=False)):
         dist = norm(q(bez, u) - point) ** 2
         if dist > max_dist:
@@ -192,5 +218,5 @@ def computeMaxError(points, bez, parameters):
     return max_dist, split_point
 
 
-def normalize(v):
+def normalize(v: FloatArray) -> FloatArray:
     return v / norm(v)

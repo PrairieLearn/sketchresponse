@@ -18,6 +18,19 @@ class TestPolygonMethods(TestData.TestData):
         )
         self.assertTrue(poly.contains_point(0, 1))
 
+    def test_null_polygon_submission_is_ignored(self):
+        data = self.load_as_gradeable_collections("polygon_point")
+        d = data[0]
+        args = d["pl"]
+        args.submission["gradeable"][args.tool_id].insert(0, None)
+
+        poly = Polygon.Polygons(
+            args.grader, args.submission, args.submission["meta"]["config"], args.tool_id
+        )
+
+        self.assertEqual(poly.get_polygon_count(), 1)
+        self.assertTrue(poly.contains_point(0, 1))
+
     def test_contains_point_false(self):
         data = self.load_as_gradeable_collections("polygon_point")
         d = data[0]

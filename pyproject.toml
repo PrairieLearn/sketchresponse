@@ -72,19 +72,39 @@ python_files = ["test*.py"]
 dev = [
     "matplotlib>=3.0.0",
     "pandas>=1.0.0",
+    "pyright>=1.1.409",
     "pytest>=7.0.0",
     "ruff>=0.8.0",
-    "ty>=0.0.16",
 ]
 
-[tool.ty.src]
+[tool.pyright]
+include = ["sketchresponse"]
 exclude = [
-    "grader_scripts/",  # example/template scripts with broken runtime calls
+    "grader_scripts",
+    "**/__pycache__",
 ]
-
-[tool.ty.environment]
-python-version = "3.10"
-
-[tool.ty.analysis]
-# flask is an optional dependency (server extra)
-allowed-unresolved-imports = ["flask"]
+pythonVersion = "3.10"
+typeCheckingMode = "strict"
+# SketchConfig/SketchItem/SketchSubmission are declared total=False so every
+# key is technically optional, but the code treats them as present at usage
+# sites. Disable the strict-access check to match mypy's default behavior.
+reportTypedDictNotRequiredAccess = "none"
+# Subclasses of Function (CurveFunction, SplineFunction, MultipleSplinesFunction)
+# deliberately narrow `domain` / `functions` to the concrete shape they use.
+# These overrides are safe because the subclasses never expose the wider type.
+reportIncompatibleVariableOverride = "none"
+# Unknown-type propagation from numpy/sympy. Both ship stubs, but sympy's
+# geometry stubs are narrow (e.g. Segment.points is tuple[Basic, Basic]
+# instead of tuple[Point2D, Point2D]) and numpy's polyval/ndarray types leak
+# Any. Re-enable these if you're willing to add cast(...) at the library
+# boundary.
+reportUnknownMemberType = "none"
+reportUnknownVariableType = "none"
+reportUnknownArgumentType = "none"
+reportUnknownLambdaType = "none"
+reportMissingTypeStubs = "none"
+# Stylistic strict-mode checks we don't enforce — independent of library typing.
+reportPrivateUsage = "none"
+reportUnusedCallResult = "none"
+reportImplicitOverride = "none"
+reportImportCycles = "none"

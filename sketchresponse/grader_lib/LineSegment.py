@@ -1,14 +1,30 @@
+from __future__ import annotations
+
 import math
+from collections.abc import Callable
+from typing import TypeVar
 
 import numpy as np
 
+from ..types import SketchConfig, SketchGrader, SketchSubmission
 from .Gradeable import Gradeable
 from .Point import Point
 from .Tag import Tag
 
+_T = TypeVar("_T")
+
 
 class LineSegments(Gradeable):  # noqa: PLR0904
-    def __init__(self, grader, submission, config, current_tool, tolerance=None):
+    segments: list[LineSegment]
+
+    def __init__(
+        self,
+        grader: SketchGrader,
+        submission: SketchSubmission,
+        config: SketchConfig,
+        current_tool: str,
+        tolerance: dict[str, float] | None = None,
+    ) -> None:
         super().__init__(grader, submission, config, current_tool, tolerance)
 
         self.set_default_tolerance(
@@ -50,10 +66,10 @@ class LineSegments(Gradeable):  # noqa: PLR0904
         if len(self.segments) > 0:
             self.set_tagables(self.segments)
 
-    def isALine(self, spline):
+    def isALine(self, spline: list[list[float]]) -> bool:
         # compute R^2 fitness of a straight line return true if > .99
-        xs = [x for x, y in spline]
-        ys = [y for x, y in spline]
+        xs = [x for x, _ in spline]
+        ys = [y for _, y in spline]
 
         _, res, _, _, _ = np.polyfit(xs, ys, 1, full=True)
 
@@ -67,13 +83,13 @@ class LineSegments(Gradeable):  # noqa: PLR0904
 
         return r2[0] > 0.99
 
-    def value_from_spline(self, spline):
+    def value_from_spline(self, spline: list[list[float]]) -> LineSegment:
         point1 = Point(self, spline[0][0], spline[0][1])
         point2 = Point(self, spline[3][0], spline[3][1])
 
         return LineSegment(point1, point2)
 
-    def value_from_polyline(self, spline):
+    def value_from_polyline(self, spline: list[list[float]]) -> list[LineSegment]:
         segs = []
         points = []
         while len(spline):
@@ -88,17 +104,17 @@ class LineSegments(Gradeable):  # noqa: PLR0904
 
     # Grader Functions ###
 
-    def get_range_defined(self):
+    def get_range_defined(self) -> list[list[float]]:
         xrange = []
         for segment in self.segments:
-            segment = self.cut_segment_to_y(segment)
-            ep1 = segment[0]
-            ep2 = segment[1]
+            cut_segment = self.cut_segment_to_y(segment)
+            ep1 = cut_segment[0]
+            ep2 = cut_segment[1]
             x1, x2 = self.swap(ep1[0], ep2[0])
             xrange.append([x1, x2])
         return self.collapse_ranges(xrange)
 
-    def is_increasing_between(self, xmin, xmax):
+    def is_increasing_between(self, xmin: float, xmax: float) -> bool:
         segments = self.get_segments_between_strict(xmin, xmax)
         if len(segments) == 0:
             if self.debug:
@@ -120,7 +136,7 @@ class LineSegments(Gradeable):  # noqa: PLR0904
                 return False
         return True
 
-    def is_decreasing_between(self, xmin, xmax):
+    def is_decreasing_between(self, xmin: float, xmax: float) -> bool:
         segments = self.get_segments_between_strict(xmin, xmax)
         if len(segments) == 0:
             if self.debug:
@@ -142,7 +158,13 @@ class LineSegments(Gradeable):  # noqa: PLR0904
                 return False
         return True
 
-    def matches_function(self, func, x1, x2, tolerance):
+    def matches_function(
+        self,
+        func: Callable[[float], float],
+        x1: float,
+        x2: float,
+        tolerance: int,
+    ) -> bool:
         segments = self.get_segments_between_strict(x1, x2)
         if len(segments) == 0:
             if self.debug:
@@ -165,15 +187,27 @@ class LineSegments(Gradeable):  # noqa: PLR0904
                     hits += 1
                 total += 1
             return hits == total  # general estimate
+        return True
 
-    def lt_function(self, func, x1, x2, tolerance):
+    def lt_function(
+        self, func: Callable[[float], float], x1: float, x2: float, tolerance: int
+    ) -> bool:
         return self.ltgt_func(func, x1, x2, tolerance, greater=False)
 
-    def gt_function(self, func, x1, x2, tolerance):
+    def gt_function(
+        self, func: Callable[[float], float], x1: float, x2: float, tolerance: int
+    ) -> bool:
         return self.ltgt_func(func, x1, x2, tolerance, greater=True)
 
     # check that each in-range segment is lt or gt the function
-    def ltgt_func(self, func, x1, x2, tolerance, greater):
+    def ltgt_func(
+        self,
+        func: Callable[[float], float],
+        x1: float,
+        x2: float,
+        tolerance: int,
+        greater: bool,
+    ) -> bool:
         segments = self.get_segments_between_strict(x1, x2)
         if len(segments) == 0:
             if self.debug:
@@ -194,16 +228,19 @@ class LineSegments(Gradeable):  # noqa: PLR0904
                     return False
         return True
 
-    def has_value_at(self, y, x, tolerance=None):
+    def has_value_at(
+        self, y: float | None, x: float | None, tolerance: float | None = None
+    ) -> bool:
         if tolerance is None:
             tolerance = self.tolerance["pixel"]
         if x is None:
+            assert y is not None
             return self.defined_at_y(y, tolerance)
         if y is None:
             return self.defined_at_x(x, tolerance)
         return self.has_value_y_at_x(y, x, yTolerance=tolerance, xTolerance=tolerance / 2)
 
-    def defined_at_x(self, x, tolerance):
+    def defined_at_x(self, x: float, tolerance: float) -> bool:
         endpoints = []
         for segment in self.segments:
             cut_segment = self.cut_segment_to_y(segment)
@@ -229,7 +266,7 @@ class LineSegments(Gradeable):  # noqa: PLR0904
             self.debugger.add(f"Max allowed is {tolerance} pixels.")
         return False
 
-    def defined_at_y(self, y, tolerance):
+    def defined_at_y(self, y: float, tolerance: float) -> bool:
         endpoints = []
         for segment in self.segments:
             p1 = segment.getStartPoint()
@@ -266,7 +303,13 @@ class LineSegments(Gradeable):  # noqa: PLR0904
             self.debugger.add(f"Max allowed is {tolerance} pixels.")
         return False
 
-    def has_value_y_at_x(self, y, x, yTolerance=None, xTolerance=None):
+    def has_value_y_at_x(
+        self,
+        y: float,
+        x: float,
+        yTolerance: float | None = None,
+        xTolerance: float | None = None,
+    ) -> bool:
         """Return whether the function has the value y at x.
 
         Args:
@@ -318,7 +361,9 @@ class LineSegments(Gradeable):  # noqa: PLR0904
 
         return False
 
-    def is_greater_than_y_between(self, y, xmin, xmax, tolerance=None):
+    def is_greater_than_y_between(
+        self, y: float, xmin: float, xmax: float, tolerance: float | None = None
+    ) -> bool:
         """Return whether function is always greater than y in the range xmin to xmax.
 
         Args:
@@ -344,7 +389,7 @@ class LineSegments(Gradeable):  # noqa: PLR0904
                 self.debugger.add("Line not within range.")
             return True
         else:
-            if self.get_min_value_between(xmin, xmax) > y - tolerance:
+            if min_val > y - tolerance:
                 return True
             if self.debug:
                 self.debugger.add(
@@ -353,7 +398,9 @@ class LineSegments(Gradeable):  # noqa: PLR0904
                 self.debugger.add(f"Max allowed is {tolerance * self.yscale} pixels.")
         return False
 
-    def is_less_than_y_between(self, y, xmin, xmax, tolerance=None):
+    def is_less_than_y_between(
+        self, y: float, xmin: float, xmax: float, tolerance: float | None = None
+    ) -> bool:
         """Return whether function is always less than y in the range xmin to xmax.
 
         Args:
@@ -388,7 +435,9 @@ class LineSegments(Gradeable):  # noqa: PLR0904
                 self.debugger.add(f"Max allowed is {tolerance * self.yscale} pixels.")
         return False
 
-    def check_eps(self, point, mode, tolerance):
+    def check_eps(
+        self, point: list[float] | tuple[float, float], mode: str, tolerance: float
+    ) -> bool:
         for segment in self.segments:
             match mode:
                 case "either":
@@ -401,14 +450,15 @@ class LineSegments(Gradeable):  # noqa: PLR0904
                     return self.check_segment_endpoint(segment, point, tolerance)
                 case _:
                     return False
+        return False
 
     def check_segment_endpoint(
         self,
-        segment,
-        point,
-        tolerance=None,
-        squared=False,
-    ):
+        segment: LineSegment,
+        point: list[float] | tuple[float, float],
+        tolerance: float | None = None,
+        squared: bool = False,
+    ) -> bool:
         """Return whether the segment has its end point at the point (x,y).
 
         Args:
@@ -423,25 +473,32 @@ class LineSegments(Gradeable):  # noqa: PLR0904
         if tolerance is None:
             tolerance = self.tolerance["line_distance_squared"]
 
-        point = Point(self, point[0], point[1], pixel=False)
+        target = Point(self, point[0], point[1], pixel=False)
         end = segment.end
 
         if squared:
-            distance = end.get_px_distance_squared(point)
+            distance = end.get_px_distance_squared(target)
             if distance <= tolerance:
                 return True
             if self.debug:
                 self.debugger.add(f"End point is {distance} pixels away from expected point.")
                 self.debugger.add(f"Max allowed is {tolerance} pixels.")
         else:
-            distance = end.get_euclidean_distance(point)
+            distance = end.get_euclidean_distance(target)
             if distance <= tolerance:
                 return True
             if self.debug:
                 self.debugger.add(f"End point is {distance} pixels away from expected point.")
                 self.debugger.add(f"Max allowed is {tolerance} pixels.")
+        return False
 
-    def check_segment_startpoint(self, segment, point, tolerance=None, squared=False):
+    def check_segment_startpoint(
+        self,
+        segment: LineSegment,
+        point: list[float] | tuple[float, float],
+        tolerance: float | None = None,
+        squared: bool = False,
+    ) -> bool:
         """Return whether the segment has its start point at the point (x,y).
 
         Args:
@@ -456,18 +513,18 @@ class LineSegments(Gradeable):  # noqa: PLR0904
         if tolerance is None:
             tolerance = self.tolerance["line_distance_squared"]
         x, y = point
-        point = Point(self, x, y, pixel=False)
+        target = Point(self, x, y, pixel=False)
         start = segment.start
 
         if squared:
-            distance = start.get_px_distance_squared(point)
+            distance = start.get_px_distance_squared(target)
             if distance <= tolerance:
                 return True
             if self.debug:
                 self.debugger.add(f"Start point is {distance} pixels away from expected point.")
                 self.debugger.add(f"Max allowed is {tolerance}.")
         else:
-            distance = start.get_euclidean_distance(point)
+            distance = start.get_euclidean_distance(target)
             if distance <= tolerance:
                 return True
             if self.debug:
@@ -475,8 +532,9 @@ class LineSegments(Gradeable):  # noqa: PLR0904
                     f"Start point is {round(distance, 3)} pixels away from expected point."
                 )
                 self.debugger.add(f"Max allowed is {tolerance}.")
+        return False
 
-    def match_length(self, expected_length, tolerance):
+    def match_length(self, expected_length: float, tolerance: float) -> bool:
         """Return whether the length of all line segments combined matches the expected length.
 
         Args:
@@ -505,7 +563,7 @@ class LineSegments(Gradeable):  # noqa: PLR0904
                 return False
         return True
 
-    def get_segment_length(self, segment, pixel=False):
+    def get_segment_length(self, segment: LineSegment, pixel: bool = False) -> float:
         """Return the length of the line segment.
 
         Args:
@@ -519,7 +577,7 @@ class LineSegments(Gradeable):  # noqa: PLR0904
 
         return math.sqrt(dx**2 + dy**2)
 
-    def match_angle(self, angle, allow_flip, tolerance):
+    def match_angle(self, angle: float, allow_flip: bool, tolerance: float) -> bool:
         angle = angle % 360
         expected_angle = angle * math.radians(1)
         if len(self.segments) == 0:
@@ -599,8 +657,9 @@ class LineSegments(Gradeable):  # noqa: PLR0904
                     f"Submitted angle {round(no_pass[0], 3)} degrees differ from the expected angle {angle} by {round(no_pass_diffs[0], 3)} degrees with allow-flip."
                 )
                 self.debugger.add(f"Max allowed difference is {tolerance} degrees.")
+        return False
 
-    def get_segment_angle(self, segment):
+    def get_segment_angle(self, segment: LineSegment) -> float:
         """Return the angle of the line segment in radians (non-negative).
 
         Args:
@@ -618,7 +677,7 @@ class LineSegments(Gradeable):  # noqa: PLR0904
 
     # Helper Functions ###
 
-    def get_y_value_at_x(self, segment, x):
+    def get_y_value_at_x(self, segment: LineSegment, x: float) -> float:
         # get the y value of the given segment at the given x position
         startX = segment.start.x
         startY = segment.start.y
@@ -630,7 +689,7 @@ class LineSegments(Gradeable):  # noqa: PLR0904
 
         return (segSlope * x) + segInt
 
-    def get_x_value_at_y(self, segment, y):
+    def get_x_value_at_y(self, segment: LineSegment, y: float) -> float:
         # get the y value of the given segment at the given x position
         startX = segment.start.x
         startY = segment.start.y
@@ -641,7 +700,7 @@ class LineSegments(Gradeable):  # noqa: PLR0904
 
         return (y - startY) / segSlope + startX
 
-    def get_y_value_at_x_all(self, x):
+    def get_y_value_at_x_all(self, x: float) -> list[float]:
         # get the y value of the given segment at the given x position
         yvals = []
         for segment in self.segments:
@@ -653,7 +712,7 @@ class LineSegments(Gradeable):  # noqa: PLR0904
                     yvals.append(y)
         return yvals
 
-    def does_not_exist_between(self, xmin, xmax, tolerance):
+    def does_not_exist_between(self, xmin: float, xmax: float, tolerance: float) -> bool:
         """Return whether the function has no values defined in the range
            xmin to xmax.
 
@@ -679,7 +738,7 @@ class LineSegments(Gradeable):  # noqa: PLR0904
 
         return True
 
-    def does_exist_between(self, xmin, xmax):
+    def does_exist_between(self, xmin: float, xmax: float) -> bool:
         """Return whether the function has values defined in the range xmin
            to xmax.
 
@@ -702,7 +761,9 @@ class LineSegments(Gradeable):  # noqa: PLR0904
 
         return False
 
-    def seg_between_vals(self, segment, xmin, xmax):
+    def seg_between_vals(
+        self, segment: LineSegment, xmin: float, xmax: float
+    ) -> tuple[float, float]:
         p1 = segment.getEndPoint()
         p2 = segment.getStartPoint()
         p1, p2 = self.swap(p1, p2)
@@ -711,7 +772,7 @@ class LineSegments(Gradeable):  # noqa: PLR0904
 
         return xleft, xright
 
-    def get_min_value_between(self, xmin, xmax):
+    def get_min_value_between(self, xmin: float, xmax: float) -> float | None:
         """Return the minimum value of the function in the domain [xmin, xmax].
 
         Args:
@@ -736,7 +797,7 @@ class LineSegments(Gradeable):  # noqa: PLR0904
         else:
             return None
 
-    def get_max_value_between(self, xmin, xmax):
+    def get_max_value_between(self, xmin: float, xmax: float) -> float | None:
         """Return the maximum value of the function in the domain [xmin, xmax].
 
         Args:
@@ -761,7 +822,7 @@ class LineSegments(Gradeable):  # noqa: PLR0904
         else:
             return None
 
-    def get_segments_between(self, xmin, xmax):
+    def get_segments_between(self, xmin: float, xmax: float) -> list[LineSegment]:
         """Return a list of line segments that exist between the given x values.
 
         Args:
@@ -788,7 +849,7 @@ class LineSegments(Gradeable):  # noqa: PLR0904
 
         return segmentsBetween
 
-    def get_segments_between_strict(self, xmin, xmax):
+    def get_segments_between_strict(self, xmin: float, xmax: float) -> list[LineSegment]:
         """Return a list of line segments that exist between the given x values.
 
         Args:
@@ -822,7 +883,7 @@ class LineSegments(Gradeable):  # noqa: PLR0904
 
         return segmentsBetweenStrict
 
-    def get_percent_overlap_of_range(self, segment, xmin, xmax):
+    def get_percent_overlap_of_range(self, segment: LineSegment, xmin: float, xmax: float) -> float:
         # make sure start and min are less than end and max
         xmin, xmax = self.swap(xmin, xmax)
 
@@ -833,17 +894,17 @@ class LineSegments(Gradeable):  # noqa: PLR0904
         overlap = self.get_overlap_length(segment, xmin, xmax)
         return overlap / range_length
 
-    def get_overlap_length(self, segment, xmin, xmax):
-        segment = self.cut_segment_to_y(segment)
-        x1 = segment[0][0]
-        x2 = segment[1][0]
+    def get_overlap_length(self, segment: LineSegment, xmin: float, xmax: float) -> float:
+        cut = self.cut_segment_to_y(segment)
+        x1 = cut[0][0]
+        x2 = cut[1][0]
         x1, x2 = self.swap(x1, x2)
 
         overlap = min(x2, xmax) - max(x1, xmin)
         overlap = max(overlap, 0.0)
         return overlap
 
-    def cut_segment_to_y(self, segment):
+    def cut_segment_to_y(self, segment: LineSegment) -> tuple[list[float], list[float]]:
         yrange = self.yaxis.domain
         endpoints = self.swap_eps(segment.getStartPoint(), segment.getEndPoint())
         if endpoints[0][1] < yrange[1]:
@@ -860,14 +921,16 @@ class LineSegments(Gradeable):  # noqa: PLR0904
             endpoints[1][0] = self.get_x_value_at_y(segment, yrange[0])
         return endpoints
 
-    def segment_within_y_range(self, segment, neg_tol=0):
+    def segment_within_y_range(self, segment: LineSegment, neg_tol: float = 0) -> bool:
         endpoints = self.swap_eps(segment.getStartPoint(), segment.getEndPoint())
         yvals = endpoints[0][1], endpoints[1][1]
         return bool(
             self.within_y_range(yvals[0], neg_tol) or self.within_y_range(yvals[1], neg_tol)
         )
 
-    def segment_within_y_range_between_x(self, segment, x1, x2, neg_tol=0):
+    def segment_within_y_range_between_x(
+        self, segment: LineSegment, x1: float, x2: float, neg_tol: float = 0
+    ) -> bool:
         endpoints = self.swap_eps(segment.getStartPoint(), segment.getEndPoint())
 
         x1, x2 = self.seg_between_vals(segment, x1, x2)
@@ -876,22 +939,14 @@ class LineSegments(Gradeable):  # noqa: PLR0904
             self.get_y_value_at_x(segment, x1),
             self.get_y_value_at_x(segment, x2),
         )
-        new_y1 = None
-        new_y2 = None
-        # start x value
-        if xrange_yvals[0] is not None:
-            if x1 > endpoints[0][0]:  # compare start x values, choose y value at higheset x value
-                new_y1 = xrange_yvals[0]
-            else:
-                new_y1 = endpoint_yvals[0]
+        # start x value — compare start x values, choose y value at highest x value
+        if x1 > endpoints[0][0]:
+            new_y1 = xrange_yvals[0]
         else:
             new_y1 = endpoint_yvals[0]
-        # end x value
-        if xrange_yvals[1] is not None:
-            if x2 < endpoints[1][0]:  # compare start x values, choose y value at lowest x value
-                new_y2 = xrange_yvals[1]
-            else:
-                new_y2 = endpoint_yvals[1]
+        # end x value — compare start x values, choose y value at lowest x value
+        if x2 < endpoints[1][0]:
+            new_y2 = xrange_yvals[1]
         else:
             new_y2 = endpoint_yvals[1]
 
@@ -901,65 +956,73 @@ class LineSegments(Gradeable):  # noqa: PLR0904
 
     # Minor Helper Functions ###
 
-    def swap(self, x1, x2):
-        if x1 > x2:
+    def swap(self, x1: _T, x2: _T) -> tuple[_T, _T]:
+        if x1 > x2:  # pyright: ignore[reportOperatorIssue]
             temp = x1
             x1 = x2
             x2 = temp
         return (x1, x2)
 
-    def swap_eps(self, p1, p2):
+    def swap_eps(self, p1: list[float], p2: list[float]) -> tuple[list[float], list[float]]:
         if p1[0] > p2[0]:
             return p2, p1
         else:
             return p1, p2
 
-    def x_is_between(self, x, xmin, xmax, tolerance):
+    def x_is_between(self, x: float, xmin: float, xmax: float, tolerance: float) -> bool:
         xmin -= tolerance
         xmax += tolerance
         return x >= xmin and x <= xmax
 
     # some vector helper functions
-    def dot(self, v, w):
+    def dot(self, v: tuple[float, float], w: tuple[float, float]) -> float:
         x, y = v
         X, Y = w
         return x * X + y * Y
 
-    def length(self, v):
+    def length(self, v: tuple[float, float]) -> float:
         x, y = v
         return math.sqrt(x * x + y * y)
 
-    def vector(self, b, e):
+    def vector(
+        self,
+        b: list[float] | tuple[float, float],
+        e: list[float] | tuple[float, float],
+    ) -> tuple[float, float]:
         x, y = b
         X, Y = e
         return (X - x, Y - y)
 
-    def unit(self, v):
+    def unit(self, v: tuple[float, float]) -> tuple[float, float]:
         x, y = v
         mag = self.length(v)
         return (x / mag, y / mag)
 
-    def distance(self, p0, p1):
+    def distance(
+        self,
+        p0: list[float] | tuple[float, float],
+        p1: list[float] | tuple[float, float],
+    ) -> float:
         return self.length(self.vector(p0, p1))
 
-    def scale(self, v, sc):
+    def scale(self, v: tuple[float, float], sc: float) -> tuple[float, float]:
         x, y = v
         return (x * sc, y * sc)
 
-    def add(self, v, w):
+    def add(self, v: tuple[float, float], w: tuple[float, float]) -> tuple[float, float]:
         x, y = v
         X, Y = w
         return (x + X, y + Y)
 
-    def slope(self, x0, y0, x1, y1):
+    def slope(self, x0: float, y0: float, x1: float, y1: float) -> float:
         if x1 == x0:
             return float("inf")
         return (y1 - y0) / (x1 - x0)
 
-    def intercept(self, x, y, m):
+    def intercept(self, x: float, y: float, m: float) -> float:
         return y - (m * x)
 
-    def between(self, val, start, end):
+    def between(self, val: float, start: float, end: float) -> bool:
         if start > end:
             return val <= start and val >= end
         else:
@@ -967,7 +1030,13 @@ class LineSegments(Gradeable):  # noqa: PLR0904
 
     # Other Functions from SketchResponse ###
 
-    def has_slope_m_at_x(self, m, x, ignoreDirection=True, tolerance=None):
+    def has_slope_m_at_x(
+        self,
+        m: float,
+        x: float,
+        ignoreDirection: bool = True,
+        tolerance: float | None = None,
+    ) -> bool:
         """Return whether the function has slope m at the value x.
 
         Args:
@@ -1009,7 +1078,13 @@ class LineSegments(Gradeable):  # noqa: PLR0904
 
         return False
 
-    def has_angle_t_at_x(self, t, x, ignoreDirection=True, tolerance=None):
+    def has_angle_t_at_x(
+        self,
+        t: float,
+        x: float,
+        ignoreDirection: bool = True,
+        tolerance: float | None = None,
+    ) -> bool:
         """Return whether the line segment at position x has an angle of t
            wrt the x axis.
 
@@ -1048,7 +1123,7 @@ class LineSegments(Gradeable):  # noqa: PLR0904
 
         return False
 
-    def has_constant_value_y_between(self, y, xmin, xmax):
+    def has_constant_value_y_between(self, y: float, xmin: float, xmax: float) -> bool:
         """Return whether the function has a constant value y over the range xmin to xmax.
 
         Args:
@@ -1071,7 +1146,7 @@ class LineSegments(Gradeable):  # noqa: PLR0904
                 percentOfRangeWithValueY += self.get_percent_overlap_of_range(segment, xmin, xmax)
         return percentOfRangeWithValueY > 0.95
 
-    def segment_has_constant_value_y(self, segment, y):
+    def segment_has_constant_value_y(self, segment: LineSegment, y: float) -> bool:
         """Return whether the line segment has the constant value of y
 
         Args:
@@ -1092,7 +1167,7 @@ class LineSegments(Gradeable):  # noqa: PLR0904
 
         return start_within_tolerance and end_within_tolerance
 
-    def segments_distances_to_point(self, point):
+    def segments_distances_to_point(self, point: Point) -> list[float]:
         # helper function computes the distances of each line segment to a give
         # point based on tutorial published at:
         # http://www.fundza.com/vectors/point2line/index.html
@@ -1118,8 +1193,13 @@ class LineSegments(Gradeable):  # noqa: PLR0904
         return distances
 
     def get_segments_at(
-        self, point=None, x=None, y=None, distTolerance=None, squareDistTolerance=None
-    ):
+        self,
+        point: Point | None = None,
+        x: float | None = None,
+        y: float | None = None,
+        distTolerance: float | None = None,
+        squareDistTolerance: float | None = None,
+    ) -> list[LineSegment] | None:
         """Return a list of line segments declared at the given value.
 
         Args:
@@ -1206,8 +1286,13 @@ class LineSegments(Gradeable):  # noqa: PLR0904
         return None
 
     def has_segments_at(
-        self, point=None, x=None, y=None, distTolerance=None, squareDistTolerance=None
-    ):
+        self,
+        point: Point | None = None,
+        x: float | None = None,
+        y: float | None = None,
+        distTolerance: float | None = None,
+        squareDistTolerance: float | None = None,
+    ) -> bool:
         """Return true if one or more line segment exists at the given point, x coord,
             y coord, or combination.
 
@@ -1237,7 +1322,12 @@ class LineSegments(Gradeable):  # noqa: PLR0904
         """
         return self.get_segments_at(point, x, y, distTolerance, squareDistTolerance) is not None
 
-    def check_both_segment_endpoints(self, segment, points, tolerance=None):
+    def check_both_segment_endpoints(
+        self,
+        segment: LineSegment,
+        points: list[list[float]],
+        tolerance: float | None = None,
+    ) -> bool:
         """Return whether the segment's start and end points are both in
            the list of points.
 
@@ -1274,7 +1364,7 @@ class LineSegments(Gradeable):  # noqa: PLR0904
 
         return point1_match and point2_match
 
-    def get_number_of_segments(self):
+    def get_number_of_segments(self) -> int:
         """Return the number of line segments in this grader module.
 
         Returns:
@@ -1283,7 +1373,9 @@ class LineSegments(Gradeable):  # noqa: PLR0904
         """
         return len(self.segments)
 
-    def is_zero_at_x_equals_zero(self, yTolerance=None, xTolerance=None):
+    def is_zero_at_x_equals_zero(
+        self, yTolerance: float | None = None, xTolerance: float | None = None
+    ) -> bool:
         """Return whether the function is zero at x equals zero.
 
         Args:
@@ -1301,7 +1393,13 @@ class LineSegments(Gradeable):  # noqa: PLR0904
 
     # checks that the local minima between xmin and xmax is at x
     # may specify xmin and xmax directly, or with a delta value that indicates them, or leave it to the default delta
-    def has_min_at(self, x, delta=None, xmin=None, xmax=None):
+    def has_min_at(
+        self,
+        x: float,
+        delta: float | None = None,
+        xmin: float | None = None,
+        xmax: float | None = None,
+    ) -> bool:
         """Return if the function has a local minimum at the value x.
 
         Args:
@@ -1326,17 +1424,25 @@ class LineSegments(Gradeable):  # noqa: PLR0904
         if xmax is None:
             xmax = x + delta
 
-        segments = self.get_segments_at(x=x)
+        segments = self.get_segments_at(x=x) or []
         min_val_at_x = float("inf")
         for segment in segments:
             val = self.get_y_value_at_x(segment, x)
             min_val_at_x = min(min_val_at_x, val)
 
         min_val_in_range = self.get_min_value_between(xmin, xmax)
+        if min_val_in_range is None:
+            return False
 
         return abs(min_val_at_x - min_val_in_range) <= delta
 
-    def has_max_at(self, x, delta=None, xmin=None, xmax=None):
+    def has_max_at(
+        self,
+        x: float,
+        delta: float | None = None,
+        xmin: float | None = None,
+        xmax: float | None = None,
+    ) -> bool:
         """Return if the function has a local maximum at the value x.
 
         Args:
@@ -1360,13 +1466,15 @@ class LineSegments(Gradeable):  # noqa: PLR0904
         if xmax is None:
             xmax = x + delta
 
-        segments = self.get_segments_at(x=x)
+        segments = self.get_segments_at(x=x) or []
         max_val_at_x = float("-inf")
         for segment in segments:
             val = self.get_y_value_at_x(segment, x)
             max_val_at_x = max(max_val_at_x, val)
 
         max_val_in_range = self.get_max_value_between(xmin, xmax)
+        if max_val_in_range is None:
+            return False
 
         return abs(max_val_at_x - max_val_in_range) <= delta
 
@@ -1376,12 +1484,15 @@ class LineSegment(Tag):
     start point and the end point of the segment.
     """
 
-    def __init__(self, point1, point2):
+    start: Point
+    end: Point
+
+    def __init__(self, point1: Point, point2: Point) -> None:
         super().__init__()
         self.start = point1
         self.end = point2
 
-    def getStartPoint(self):
+    def getStartPoint(self) -> list[float]:
         """Return the start point of the line segment as an [x, y] pair.
 
         Returns:
@@ -1390,7 +1501,7 @@ class LineSegment(Tag):
         """
         return [self.start.x, self.start.y]
 
-    def getEndPoint(self):
+    def getEndPoint(self) -> list[float]:
         """Return the end point of the line segment as an [x, y] pair.
 
         Returns:
