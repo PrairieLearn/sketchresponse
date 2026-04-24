@@ -1,7 +1,5 @@
 from __future__ import annotations
 
-from typing import Any
-
 import numpy as np
 
 from ..types import SketchGrader
@@ -27,7 +25,7 @@ class CurveFunction(Function):
         self,
         xaxis: Axis,
         yaxis: Axis,
-        path_info: Any,
+        path_info: list[list[float]] | None,
         grader: SketchGrader,
         current_tool: str,
         tolerance: dict[str, float] | None = None,

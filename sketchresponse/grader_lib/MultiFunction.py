@@ -1,7 +1,5 @@
 from __future__ import annotations
 
-from typing import Any
-
 import numpy as np
 
 from ..types import SketchGrader
@@ -15,16 +13,18 @@ from .Function import Function
 class MultiFunction(Function):
     """MultiFunction."""
 
+    functions: list[Function]
+
     # only provide path_info or functions, not both
     # will use functions if they exist
     def __init__(
         self,
         xaxis: Axis,
         yaxis: Axis,
-        path_info: Any,
+        path_info: list[list[float]] | None,
         grader: SketchGrader,
         current_tool: str,
-        functions: Any = None,
+        functions: list[Function] | None = None,
         tolerance: dict[str, float] | None = None,
     ) -> None:
         super().__init__(xaxis, yaxis, path_info, grader, current_tool, tolerance)

@@ -5,7 +5,6 @@ import inspect
 import json
 from collections.abc import Callable
 from copy import deepcopy
-from typing import Any
 
 from .types import (
     GraderResult,
@@ -14,11 +13,8 @@ from .types import (
     SketchItem,
 )
 
-# A grader-function return value: either a ready-made GraderResult dict (with
-# `ok` present) or a tuple of `(ok, ...)` with an optional msg as the second
-# element. The tuple form is widened to `tuple[Any, ...]` so downstream callers
-# aren't forced to over-specify the arity at the call site.
-GraderReturn = GraderResult | tuple[Any, ...]
+OkValue = bool | str | float
+GraderReturn = GraderResult | tuple[OkValue] | tuple[OkValue, str]
 
 
 class GradeableCollection(list[SketchItem]):
@@ -55,7 +51,7 @@ class GradeableCollection(list[SketchItem]):
 
 def grader(
     func: Callable[..., GraderReturn],
-) -> Callable[[Any, str], GraderResult]:
+) -> Callable[[str | None, str], GraderResult]:
     """Decorator that adapts a user grading function to the JSON-in/JSON-out
     contract used by the hosting LMS.
 
@@ -64,9 +60,15 @@ def grader(
     builds a `GradeableCollection` per plugin id, passes the collections
     whose names match the user function's parameters, and normalizes the
     return value into a `GraderResult`.
+
+    Historical: the `(expect, ans)` signature is the EdX customresponse
+    contract this library was originally built for (`expect` was the
+    expected-answer string from `<customresponse expect="...">`). The
+    PrairieLearn `pl-sketch` element does not call the decorator — it uses
+    `grader_lib` directly — so `expect` is effectively unused in that path.
     """
 
-    def jsinput_grader(expect: Any, ans: str) -> GraderResult:
+    def jsinput_grader(expect: str | None, ans: str) -> GraderResult:
         try:
             gradeable_json = json.loads(ans)["answer"]
         except ValueError:
@@ -106,11 +108,14 @@ def grader(
         if isinstance(result, dict) and "ok" in result:
             # This is a customresponse-style dict
             return result
-        elif isinstance(result, tuple):
-            # This is a special sketchinput-style response
-            return {"ok": result[0], "msg": result[1] if len(result) >= 2 else ""}
-        else:
-            raise ValueError("The grader function response was not formatted correctly")
+        # sketchinput-style tuple response
+        match result:
+            case (ok,):
+                return {"ok": ok, "msg": ""}
+            case (ok, msg):
+                return {"ok": ok, "msg": msg}
+            case _:
+                raise ValueError("The grader function response was not formatted correctly")
 
     return jsinput_grader  # the decorated function
 

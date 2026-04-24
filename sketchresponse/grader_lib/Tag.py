@@ -1,5 +1,7 @@
 from __future__ import annotations
 
+from collections.abc import Sequence
+
 
 class Tag:
     tag: str
@@ -41,12 +43,12 @@ class Tag:
 
 
 class Tagable:
-    tags: list[Tag] | None
+    tags: Sequence[Tag] | None
 
     def __init__(self) -> None:
         self.tags = None
 
-    def set_tagables(self, tags: list[Tag] | None) -> None:
+    def set_tagables(self, tags: Sequence[Tag] | None) -> None:
         self.tags = tags
 
     def contains_tag(self, to_compare: str, ignore_case: bool = False) -> Tag | None:

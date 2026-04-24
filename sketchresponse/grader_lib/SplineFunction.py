@@ -1,7 +1,5 @@
 from __future__ import annotations
 
-from typing import Any
-
 import numpy as np
 
 from ..types import SketchGrader
@@ -12,18 +10,17 @@ from .MultiFunction import MultiFunction
 
 # Function composed of a series of Bezier curves
 class SplineFunction(MultiFunction):
-    # a list of the curves: each curve is a Curve Function
-    # self.functions = []
+    functions: list[CurveFunction]
 
     # only provide path_info or curves, not both
     def __init__(
         self,
         xaxis: Axis,
         yaxis: Axis,
-        path_info: Any,
+        path_info: list[list[float]] | None,
         grader: SketchGrader,
         current_tool: str,
-        functions: Any = None,
+        functions: list[CurveFunction] | None = None,
         tolerance: dict[str, float] | None = None,
     ) -> None:
         super().__init__(xaxis, yaxis, path_info, grader, current_tool, tolerance=tolerance)

@@ -1,12 +1,12 @@
 from __future__ import annotations
 
 import math
-from typing import Any
 
 import numpy as np
 
 from ..types import SketchGrader, SketchSubmission
 from .Axis import Axis
+from .Function import Function
 from .MultiFunction import MultiFunction
 from .SplineFunction import SplineFunction
 
@@ -41,15 +41,17 @@ def greater_or_equal(a, b, delta=0):
 
 
 class MultipleSplinesFunction(MultiFunction):  # noqa: PLR0904
+    functions: list[SplineFunction]
+
     def __init__(
         self,
         xaxis: Axis,
         yaxis: Axis,
-        path_info: Any,
+        path_info: list[list[float]] | None,
         grader: SketchGrader,
         submission: SketchSubmission,
         current_tool: str,
-        functions: Any = None,
+        functions: list[Function] | None = None,
         tolerance: dict[str, float] | None = None,
     ) -> None:
         self.submission = submission

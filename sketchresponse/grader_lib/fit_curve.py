@@ -5,16 +5,13 @@ by Philip J. Schneider
 Based on https://github.com/volkerp/fitCurves
 """
 
-from typing import Any
-
 from numpy import array, dot, zeros
 from numpy.linalg import norm
+from numpy.typing import ArrayLike
 
 
 # Fit one (or more) Bezier curves to a set of points
-# rawPoints accepts any array-like sequence of 2D points (list[list[float]],
-# list[np.ndarray], etc.) because it is passed to numpy.array.
-def fitCurve(rawPoints: Any, maxError: float) -> list[list[float]]:
+def fitCurve(rawPoints: ArrayLike, maxError: float) -> list[list[float]]:
     points = array(rawPoints)
     left_tangent = normalize(points[1] - points[0])
     right_tangent = normalize(points[-2] - points[-1])

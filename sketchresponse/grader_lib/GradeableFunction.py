@@ -4,16 +4,35 @@ from collections.abc import Callable
 
 import numpy as np
 
-from sketchresponse.types import SketchCanvasSize, SketchConfig, SketchGrader, SketchSubmission
+from sketchresponse.types import (
+    SketchCanvasSize,
+    SketchConfig,
+    SketchGrader,
+    SketchItem,
+    SketchSubmission,
+)
 
 from .Axis import Axis
 from .fit_curve import fitCurve
 from .MultipleSplinesFunction import MultipleSplinesFunction
 from .Point import Point
+from .PolarTransform import _PolarParams
 from .SplineFunction import SplineFunction
 
 
+class FunctionDataWrapper(list[SketchItem]):
+    """List of spline/point dicts with a `params` attribute (for PolarTransform)."""
+
+    params: _PolarParams
+
+    def __init__(self, gradeable_data: list[SketchItem], params: _PolarParams) -> None:
+        super().__init__(gradeable_data)
+        self.params = params
+
+
 class GradeableFunction(MultipleSplinesFunction):  # noqa: PLR0904
+    functions: list[SplineFunction]
+
     def __init__(
         self,
         grader: SketchGrader,
@@ -27,7 +46,7 @@ class GradeableFunction(MultipleSplinesFunction):  # noqa: PLR0904
         super().__init__(
             xaxis,
             yaxis,
-            submission["gradeable"],
+            None,
             grader,
             submission,
             current_tool,
@@ -41,12 +60,6 @@ class GradeableFunction(MultipleSplinesFunction):  # noqa: PLR0904
         # Transform from polar coordinates if specified
         if "coordinates" in config and config["coordinates"] == "polar":
             from .PolarTransform import PolarTransform
-
-            # Create wrapper that PolarTransform expects
-            class FunctionDataWrapper(list):
-                def __init__(self, gradeable_data, params):
-                    super().__init__(gradeable_data)
-                    self.params = params
 
             func_data = FunctionDataWrapper(
                 submission["gradeable"][current_tool],

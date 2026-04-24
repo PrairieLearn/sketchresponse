@@ -4,7 +4,6 @@ import ast
 import copy
 import math
 from collections.abc import Callable
-from typing import Any
 
 from .grader_lib import (
     Asymptote,
@@ -366,7 +365,7 @@ def in_range(val: float, start: float, end: float, tolerance: float = 0) -> bool
 
 def format_drawing(
     initials: list[SketchDrawing], tool: SketchTool, ranges: SketchCanvasSize
-) -> list[dict[str, Any]] | list[list[dict[str, float]]]:
+) -> list[dict[str, float]] | list[list[dict[str, float]]]:
     """
     Convert drawing data for one sketching tool into the data format that is used by the client.
     Note that this function does not validate the inputs and assumes that attribute combinations are all
@@ -375,7 +374,6 @@ def format_drawing(
     Returns:
         A list that can be converted into JSON for the client
     """
-    new_format: list[Any] = []
     if tool["name"] in ["horizontal-line", "vertical-line"]:
         coordinates = []
         for initial in initials:
@@ -383,7 +381,7 @@ def format_drawing(
                 coordinates += initial["coordinates"]
 
         if tool["name"] == "vertical-line":
-            new_format = [
+            return [
                 {
                     "x": graph_to_screen(
                         ranges["x_start"],
@@ -394,19 +392,20 @@ def format_drawing(
                 }
                 for coord in coordinates
             ]
-        else:
-            new_format = [
-                {
-                    "y": graph_to_screen(
-                        ranges["y_end"],
-                        ranges["y_start"],
-                        ranges["height"],
-                        coord,
-                    )
-                }
-                for coord in coordinates
-            ]
-    elif tool["name"] in ["spline", "freeform", "polyline"]:
+        return [
+            {
+                "y": graph_to_screen(
+                    ranges["y_end"],
+                    ranges["y_start"],
+                    ranges["height"],
+                    coord,
+                )
+            }
+            for coord in coordinates
+        ]
+
+    nested_format: list[list[dict[str, float]]] = []
+    if tool["name"] in ["spline", "freeform", "polyline"]:
         for initial in initials:
             if initial["toolid"] == tool["id"]:
                 if initial["fun"] is None:
@@ -432,7 +431,7 @@ def format_drawing(
                     if tool["name"] == "freeform":
                         x_y_vals = fitCurve(x_y_vals, 5)
                     formatted_x_y_vals = [{"x": val[0], "y": val[1]} for val in x_y_vals]
-                    new_format.append(formatted_x_y_vals)
+                    nested_format.append(formatted_x_y_vals)
                 else:
                     function = None
                     x1, x2 = initial["xrange"]
@@ -451,29 +450,31 @@ def format_drawing(
                             if tool["name"] == "freeform":
                                 x_y_vals = fitCurve(x_y_vals, 5)
                             formatted_x_y_vals = [{"x": val[0], "y": val[1]} for val in x_y_vals]
-                            new_format.append(formatted_x_y_vals)
+                            nested_format.append(formatted_x_y_vals)
                         if broken:
                             x1 = new_start
-    else:  # one and two point tools
-        new_format = []
-        for initial in initials:
-            if initial["toolid"] == tool["id"]:
-                coordinates = initial["coordinates"]
-                new_format += [
-                    {
-                        "x": graph_to_screen(
-                            ranges["x_start"],
-                            ranges["x_end"],
-                            ranges["width"],
-                            coordinates[i],
-                        ),
-                        "y": graph_to_screen(
-                            ranges["y_end"],
-                            ranges["y_start"],
-                            ranges["height"],
-                            coordinates[i + 1],
-                        ),
-                    }
-                    for i in range(0, len(coordinates), 2)
-                ]
-    return new_format
+        return nested_format
+
+    # one and two point tools
+    points: list[dict[str, float]] = []
+    for initial in initials:
+        if initial["toolid"] == tool["id"]:
+            coordinates = initial["coordinates"]
+            points += [
+                {
+                    "x": graph_to_screen(
+                        ranges["x_start"],
+                        ranges["x_end"],
+                        ranges["width"],
+                        coordinates[i],
+                    ),
+                    "y": graph_to_screen(
+                        ranges["y_end"],
+                        ranges["y_start"],
+                        ranges["height"],
+                        coordinates[i + 1],
+                    ),
+                }
+                for i in range(0, len(coordinates), 2)
+            ]
+    return points

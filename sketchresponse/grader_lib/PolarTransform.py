@@ -2,19 +2,38 @@ from __future__ import annotations
 
 import copy
 import math
-from typing import Any
+from typing import TYPE_CHECKING, Protocol, TypedDict
 
 import numpy as np
 
 from . import Axis
 from . import fit_curve as fitCurves
 
+if TYPE_CHECKING:
+    from .GradeableFunction import FunctionDataWrapper
+
+
+class _PolarParams(TypedDict):
+    xrange: list[float]
+    yrange: list[float]
+    width: int
+    height: int
+
+
+class _GradeableLike(Protocol):
+    """Holder of points and spline functions consumed by PolarTransform."""
+
+    points: list
+    functions: list
+
 
 class PolarTransform:
     FIT_TOLERANCE = 5
     STEP = 0.02
 
-    def __init__(self, functionData: Any, gradeableFunction: Any) -> None:
+    def __init__(
+        self, functionData: FunctionDataWrapper, gradeableFunction: _GradeableLike
+    ) -> None:
         #        print gradeable
         #        print gradeable.params
 
@@ -574,16 +593,12 @@ class PolarTransform:
         for s in splines:
             # Each spline is a list of control points, flip y for each
             s_flipped = [[pt[0], height - pt[1]] for pt in s]
-            splineDict = {}
-            splineDict["spline"] = s_flipped
-            self.f.append(splineDict)
+            self.f.append({"spline": s_flipped})
 
         for p in points:
             # Each point is [theta_pixel, r_pixel], flip r
             p_flipped = [p[0], height - p[1]]
-            pointDict = {}
-            pointDict["point"] = p_flipped
-            self.f.append(pointDict)
+            self.f.append({"point": p_flipped})
 
     def sample_x_and_y(self, curve, step):
         samples = []

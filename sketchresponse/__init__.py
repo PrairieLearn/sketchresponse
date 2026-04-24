@@ -1,6 +1,6 @@
 """SketchResponse - A tool for drawing and evaluating mathematical functions."""
 
-from .sketchresponse import GradeableCollection, GraderReturn, config, grader
+from .sketchresponse import GradeableCollection, GraderReturn, OkValue, config, grader
 from .types import (
     GraderResult,
     SketchAnswer,
@@ -24,6 +24,7 @@ __all__ = [
     # Result / return types
     "GraderResult",
     "GraderReturn",
+    "OkValue",
     # Data-shape TypedDicts
     "SketchAnswer",
     "SketchCanvasSize",

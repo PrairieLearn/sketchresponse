@@ -1,7 +1,5 @@
 from __future__ import annotations
 
-from typing import Any
-
 from ..types import SketchGrader
 from .Axis import Axis
 from .Debugger import Debugger
@@ -20,7 +18,7 @@ class Function(Tag, Tagable):  # noqa: PLR0904
         self,
         xaxis: Axis,
         yaxis: Axis,
-        path_info: Any,
+        path_info: list[list[float]] | None,
         grader: SketchGrader,
         current_tool: str,
         tolerance: dict[str, float] | None = None,
@@ -58,7 +56,7 @@ class Function(Tag, Tagable):  # noqa: PLR0904
         self.tolerance[key] = value
 
     # sets the variables related to the path, and finds the domain
-    def create_from_path_info(self, path_info: Any) -> None:
+    def create_from_path_info(self, path_info: list[list[float]] | None) -> None:
         self.domain = []
 
     # methods to handle pixel <-> math conversions
@@ -134,9 +132,14 @@ class Function(Tag, Tagable):  # noqa: PLR0904
             "The get_horizontal_line_crossings method is not implemented by this class."
         )
 
-    def get_vertical_line_crossing(self, xval):
+    def get_vertical_line_crossings(self, xval):
         raise NotImplementedError(
-            "The get_vertical_line_crossing method is not implemented by this class."
+            "The get_vertical_line_crossings method is not implemented by this class."
+        )
+
+    def is_defined_at(self, xval):
+        raise NotImplementedError(
+            "The is_defined_at method is not implemented by this class."
         )
 
     def get_domain(self):
