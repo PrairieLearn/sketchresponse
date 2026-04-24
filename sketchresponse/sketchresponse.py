@@ -8,12 +8,12 @@ from copy import deepcopy
 
 from .types import (
     GraderResult,
+    OkValue,
     SketchAnswer,
     SketchConfig,
     SketchItem,
 )
 
-OkValue = bool | int | float | str
 GraderReturn = GraderResult | tuple[OkValue] | tuple[OkValue, str]
 
 

@@ -23,6 +23,11 @@ FunctionDomain = list[float] | list[list[float]]
 # the tested range, and the string sentinel "ndef" when it is not.
 TernaryResult = bool | Literal["ndef"]
 
+# The `ok` field of a grader result. Accepts any of the values the hosting
+# LMS interprets as correctness (bool for right/wrong, numeric for partial
+# credit, string for custom statuses like "partial").
+OkValue = bool | int | float | str
+
 
 class SketchTool(TypedDict):
     name: str
@@ -157,5 +162,5 @@ class SketchAnswer(TypedDict):
 class GraderResult(TypedDict, total=False):
     """The dict returned from a grader function (or from the decorator)."""
 
-    ok: bool | int | float | str
+    ok: OkValue
     msg: str

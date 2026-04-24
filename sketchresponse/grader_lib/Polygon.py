@@ -556,21 +556,28 @@ class Polygons(Gradeable):  # noqa: PLR0904
         return None
 
     def clip_point_on_seg(
-        self, point: Any, segment: Segment, xmin: float, xmax: float
+        self,
+        point: list[float] | tuple[float, float] | Point,
+        segment: Segment,
+        xmin: float,
+        xmax: float,
     ) -> tuple[float, float]:
         yrange = self.yaxis.domain
         y1 = yrange[1]
         y2 = yrange[0]
-        xval = point[0]
-        yval = point[1]
-        slope = None
+        xval = cast("float", point[0])
+        yval = cast("float", point[1])
         try:
             slope = cast("Any", segment).slope
-        except Exception:  # slope undefined
+        except Exception:
+            # Vertical segment: x is fixed by the segment, so only clamp y to
+            # the axis range. cut_segment guarantees xval is already in
+            # [xmin, xmax] for vertical inputs.
             if yval > y2:
                 return (xval, y2)
             if yval < y1:
                 return (xval, y1)
+            return (xval, yval)
 
         def find_y(x: float) -> float:
             return slope * (x - xval) + yval

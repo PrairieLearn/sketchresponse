@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import numpy as np
+from numpy.typing import NDArray
 
 from ..types import SketchGrader, SplinePoints
 from .Axis import Axis
@@ -20,12 +21,12 @@ class CurveFunction(Function):
 
     # The polynomials for x and y as functions of t, plus their 1st and 2nd
     # derivatives (numpy 1-D arrays of polynomial coefficients).
-    x: np.ndarray
-    y: np.ndarray
-    dxdt: np.ndarray
-    dydt: np.ndarray
-    ddx: np.ndarray
-    ddy: np.ndarray
+    x: NDArray[np.float64]
+    y: NDArray[np.float64]
+    dxdt: NDArray[np.float64]
+    dydt: NDArray[np.float64]
+    ddx: NDArray[np.float64]
+    ddy: NDArray[np.float64]
 
     # Note: `self.domain` is the flat `[xmin, xmax]` shape on CurveFunction —
     # see the `FunctionDomain` alias in sketchresponse.types.
@@ -125,7 +126,9 @@ class CurveFunction(Function):
 
         return t_filtered
 
-    def get_t_extrema_between(self, xmin: float, xmax: float, p: np.ndarray) -> list[float]:
+    def get_t_extrema_between(
+        self, xmin: float, xmax: float, p: NDArray[np.float64]
+    ) -> list[float]:
         # gets the t vals of the roots of p between xmin and xmax
         # used for finding extrema between xmin and xmax
         # assumes xmin and xmax are within the domain
