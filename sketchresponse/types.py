@@ -54,7 +54,7 @@ class SketchTool(TypedDict):
 class SketchGrader(TypedDict):
     type: str
     toolid: list[SketchTool]
-    x: float | str | None
+    x: float | None
     y: float | None
     endpoint: str | None
     xrange: list[float] | None
