@@ -125,10 +125,11 @@ class SplineFunction(MultiFunction):
             if curve.p3[0] <= xval and curve.p0[0] >= xval:
                 return i
         if len(self.functions) > 0:
-            if xval < self.functions[i].p0[0]:
+            if xval < self.functions[-1].p0[0]:
                 return -1
             else:
                 return -2
+        return None
 
     # returns three arrays: the curves, the respective xmins, and the respective xmaxes
     # first xmin is the given parameter xmin, likewise for last xmax

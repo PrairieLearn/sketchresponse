@@ -161,13 +161,11 @@ class CurveFunction(Function):
             return -1
 
     def get_value_at(self, xval: float) -> float | None:
-        # returns False if the function is not defined at this xval
+        # returns None if the function is not defined at this xval
         t = self.get_t_for_xval(xval)
         if t > -self.tolerance["t_threshold"]:
-            yval = np.polyval(self.y, t)
-        else:
-            yval = None
-        return yval
+            return float(np.polyval(self.y, t))
+        return None
 
     def get_x_for_yval(self, yval: float) -> list[float]:
         p = np.poly1d(self.y)
@@ -189,18 +187,17 @@ class CurveFunction(Function):
         t = self.get_t_for_xval(xval)
         yprime = np.polyval(self.dydt, t)
         xprime = np.polyval(self.dxdt, t)
-        angle = np.arctan2(yprime, xprime)
-        return angle
+        return float(np.arctan2(yprime, xprime))
 
     def get_min_value_between(self, xmin: float, xmax: float) -> float | None:
         xleft, xright = self.between_vals(xmin, xmax)
         t = self.get_t_extrema_between(xleft, xright, self.dydt)
         y = np.polyval(self.y, t)
         if len(y):
-            min = np.min(y)
-            if not self.within_y_range(min, negative_tolerance=10):
+            min_val = float(np.min(y))
+            if not self.within_y_range(min_val, negative_tolerance=10):
                 return self.yaxis.domain[1]
-            return min
+            return min_val
         else:
             return None
 
@@ -210,10 +207,10 @@ class CurveFunction(Function):
         t = self.get_t_extrema_between(xleft, xright, self.dydt)
         y = np.polyval(self.y, t)
         if len(y):
-            max = np.max(y)
-            if not self.within_y_range(max, negative_tolerance=10):
+            max_val = float(np.max(y))
+            if not self.within_y_range(max_val, negative_tolerance=10):
                 return self.yaxis.domain[0]
-            return max
+            return max_val
         else:
             return None
 
@@ -221,7 +218,7 @@ class CurveFunction(Function):
         p = [self.y[0], self.y[1], self.y[2], self.y[3] - yval]
         t = self.get_t_roots_within_zero_and_one(p)
         x = np.polyval(self.x, t)
-        return x
+        return [float(v) for v in np.atleast_1d(x)]
 
     def get_vertical_line_crossings(self, xval: float) -> list[float]:
         # note: only gets one value. this should be fine for now.

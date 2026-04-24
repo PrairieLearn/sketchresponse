@@ -255,7 +255,7 @@ class GradeableFunction(MultipleSplinesFunction):  # noqa: PLR0904
             tol = distTolerance / self.xscale
             if dist < tol:
                 return True
-            if self.debug:
+            if self.debug and point is not None:
                 self.debugger.add(
                     f"Closest point ({point.x}, {point.y}) is {dist * self.xscale} pixels away from x = {x}."
                 )
@@ -267,7 +267,7 @@ class GradeableFunction(MultipleSplinesFunction):  # noqa: PLR0904
             tol = distTolerance / self.yscale
             if dist < tol:
                 return True
-            if self.debug:
+            if self.debug and point is not None:
                 self.debugger.add(
                     f"Closest point ({point.x}, {point.y}) is {dist * self.yscale} pixels away from y = {y}."
                 )

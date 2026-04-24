@@ -1336,13 +1336,15 @@ class LineSegments(Gradeable):  # noqa: PLR0904
         if xmax is None:
             xmax = x + delta
 
-        segments = self.get_segments_at(x=x)
+        segments = self.get_segments_at(x=x) or []
         min_val_at_x = float("inf")
         for segment in segments:
             val = self.get_y_value_at_x(segment, x)
             min_val_at_x = min(min_val_at_x, val)
 
         min_val_in_range = self.get_min_value_between(xmin, xmax)
+        if min_val_in_range is None:
+            return False
 
         return abs(min_val_at_x - min_val_in_range) <= delta
 
@@ -1370,13 +1372,15 @@ class LineSegments(Gradeable):  # noqa: PLR0904
         if xmax is None:
             xmax = x + delta
 
-        segments = self.get_segments_at(x=x)
+        segments = self.get_segments_at(x=x) or []
         max_val_at_x = float("-inf")
         for segment in segments:
             val = self.get_y_value_at_x(segment, x)
             max_val_at_x = max(max_val_at_x, val)
 
         max_val_in_range = self.get_max_value_between(xmin, xmax)
+        if max_val_in_range is None:
+            return False
 
         return abs(max_val_at_x - max_val_in_range) <= delta
 

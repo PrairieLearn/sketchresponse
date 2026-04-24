@@ -189,11 +189,11 @@ class Gradeable(Tagable):
 
     def collapse_ranges(self, ranges: list[list[float]]) -> list[list[float]]:
         all_ranges = ranges
-        if len(ranges) == 1:
+        if len(ranges) <= 1:
             return ranges
         sorted_ranges = sorted(all_ranges, key=lambda x: x[0], reverse=False)
-        xrange = []
-        highest_end = None
+        xrange: list[float] = []
+        highest_end: float | None = None
         for i in range(len(sorted_ranges)):
             if highest_end is None:
                 xrange.append(sorted_ranges[i][0])
@@ -203,6 +203,7 @@ class Gradeable(Tagable):
                 highest_end = sorted_ranges[i][1]
             elif highest_end < sorted_ranges[i][1]:
                 highest_end = sorted_ranges[i][1]
+        assert highest_end is not None
         xrange.append(highest_end)
         ls = [[xrange[i], xrange[i + 1]] for i in range(0, len(xrange) - 1, 2)]
         return ls

@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 from collections.abc import Callable
+from typing import cast
 
 from sympy.geometry import Line, Point, Segment, intersection
 from sympy.geometry import Polygon as SymPyPolygon
@@ -10,6 +11,16 @@ from .Gradeable import Gradeable
 from .LineSegment import LineSegment
 from .Point import Point as SR_Point
 from .Tag import Tag
+
+
+def _as_sympy_polygon(
+    *points: object,
+) -> SymPyPolygon:
+    """Construct a sympy Polygon, narrowing away the Point/Segment dispatch
+    branches of the `Polygon.__new__` return type. Callers in this module
+    always pass 3+ vertices, so the runtime result is always a Polygon.
+    """
+    return cast("SymPyPolygon", SymPyPolygon(*points))
 
 
 class Polygons(Gradeable):  # noqa: PLR0904
@@ -64,7 +75,7 @@ class Polygons(Gradeable):  # noqa: PLR0904
         return pointList
 
     def set_polygon_range_defined(self, polygon):
-        poly = SymPyPolygon(*polygon.points)
+        poly = _as_sympy_polygon(*polygon.points)
         bounds = poly.bounds
         xmin, xmax = bounds[0], bounds[2]
         if self.polygon_within_y_range(polygon):
@@ -108,7 +119,10 @@ class Polygons(Gradeable):  # noqa: PLR0904
                 new_polys = []
             rg = []
             for p in new_polys:
-                xmin, xmax = self.min_max_defined_x_vals(p)
+                bounds = self.min_max_defined_x_vals(p)
+                if bounds is None:
+                    continue
+                xmin, xmax = bounds
                 rg.append([xmin, xmax])
             polygon.range_defined = rg
         else:
@@ -473,7 +487,7 @@ class Polygons(Gradeable):  # noqa: PLR0904
 
         for p in self.polygons:
             # sympy polygon does not take a list of points, stupidly
-            poly = SymPyPolygon(*p.points)
+            poly = _as_sympy_polygon(*p.points)
             isInside = poly.encloses_point(Point(*point))
             onBoundary = self.point_is_on_polygon_boundary(
                 p, point, tolerance=tolerance / self.xscale
@@ -511,7 +525,7 @@ class Polygons(Gradeable):  # noqa: PLR0904
             or (points[0][0] >= x2 and points[1][0] > x2)
         ) and (self.within_y_range(points[0][1]) and self.within_y_range(points[1][1]))
 
-    def cut_segment(self, segment, x1, x2):
+    def cut_segment(self, segment, x1, x2) -> Segment | None:
         points = segment.points
         if points[0][0] < points[1][0]:
             p1 = points[0]
@@ -527,7 +541,10 @@ class Polygons(Gradeable):  # noqa: PLR0904
             and abs(p1_new[1] - p2_new[1]) <= 1 / self.yscale
         ):
             return None
-        new_seg = Segment(p1_new, p2_new)
+        # The Segment constructor narrows to Segment | Point | Segment2D/3D,
+        # but the pixel-distance check above guarantees the endpoints are
+        # distinct so the result is always a Segment.
+        new_seg = cast("Segment", Segment(p1_new, p2_new))
         if self.segment_in_range_strict(new_seg, x1, x2):
             return new_seg
         return None
@@ -595,7 +612,7 @@ class Polygons(Gradeable):  # noqa: PLR0904
         if isinstance(polygon, Polygon):
             polygon = polygon.points
 
-        poly = SymPyPolygon(*polygon)
+        poly = _as_sympy_polygon(*polygon)
         isInside = poly.encloses_point(Point(*point))
         onBoundary = self.point_is_on_polygon_boundary(polygon, point, tolerance=tolerance)
 

@@ -245,7 +245,7 @@ class Function(Tag, Tagable):  # noqa: PLR0904
 
     def is_greater_than_y_between(
         self, y: float, xmin: float, xmax: float, tolerance: float | None = None
-    ) -> TernaryResult | None:
+    ) -> TernaryResult:
         """Return whether function is always greater than y in the range xmin to xmax.
 
         Args:
@@ -277,10 +277,11 @@ class Function(Tag, Tagable):  # noqa: PLR0904
                     f"Min value {min_val} is {(y - min_val) * self.yscale} pixels below y = {y}."
                 )
                 self.debugger.add(f"Max allowed is {tolerance * self.yscale} pixels.")
+            return False
 
     def is_less_than_y_between(
         self, y: float, xmin: float, xmax: float, tolerance: float | None = None
-    ) -> TernaryResult | None:
+    ) -> TernaryResult:
         """Return whether function is always less than y in the range xmin to xmax.
 
         Args:
@@ -313,3 +314,4 @@ class Function(Tag, Tagable):  # noqa: PLR0904
                     f"Max value {max_val} is {(max_val - y) * self.yscale} pixels above y = {y}."
                 )
                 self.debugger.add(f"Max allowed is {tolerance * self.yscale} pixels.")
+            return False

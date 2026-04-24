@@ -4,6 +4,7 @@ import ast
 import copy
 import math
 from collections.abc import Callable
+from typing import Protocol
 
 from .grader_lib import (
     Asymptote,
@@ -22,6 +23,11 @@ from .types import (
     SketchTool,
     SplinePoints,
 )
+
+
+class _HasRanges(Protocol):
+    def get_range_defined(self) -> list[list[float]]: ...
+    def collapse_ranges(self, ranges: list[list[float]]) -> list[list[float]]: ...
 
 
 def parse_function_string(s: str) -> Callable[[float], float]:
@@ -133,7 +139,7 @@ def get_gap_length_px(
 ) -> float:
     if rd == []:
         return graph_to_screen_submission(submission, config, True, False, (x2 - x1))
-    gap_total = 0
+    gap_total: float = 0
     rstart = [float("-inf"), config["xrange"][0]]
     rend = [config["xrange"][1], float("inf")]
     rd.insert(0, rstart)
@@ -166,8 +172,8 @@ def get_coverage_length_px(
         return True
 
     gf_tools = ["spline", "freeform", "polyline", "point"]
-    xrange = []
-    tool_grader = None
+    xrange: list[list[float]] = []
+    tool_grader: _HasRanges | None = None
     for toolid in tools_to_check:
         tool_used = tool_dict[toolid]["name"]
         if tool_used == "polygon":
