@@ -1,7 +1,9 @@
 import unittest
+from typing import cast
 
 from sketchresponse.grader_lib.Axis import Axis
 from sketchresponse.grader_lib.SplineFunction import SplineFunction
+from sketchresponse.types import SketchGrader
 
 
 class TestSplineFunctionTolerance(unittest.TestCase):
@@ -10,8 +12,8 @@ class TestSplineFunctionTolerance(unittest.TestCase):
     def test_custom_tolerance_is_applied(self):
         xaxis = Axis([0, 10], 100)
         yaxis = Axis([10, 0], 100)
-        path_info = [[10, 50], [30, 50], [50, 50], [70, 50]]
-        grader = {"tolerance": 10, "debug": False}
+        path_info: list[list[float]] = [[10, 50], [30, 50], [50, 50], [70, 50]]
+        grader = cast(SketchGrader, {"tolerance": 10, "debug": False})
 
         sf = SplineFunction(
             xaxis,

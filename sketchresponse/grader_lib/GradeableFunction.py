@@ -10,6 +10,7 @@ from sketchresponse.types import (
     SketchGrader,
     SketchItem,
     SketchSubmission,
+    SplinePoints,
 )
 
 from .Axis import Axis
@@ -186,11 +187,11 @@ class GradeableFunction(MultipleSplinesFunction):  # noqa: PLR0904
 
         return [x, y]
 
-    def create_from_path_info(self, path_info):
+    def create_from_path_info(self, path_info: SplinePoints | None) -> None:
         dtol = 100
         self.functions = []
-        self.points = []
-        xvals = []
+        self.points: list[Point] = []
+        xvals: list[list[float]] = []
 
         submission_data = self.submission["gradeable"][self.current_tool]
         for i in range(len(submission_data)):
@@ -702,7 +703,7 @@ def function_to_spline(
     x_min: float,
     x_max: float,
     range_data: SketchCanvasSize,
-) -> tuple[list[list[float]], bool, float]:
+) -> tuple[SplinePoints, bool, float]:
     spline = []
 
     # set up values that are needed to convert the coordinates from graph to screen coordinates

@@ -9,7 +9,19 @@ dicts they build and the answer JSON they receive.
 
 from __future__ import annotations
 
-from typing import TypedDict
+from typing import Literal, TypedDict
+
+# A list of [x, y] control points in pixel space — the JSON wire format
+# for spline-based tools.
+SplinePoints = list[list[float]]
+
+# A function's x-domain. CurveFunction stores a single flat [xmin, xmax],
+# while Spline/Multi variants store a list of such pairs.
+FunctionDomain = list[float] | list[list[float]]
+
+# Many grader methods return True/False when the function is defined over
+# the tested range, and the string sentinel "ndef" when it is not.
+TernaryResult = bool | Literal["ndef"]
 
 
 class SketchTool(TypedDict):
@@ -78,7 +90,7 @@ class SketchItem(TypedDict, total=False):
     tools populate `point`. `tag` is optionally set by the user.
     """
 
-    spline: list[list[float]]  # list of [x_px, y_px] control points
+    spline: SplinePoints  # list of [x_px, y_px] control points
     point: list[float]  # [x_px, y_px]
     tag: str
 
@@ -145,5 +157,5 @@ class SketchAnswer(TypedDict):
 class GraderResult(TypedDict, total=False):
     """The dict returned from a grader function (or from the decorator)."""
 
-    ok: bool | str | float
+    ok: bool | int | float | str
     msg: str

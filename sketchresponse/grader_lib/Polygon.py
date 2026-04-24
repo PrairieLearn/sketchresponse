@@ -1,9 +1,11 @@
 from __future__ import annotations
 
+from collections.abc import Callable
+
 from sympy.geometry import Line, Point, Segment, intersection
 from sympy.geometry import Polygon as SymPyPolygon
 
-from ..types import SketchConfig, SketchGrader, SketchSubmission
+from ..types import SketchConfig, SketchGrader, SketchSubmission, TernaryResult
 from .Gradeable import Gradeable
 from .LineSegment import LineSegment
 from .Point import Point as SR_Point
@@ -208,10 +210,12 @@ class Polygons(Gradeable):  # noqa: PLR0904
 
     # Grader Functions ###
 
-    def get_range_defined(self):
+    def get_range_defined(self) -> list[list[float]]:
         return self.range_defined or []
 
-    def is_greater_than_y_between(self, y, x1, x2, tolerance=None):
+    def is_greater_than_y_between(
+        self, y: float, x1: float, x2: float, tolerance: float
+    ) -> TernaryResult:
         tol = tolerance / self.yscale
         polygons = self.get_polygons_within_range(x1, x2)
         segments = []
@@ -241,7 +245,9 @@ class Polygons(Gradeable):  # noqa: PLR0904
                     self.debugger.add(f"Max allowed is {tolerance} pixels.")
         return incorrect_count <= max_incorrect
 
-    def is_less_than_y_between(self, y, x1, x2, tolerance):
+    def is_less_than_y_between(
+        self, y: float, x1: float, x2: float, tolerance: float
+    ) -> TernaryResult:
         tol = tolerance / self.yscale
         polygons = self.get_polygons_within_range(x1, x2)
         segments = []
@@ -271,7 +277,9 @@ class Polygons(Gradeable):  # noqa: PLR0904
                     self.debugger.add(f"Max allowed is {tolerance} pixels.")
         return incorrect_count <= max_incorrect
 
-    def does_not_exist_between(self, xmin, xmax, tolerance):  # tolerance in graph dist
+    def does_not_exist_between(
+        self, xmin: float, xmax: float, tolerance: float
+    ) -> bool:  # tolerance in graph dist
         rd = self.range_defined if self.range_defined is not None else []
         if len(rd) == 0:
             return True
@@ -297,7 +305,13 @@ class Polygons(Gradeable):  # noqa: PLR0904
                 return False
         return True
 
-    def matches_function(self, func, x1, x2, tolerance):
+    def matches_function(
+        self,
+        func: Callable[[float], float],
+        x1: float,
+        x2: float,
+        tolerance: int,
+    ) -> TernaryResult:
         rg = x2 - x1
         interval = rg / 9
         incorrect_count = 0
@@ -316,13 +330,32 @@ class Polygons(Gradeable):  # noqa: PLR0904
             total += 1
         return incorrect_count <= max_incorrect
 
-    def lt_function(self, func, x1, x2, tolerance):
+    def lt_function(
+        self,
+        func: Callable[[float], float],
+        x1: float,
+        x2: float,
+        tolerance: int,
+    ) -> TernaryResult:
         return self.ltgt_function(func, x1, x2, False, tolerance)
 
-    def gt_function(self, func, x1, x2, tolerance):
+    def gt_function(
+        self,
+        func: Callable[[float], float],
+        x1: float,
+        x2: float,
+        tolerance: int,
+    ) -> TernaryResult:
         return self.ltgt_function(func, x1, x2, True, tolerance)
 
-    def ltgt_function(self, func, x1, x2, greater, tolerance):
+    def ltgt_function(
+        self,
+        func: Callable[[float], float],
+        x1: float,
+        x2: float,
+        greater: bool,
+        tolerance: int,
+    ) -> TernaryResult:
         polygons = self.get_polygons_within_range(x1, x2)
         segments = []
         for p in polygons:
@@ -350,7 +383,7 @@ class Polygons(Gradeable):  # noqa: PLR0904
 
         return incorrect_count <= max_incorrect
 
-    def intersects_at_x(self, x, tolerance):
+    def intersects_at_x(self, x: float, tolerance: float) -> bool:
         y1, y2 = self.yaxis.domain
         line = [[x, y1], [x, y2]]
         inters = self.get_intersections_with_boundary(line)
@@ -378,7 +411,7 @@ class Polygons(Gradeable):  # noqa: PLR0904
             self.debugger.add(f"Max allowed is {tolerance} pixels.")
         return False
 
-    def intersects_at_y(self, y, tolerance):
+    def intersects_at_y(self, y: float, tolerance: float) -> bool:
         x1, x2 = self.xaxis.domain
         line = [[x1, y], [x2, y]]
         inters = self.get_intersections_with_boundary(line)
@@ -407,7 +440,9 @@ class Polygons(Gradeable):  # noqa: PLR0904
 
         return False
 
-    def contains_point(self, x, y, tolerance=None):
+    def contains_point(
+        self, x: float | None, y: float | None, tolerance: float | None = None
+    ) -> Polygon | bool | None:
         """Return whether the given point is contained within the given
            polygon, within tolerance.
 
@@ -426,8 +461,10 @@ class Polygons(Gradeable):  # noqa: PLR0904
             tolerance = self.tolerance["point_distance"]
 
         if x is None:
+            assert y is not None and tolerance is not None
             return self.intersects_at_y(y, tolerance)
         if y is None:
+            assert tolerance is not None
             return self.intersects_at_x(x, tolerance)
 
         # sympy polygon does not take a list of points, stupidly
@@ -532,7 +569,7 @@ class Polygons(Gradeable):  # noqa: PLR0904
             new_y = find_y(xmin)
         return (new_x, new_y)
 
-    def get_polygon_count(self):
+    def get_polygon_count(self) -> int:
         """Returns the number of polygons defined in the function."""
         return len(self.polygons)
 

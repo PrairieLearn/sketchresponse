@@ -2,7 +2,7 @@ from __future__ import annotations
 
 import numpy as np
 
-from ..types import SketchGrader
+from ..types import SketchGrader, SplinePoints
 from .Axis import Axis
 from .CurveFunction import CurveFunction
 from .MultiFunction import MultiFunction
@@ -11,13 +11,14 @@ from .MultiFunction import MultiFunction
 # Function composed of a series of Bezier curves
 class SplineFunction(MultiFunction):
     functions: list[CurveFunction]
+    domain: list[list[float]]
 
     # only provide path_info or curves, not both
     def __init__(
         self,
         xaxis: Axis,
         yaxis: Axis,
-        path_info: list[list[float]] | None,
+        path_info: SplinePoints | None,
         grader: SketchGrader,
         current_tool: str,
         functions: list[CurveFunction] | None = None,
@@ -88,7 +89,7 @@ class SplineFunction(MultiFunction):
         real_domain = self.collapse_ranges(real_domain)
         self.domain = real_domain
 
-    def create_from_path_info(self, path_info):
+    def create_from_path_info(self, path_info: SplinePoints | None) -> None:
         if not path_info:
             return
 
@@ -116,7 +117,7 @@ class SplineFunction(MultiFunction):
 
     # find the first curve with this xval, returns the index:
     # returns -1 if the xval is to the left of all curves, -2 if it is to the right of all curves
-    def find_curve(self, xval):
+    def find_curve(self, xval: float) -> int | None:
         for i in range(len(self.functions)):
             curve = self.functions[i]
             if curve.p0[0] <= xval and curve.p3[0] >= xval:
@@ -131,7 +132,9 @@ class SplineFunction(MultiFunction):
 
     # returns three arrays: the curves, the respective xmins, and the respective xmaxes
     # first xmin is the given parameter xmin, likewise for last xmax
-    def find_curves_between(self, xmin, xmax):
+    def find_curves_between(
+        self, xmin: float, xmax: float
+    ) -> tuple[list[CurveFunction], list[float], list[float]] | None:
         a = self.find_curve(xmin)
         b = self.find_curve(xmax)
 
@@ -144,6 +147,8 @@ class SplineFunction(MultiFunction):
             return None
         elif b == -2:
             b = len(self.functions) - 1
+        if a is None or b is None:
+            return None
 
         curves = self.functions[a : b + 1]
         xminvals = []
@@ -157,17 +162,20 @@ class SplineFunction(MultiFunction):
 
     # "get" methods ##
 
-    def get_domain(self):
+    def get_domain(self) -> list[list[float]]:
         return self.domain
 
-    def get_angle_at(self, xval):
+    def get_angle_at(self, xval: float) -> float | None:
         i = self.find_curve(xval)
-        if i >= 0:
+        if i is not None and i >= 0:
             return self.functions[i].get_angle_at(xval)
         return None
 
-    def get_min_value_between(self, xmin, xmax):
-        curves, xMinVals, xMaxVals = self.find_curves_between(xmin, xmax)
+    def get_min_value_between(self, xmin: float, xmax: float) -> float | None:
+        result = self.find_curves_between(xmin, xmax)
+        if result is None:
+            return None
+        curves, xMinVals, xMaxVals = result
         minVals = []
 
         for i in range(len(curves)):
@@ -176,8 +184,11 @@ class SplineFunction(MultiFunction):
 
         return np.min(minVals)
 
-    def get_max_value_between(self, xmin, xmax):
-        curves, xMinVals, xMaxVals = self.find_curves_between(xmin, xmax)
+    def get_max_value_between(self, xmin: float, xmax: float) -> float | None:
+        result = self.find_curves_between(xmin, xmax)
+        if result is None:
+            return None
+        curves, xMinVals, xMaxVals = result
         maxVals = []
 
         for i in range(len(curves)):
@@ -186,7 +197,9 @@ class SplineFunction(MultiFunction):
 
         return np.max(maxVals)
 
-    def get_closest_endpoint(self, xval=None, yval=None):
+    def get_closest_endpoint(
+        self, xval: float | None = None, yval: float | None = None
+    ) -> list[float]:
         endpoints = []
         for f in self.functions:
             endpoints += f.get_endpoints()
@@ -206,8 +219,8 @@ class SplineFunction(MultiFunction):
 
     # Grader functions ###
 
-    def is_a_function(self):
+    def is_a_function(self) -> bool:
         return all(curve.is_a_function() for curve in self.functions)
 
-    def is_straight(self):
+    def is_straight(self) -> bool:
         return self.is_straight_between(self.functions[0].p0[0], self.functions[-1].p3[0])

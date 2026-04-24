@@ -1,26 +1,31 @@
 from __future__ import annotations
 
 import math
+from collections.abc import Callable
 
 import numpy as np
 
-from ..types import SketchGrader, SketchSubmission
+from ..types import SketchGrader, SketchSubmission, SplinePoints, TernaryResult
 from .Axis import Axis
 from .Function import Function
 from .MultiFunction import MultiFunction
 from .SplineFunction import SplineFunction
 
+# A comparer consumed by `always_comparer_at_points` — takes (a, b, delta) and
+# returns 0 if the comparison holds, 0.5 if it holds within `delta`, 1 otherwise.
+Comparer = Callable[[float, float, float], float]
+
 
 # Minor Helper Functions
-def lesser(a, b):
+def lesser(a: float, b: float) -> bool:
     return a <= b
 
 
-def greater(a, b):
+def greater(a: float, b: float) -> bool:
     return a >= b
 
 
-def lesser_or_equal(a, b, delta=0):
+def lesser_or_equal(a: float, b: float, delta: float = 0) -> float:
     d = delta * math.tan(math.pi / 12)
     if a <= b:
         return 0
@@ -30,7 +35,7 @@ def lesser_or_equal(a, b, delta=0):
         return 1
 
 
-def greater_or_equal(a, b, delta=0):
+def greater_or_equal(a: float, b: float, delta: float = 0) -> float:
     d = delta * math.tan(math.pi / 12)
     if a >= b:
         return 0
@@ -42,12 +47,14 @@ def greater_or_equal(a, b, delta=0):
 
 class MultipleSplinesFunction(MultiFunction):  # noqa: PLR0904
     functions: list[SplineFunction]
+    domain: list[list[float]]
+    points: list
 
     def __init__(
         self,
         xaxis: Axis,
         yaxis: Axis,
-        path_info: list[list[float]] | None,
+        path_info: SplinePoints | None,
         grader: SketchGrader,
         submission: SketchSubmission,
         current_tool: str,
@@ -72,10 +79,10 @@ class MultipleSplinesFunction(MultiFunction):  # noqa: PLR0904
 
         self.set_default_tolerance("inc_dec_failure", 2)
 
-    def create_from_path_info(self, path_info):
+    def create_from_path_info(self, path_info: SplinePoints | None) -> None:
         self.functions = []
         self.points = []
-        xvals = []
+        xvals: list[list[float]] = []
         toolid = self.current_tool
         submission_data = self.submission["gradeable"][toolid]  # CHECK
         for i in range(len(submission_data)):
@@ -98,13 +105,19 @@ class MultipleSplinesFunction(MultiFunction):  # noqa: PLR0904
             self.domain = self.collapse_ranges(xvals)
 
     # Grader Functions ###
-    def get_domain(self):
+    def get_domain(self) -> list[list[float]]:
         """Returns the domain of the function within the bounds of the graph. Used by defined-in
         and undefined-in graders.
         """
         return self.domain
 
-    def is_increasing_between(self, xmin, xmax, numPoints=10, failureTolerance=None):
+    def is_increasing_between(
+        self,
+        xmin: float,
+        xmax: float,
+        numPoints: int = 10,
+        failureTolerance: float | None = None,
+    ) -> TernaryResult:
         """Return whether the function is increasing in the range xmin to xmax.
 
         Args:
@@ -146,7 +159,13 @@ class MultipleSplinesFunction(MultiFunction):  # noqa: PLR0904
 
         return self.always_comparer_at_points(lesser_or_equal, yvals, delta, failureTolerance)
 
-    def is_decreasing_between(self, xmin, xmax, numPoints=10, failureTolerance=None):
+    def is_decreasing_between(
+        self,
+        xmin: float,
+        xmax: float,
+        numPoints: int = 10,
+        failureTolerance: float | None = None,
+    ) -> TernaryResult:
         """Return whether the function is decreasing in the range xmin to xmax.
 
         Args:
@@ -188,7 +207,9 @@ class MultipleSplinesFunction(MultiFunction):  # noqa: PLR0904
 
         return self.always_comparer_at_points(greater_or_equal, yvals, delta, failureTolerance)
 
-    def is_always_increasing(self, numPoints=10, failureTolerance=None):
+    def is_always_increasing(
+        self, numPoints: int = 10, failureTolerance: float | None = None
+    ) -> bool:
         """Return whether the function is increasing over its entire domain.
 
         Args:
@@ -209,7 +230,9 @@ class MultipleSplinesFunction(MultiFunction):  # noqa: PLR0904
             self.is_increasing_between(d[0], d[1], numPoints, failureTolerance) for d in domain
         )
 
-    def is_always_decreasing(self, numPoints=10, failureTolerance=None):
+    def is_always_decreasing(
+        self, numPoints: int = 10, failureTolerance: float | None = None
+    ) -> bool:
         """Return whether the function is decreasing over its entire domain.
 
         Args:
@@ -230,7 +253,13 @@ class MultipleSplinesFunction(MultiFunction):  # noqa: PLR0904
             self.is_decreasing_between(d[0], d[1], numPoints, failureTolerance) for d in domain
         )
 
-    def has_positive_curvature_between(self, xmin, xmax, numSegments=5, failureTolerance=None):
+    def has_positive_curvature_between(
+        self,
+        xmin: float,
+        xmax: float,
+        numSegments: int = 5,
+        failureTolerance: float | None = None,
+    ) -> TernaryResult:
         """Return whether the function has positive curvature in the range xmin to xmax.
 
         Args:
@@ -261,7 +290,13 @@ class MultipleSplinesFunction(MultiFunction):  # noqa: PLR0904
             xmin, xmax, numSegments, failureTolerance, lesser_or_equal
         )
 
-    def has_negative_curvature_between(self, xmin, xmax, numSegments=5, failureTolerance=None):
+    def has_negative_curvature_between(
+        self,
+        xmin: float,
+        xmax: float,
+        numSegments: int = 5,
+        failureTolerance: float | None = None,
+    ) -> TernaryResult:
         """Return whether the function has negative curvature in the range xmin to xmax.
 
         Args:
@@ -296,8 +331,13 @@ class MultipleSplinesFunction(MultiFunction):  # noqa: PLR0904
     # does most of the work, but the comparer differs for the two functions
     # breaks the function up into some segments, and checks if the delta_y has appropriately higher or lower
     def has_curvature_between(
-        self, xmin, xmax, numSegments=5, failureTolerance=None, comparer=None
-    ):
+        self,
+        xmin: float,
+        xmax: float,
+        numSegments: int = 5,
+        failureTolerance: float | None = None,
+        comparer: Comparer | None = None,
+    ) -> TernaryResult:
         if failureTolerance is None:
             failureTolerance = self.tolerance["curve_failure"]
 
@@ -344,7 +384,7 @@ class MultipleSplinesFunction(MultiFunction):  # noqa: PLR0904
 
         return self.always_comparer_at_points(comparer, ydiffs, delta, failureTolerance)
 
-    def defined_at_x(self, x, tolerance):
+    def defined_at_x(self, x: float, tolerance: float) -> bool:
         """Returns if the function exists at or is close to the line x=x within a tolerance."""
         tol = tolerance / self.xscale
         x_vals = self.find_closest_xvals(x)
@@ -361,7 +401,7 @@ class MultipleSplinesFunction(MultiFunction):  # noqa: PLR0904
                 self.debugger.add(f"Max allowed difference is {tolerance} pixels.")
             return False
 
-    def defined_at_y(self, y, tolerance):
+    def defined_at_y(self, y: float, tolerance: float) -> bool:
         """Returns if the function exists at or is close to the line y=y within a tolerance."""
         tol = tolerance / self.yscale
         y_vals = self.find_closest_yvals(y)
@@ -377,17 +417,21 @@ class MultipleSplinesFunction(MultiFunction):  # noqa: PLR0904
                 self.debugger.add(f"Max allowed difference is {tolerance} pixels.")
             return False
 
-    def has_value_at(self, x, y, tolerance=None):
+    def has_value_at(
+        self, x: float | None, y: float | None, tolerance: float | None = None
+    ) -> bool:
         """Returns if the function exists at both or either of the x and y value within a tolerance."""
         if x is None:
+            assert y is not None and tolerance is not None
             return self.defined_at_y(y, tolerance)
         if y is None:
+            assert tolerance is not None
             return self.defined_at_x(x, tolerance)
         return self.has_value_y_at_x(x=x, y=y, yTolerance=tolerance, xTolerance=tolerance)
 
     # Helper Functions ###
 
-    def get_range_defined(self):
+    def get_range_defined(self) -> list[list[float]]:
         xvals = []
         if self.functions:
             xvals = self.get_domain()
@@ -398,11 +442,11 @@ class MultipleSplinesFunction(MultiFunction):  # noqa: PLR0904
         rd = self.collapse_ranges(xvals)
         return rd
 
-    def x_in_rd(self, x):
+    def x_in_rd(self, x: float) -> bool:
         return any(x <= rd[1] and x >= rd[0] for rd in self.domain)
 
     # finds the closest (largest) xval from the left, and the closest (smallest) xval from the right
-    def find_closest_xvals(self, xval):
+    def find_closest_xvals(self, xval: float) -> list[float]:
         # gets start and end vals for each spline, then sorts them to the left and right
         xvals = []
         if self.x_in_rd(xval):
@@ -419,12 +463,14 @@ class MultipleSplinesFunction(MultiFunction):  # noqa: PLR0904
 
         return [np.max(xvals_left), np.min(xvals_right)]
 
-    def find_closest_yvals(self, yval):
+    def find_closest_yvals(self, yval: float) -> list[float]:
         # gets start and end vals for each spline, then sorts them to the left and right
-        yvals = []
+        yvals: list[float] = []
         for function in self.functions:
             min = function.get_min_value_between(self.xaxis.domain[0], self.xaxis.domain[1])
             max = function.get_max_value_between(self.xaxis.domain[0], self.xaxis.domain[1])
+            if min is None or max is None:
+                continue
             if yval >= min and yval <= max:
                 return [yval]
             yvals.append(min)
@@ -437,12 +483,14 @@ class MultipleSplinesFunction(MultiFunction):  # noqa: PLR0904
 
         return [np.max(yvals_below), np.min(yvals_above)]
 
-    def get_between_vals(self, xmin, xmax):
+    def get_between_vals(self, xmin: float, xmax: float) -> list[float]:
         xleft = self.find_closest_xvals(xmin)[-1]
         xright = self.find_closest_xvals(xmax)[0]
         return [xleft, xright]
 
-    def get_sample_points(self, numPoints, xmin, xmax):
+    def get_sample_points(
+        self, numPoints: int, xmin: float, xmax: float
+    ) -> tuple[list[float], list[float], list[float]]:
         # samples the function at some points, returns x and y values
         closest_to_xmin = self.find_closest_xvals(xmin)
         if len(closest_to_xmin) == 1:
@@ -469,7 +517,13 @@ class MultipleSplinesFunction(MultiFunction):  # noqa: PLR0904
         return xvals, yvals, delta
 
     # helper function for is_always_increasing, **decreasing, and has_curvature_between
-    def always_comparer_at_points(self, comparer, values, delta, failureTolerance=1):
+    def always_comparer_at_points(
+        self,
+        comparer: Comparer,
+        values: list[float],
+        delta: list[float],
+        failureTolerance: float = 1,
+    ) -> bool:
         # checks that applying comparer to each successive pair of values is true, allowing for failureTolerance
         # 'removes' a value if it does not satisfy the comparer
         # TODO: try both sides? (since a comparer requires two to fail)
@@ -506,7 +560,7 @@ class MultipleSplinesFunction(MultiFunction):  # noqa: PLR0904
         return True
 
     # returns no_gap, value
-    def get_value_at_gap(self, xval):
+    def get_value_at_gap(self, xval: float) -> tuple[bool | None, float | None]:
         # no_gap is a boolean that indicates that the gap, if it exists, is small enough to not be considered a gap
         # value is the value of the function at the xval. if there is a gap, the value is obtained by interpolation
         # TODO: get_value_at edge? currently returns the other one if one is False
@@ -528,7 +582,7 @@ class MultipleSplinesFunction(MultiFunction):  # noqa: PLR0904
         return (xdiff < self.tolerance["gap"]), yleft + (xval - xvals[0]) * 1.0 * ydiff / xdiff
 
     # strict does not exist between. Will return false if anything is within the xmin xmax range
-    def does_not_exist_between(self, xmin, xmax, tolerance=0):
+    def does_not_exist_between(self, xmin: float, xmax: float, tolerance: float = 0) -> bool:
         """Return whether the function has no values defined in the range xmin to xmax.
 
         Args:
@@ -553,7 +607,7 @@ class MultipleSplinesFunction(MultiFunction):  # noqa: PLR0904
                 return False
         return True
 
-    def does_exist_between(self, xmin, xmax):
+    def does_exist_between(self, xmin: float, xmax: float) -> bool:
         """Return whether the function has values defined in the range xmin to xmax.
 
         Args:
@@ -567,7 +621,7 @@ class MultipleSplinesFunction(MultiFunction):  # noqa: PLR0904
         return not self.does_not_exist_between(xmin, xmax, tolerance=5)
 
     # Other Functions from SketchResponse ###
-    def has_slope_m_at_x(self, m, x, tolerance=None):
+    def has_slope_m_at_x(self, m: float, x: float, tolerance: float | None = None) -> bool:
         """Return whether the function has slope m at the value x.
 
         Args:
@@ -591,7 +645,7 @@ class MultipleSplinesFunction(MultiFunction):  # noqa: PLR0904
         no_gap, actualAngle = self.get_angle_at_gap(x)
         return abs(expectedAngle - actualAngle) < tolerance
 
-    def has_constant_value_y_between(self, y, xmin, xmax):
+    def has_constant_value_y_between(self, y: float, xmin: float, xmax: float) -> bool:
         """Return whether the function has a constant value y over the range xmin to xmax.
 
         Args:
@@ -613,7 +667,7 @@ class MultipleSplinesFunction(MultiFunction):  # noqa: PLR0904
     # returns no_gap, angle
     # angle is the angle at the xval if it exists, or the angle from the left point of the gap to the right
     # TODO: handle edges
-    def get_angle_at_gap(self, xval):
+    def get_angle_at_gap(self, xval: float) -> tuple[bool, float | None]:
         xvals = self.find_closest_xvals(xval)
         if len(xvals) == 1:
             return True, self.get_angle_at(xval)
@@ -629,7 +683,7 @@ class MultipleSplinesFunction(MultiFunction):  # noqa: PLR0904
 
         return (xdiff < self.tolerance["gap"]), np.arctan2(self.yscale * ydiff, self.xscale * xdiff)
 
-    def comparer(self, x1, x2, leeway):
+    def comparer(self, x1: float, x2: float, leeway: float) -> bool:
         if x1 == float("-inf"):
             return True
         if x2 == float("inf"):
@@ -640,7 +694,13 @@ class MultipleSplinesFunction(MultiFunction):  # noqa: PLR0904
 
     # checks that the local minima between xmin and xmax is at x
     # may specify xmin and xmax directly, or with a delta value that indicates them, or leave it to the default delta
-    def has_min_at(self, x, delta=None, xmin=None, xmax=None):
+    def has_min_at(
+        self,
+        x: float,
+        delta: float | None = None,
+        xmin: float | None = None,
+        xmax: float | None = None,
+    ) -> bool:
         """Return if the function has a local minimum at the value x.
 
         Args:
@@ -668,11 +728,18 @@ class MultipleSplinesFunction(MultiFunction):  # noqa: PLR0904
         yleft = self.get_value_at_gap(xmin)[1]
         y = self.get_value_at_gap(x)[1]
         yright = self.get_value_at_gap(xmax)[1]
+        assert yleft is not None and y is not None and yright is not None
 
         return yleft > y and yright > y
 
     # see has_min_at
-    def has_max_at(self, x, delta=None, xmin=None, xmax=None):
+    def has_max_at(
+        self,
+        x: float,
+        delta: float | None = None,
+        xmin: float | None = None,
+        xmax: float | None = None,
+    ) -> bool:
         """Return if the function has a local maximum at the value x.
 
         Args:
@@ -699,5 +766,6 @@ class MultipleSplinesFunction(MultiFunction):  # noqa: PLR0904
         yleft = self.get_value_at_gap(xmin)[1]
         y = self.get_value_at_gap(x)[1]
         yright = self.get_value_at_gap(xmax)[1]
+        assert yleft is not None and y is not None and yright is not None
 
         return yleft < y and yright < y

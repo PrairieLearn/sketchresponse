@@ -1,6 +1,8 @@
 from __future__ import annotations
 
-from ..types import SketchConfig, SketchGrader, SketchSubmission
+from collections.abc import Callable
+
+from ..types import SketchConfig, SketchGrader, SketchSubmission, SplinePoints, TernaryResult
 from .Gradeable import Gradeable
 from .Tag import Tag
 
@@ -25,6 +27,11 @@ class Asymptotes(Gradeable):
     #        VerticalAsymptotes or the HorizontalAsymptotes class to use the
     #        grading functions below.
     #    """
+
+    asyms: list[Asymptote]
+    px_asyms: list[float]
+    scale: float
+
     def __init__(
         self,
         grader: SketchGrader,
@@ -62,10 +69,10 @@ class Asymptotes(Gradeable):
         if len(self.asyms) > 0:
             self.set_tagables(self.asyms)
 
-    def value_from_spline(self, spline):
+    def value_from_spline(self, spline: SplinePoints) -> tuple[float, float]:
         raise NotImplementedError("Abstract asymptote cannot be converted from spline.")
 
-    def closest_asym_to_value(self, v):
+    def closest_asym_to_value(self, v: float) -> tuple[float, float | None]:
         """Return the absolute distance between v and the closest asymptote and the x or y axis value of that asymptote.
 
         Args:
@@ -89,7 +96,7 @@ class Asymptotes(Gradeable):
 
         return min_distance, closest_asym
 
-    def get_asym_at_value(self, v, tolerance=None):
+    def get_asym_at_value(self, v: float, tolerance: float | None = None) -> float | None:
         """Return the asymptote at the value v, or None.
 
         Args:
@@ -114,7 +121,7 @@ class Asymptotes(Gradeable):
 
         return None
 
-    def has_asym_at_value(self, v, tolerance=None):
+    def has_asym_at_value(self, v: float, tolerance: float | None = None) -> bool:
         """Return whether an asymtote is declared at the given value.
 
         Args:
@@ -127,7 +134,7 @@ class Asymptotes(Gradeable):
         """
         return self.get_asym_at_value(v, tolerance=tolerance) is not None
 
-    def get_number_of_asyms(self):
+    def get_number_of_asyms(self) -> int:
         """Return the number of asymptotes declared in the function.
 
         Returns:
@@ -136,7 +143,13 @@ class Asymptotes(Gradeable):
         return len(self.asyms)
 
     # Not implementing
-    def matches_function(self, func, x1, x2, tolerance):
+    def matches_function(
+        self,
+        func: Callable[[float], float],
+        x1: float,
+        x2: float,
+        tolerance: int,
+    ) -> bool:
         rg = x2 - x1
         interval = rg / 3
         hits = 0
@@ -156,13 +169,32 @@ class Asymptotes(Gradeable):
             return len(asyms) == 0
         return hits == total
 
-    def lt_function(self, func, x1, x2, tolerance):
+    def lt_function(
+        self,
+        func: Callable[[float], float],
+        x1: float,
+        x2: float,
+        tolerance: int,
+    ) -> TernaryResult:
         return self.ltgt_function(func, x1, x2, False, tolerance)
 
-    def gt_function(self, func, x1, x2, tolerance):
+    def gt_function(
+        self,
+        func: Callable[[float], float],
+        x1: float,
+        x2: float,
+        tolerance: int,
+    ) -> TernaryResult:
         return self.ltgt_function(func, x1, x2, True, tolerance)
 
-    def ltgt_function(self, func, x1, x2, greater, tolerance):
+    def ltgt_function(
+        self,
+        func: Callable[[float], float],
+        x1: float,
+        x2: float,
+        greater: bool,
+        tolerance: int,
+    ) -> TernaryResult:
         rg = x2 - x1
         interval = rg / 4
         hits = 0
@@ -208,13 +240,13 @@ class VerticalAsymptotes(Asymptotes):
         Asymptotes.__init__(self, grader, submission, config, current_tool)
         self.scale = self.xscale
 
-    def value_from_spline(self, spline: list[list[float]]) -> tuple[float, float]:
+    def value_from_spline(self, spline: SplinePoints) -> tuple[float, float]:
         # gets x coordinate of first point
         px = spline[0][0]
         x = self._px_to_xval(px)
         return px, x
 
-    def get_range_defined(self):
+    def get_range_defined(self) -> list[list[float]]:
         if len(self.asyms) == 0:
             return []
         else:
@@ -241,19 +273,21 @@ class HorizontalAsymptotes(Asymptotes):
         Asymptotes.__init__(self, grader, submission, config, current_tool)
         self.scale = self.yscale
 
-    def value_from_spline(self, spline: list[list[float]]) -> tuple[float, float]:
+    def value_from_spline(self, spline: SplinePoints) -> tuple[float, float]:
         # gets y coordinate of first point
         px = spline[0][1]
         y = self._px_to_yval(px)
         return px, y
 
-    def get_range_defined(self):
+    def get_range_defined(self) -> list[list[float]]:
         if len(self.asyms) == 0:
             return []
         else:
             return [self.xaxis.domain]
 
-    def is_less_than_y_between(self, y, x1, x2, tolerance):  # graph tolerance
+    def is_less_than_y_between(
+        self, y: float, x1: float, x2: float, tolerance: float
+    ) -> TernaryResult:  # graph tolerance
         tolerance /= self.yscale
         if len(self.asyms) == 0:
             if self.debug:
@@ -269,7 +303,9 @@ class HorizontalAsymptotes(Asymptotes):
                 return False
         return True
 
-    def is_greater_than_y_between(self, y, x1, x2, tolerance):  # graph tolerance
+    def is_greater_than_y_between(
+        self, y: float, x1: float, x2: float, tolerance: float
+    ) -> TernaryResult:  # graph tolerance
         tolerance /= self.yscale
         if len(self.asyms) == 0:
             if self.debug:

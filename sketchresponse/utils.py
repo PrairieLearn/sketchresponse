@@ -20,6 +20,7 @@ from .types import (
     SketchGrader,
     SketchSubmission,
     SketchTool,
+    SplinePoints,
 )
 
 
@@ -247,7 +248,7 @@ def get_num_in_bound_occurrences(
 
 
 def spline_in_range(
-    spline: list[list[float]],
+    spline: SplinePoints,
     x1: float,
     x2: float,
     submission: SketchSubmission,

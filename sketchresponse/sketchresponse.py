@@ -13,7 +13,7 @@ from .types import (
     SketchItem,
 )
 
-OkValue = bool | str | float
+OkValue = bool | int | float | str
 GraderReturn = GraderResult | tuple[OkValue] | tuple[OkValue, str]
 
 

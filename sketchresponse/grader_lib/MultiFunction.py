@@ -1,8 +1,10 @@
 from __future__ import annotations
 
+from typing import cast
+
 import numpy as np
 
-from ..types import SketchGrader
+from ..types import SketchGrader, SplinePoints
 from .Axis import Axis
 from .Function import Function
 
@@ -21,7 +23,7 @@ class MultiFunction(Function):
         self,
         xaxis: Axis,
         yaxis: Axis,
-        path_info: list[list[float]] | None,
+        path_info: SplinePoints | None,
         grader: SketchGrader,
         current_tool: str,
         functions: list[Function] | None = None,
@@ -35,17 +37,17 @@ class MultiFunction(Function):
         if functions:
             self.functions = functions
 
-    def is_defined_at(self, xval):
+    def is_defined_at(self, xval: float) -> bool:
         return any(function.is_defined_at(xval) for function in self.functions)
 
     # Function finders ##
 
-    def find_function(self, xval):
+    def find_function(self, xval: float) -> list[Function]:
         functionsList = [function for function in self.functions if function.is_defined_at(xval)]
 
         return functionsList
 
-    def find_functions_between(self, xmin, xmax):
+    def find_functions_between(self, xmin: float, xmax: float) -> list[Function]:
         betweenFunctions = [
             function for function in self.functions if function.is_between(xmin, xmax)
         ]
@@ -54,27 +56,30 @@ class MultiFunction(Function):
 
     # "get" methods ##
 
-    def get_value_at(self, xval):
+    def get_value_at(self, xval: float) -> float | None:
         for function in self.functions:
             v = function.get_value_at(xval)
             if v is not None:
                 return v
         return None
 
-    def get_angle_at(self, xval):
+    def get_angle_at(self, xval: float) -> float | None:
         for function in self.functions:
             v = function.get_angle_at(xval)
             if v is not None:
                 return v
         return None
 
-    def get_domain(self):
-        xvals = []
+    def get_domain(self) -> list[list[float]]:
+        xvals: list[list[float]] = []
         for function in self.functions:
-            xvals += function.get_domain()
+            # get_domain's nested vs flat shape is subclass-dependent; here
+            # self.functions are always MultiFunction subclasses with the
+            # nested shape — see also `Function.is_between`.
+            xvals += cast("list[list[float]]", function.get_domain())
         return self.collapse_ranges(xvals)
 
-    def get_min_value_between(self, xmin, xmax):
+    def get_min_value_between(self, xmin: float, xmax: float) -> float | None:
         """Return the minimum value of the function in the domain [xmin, xmax].
 
         Args:
@@ -98,7 +103,7 @@ class MultiFunction(Function):
         else:
             return None
 
-    def get_max_value_between(self, xmin, xmax):
+    def get_max_value_between(self, xmin: float, xmax: float) -> float | None:
         """Return the maximum value of the function in the domain [xmin, xmax].
 
         Args:
@@ -122,7 +127,7 @@ class MultiFunction(Function):
         else:
             return None
 
-    def get_horizontal_line_crossings(self, yval):
+    def get_horizontal_line_crossings(self, yval: float) -> list[float]:
         """Return a list of the values where the function crosses the horizontal line y=yval.
 
         Args:
@@ -132,13 +137,13 @@ class MultiFunction(Function):
             [float]:
             the list of values where the function crosses the line y=yval.
         """
-        xvals = []
+        xvals: list[float] = []
         for function in self.functions:
             xvals.extend(function.get_horizontal_line_crossings(yval))
 
         return xvals
 
-    def get_vertical_line_crossings(self, xval):
+    def get_vertical_line_crossings(self, xval: float) -> list[float]:
         """Return a list of the values where the function crosses the horizontal line x=xval.
 
         Args:
@@ -148,7 +153,7 @@ class MultiFunction(Function):
             [float]:
             the list of values where the function crosses the line x=xval.
         """
-        yvals = []
+        yvals: list[float] = []
         for function in self.functions:
             yvals.extend(function.get_vertical_line_crossings(xval))
 
@@ -156,7 +161,7 @@ class MultiFunction(Function):
 
     # Grader functions ###
 
-    def is_straight(self):
+    def is_straight(self) -> bool:
         """Return whether the function is straight over its entire domain.
 
         Returns:
@@ -167,7 +172,7 @@ class MultiFunction(Function):
         domain = self.get_domain()
         return all(self.is_straight_between(d[0], d[1]) for d in domain)
 
-    def is_straight_between(self, xmin, xmax):
+    def is_straight_between(self, xmin: float, xmax: float) -> bool:
         """Return whether the function is straight within the range xmin to xmax. An alternate approximate implementation until we sort out some issues above
 
         Args:

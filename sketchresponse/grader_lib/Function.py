@@ -1,6 +1,8 @@
 from __future__ import annotations
 
-from ..types import SketchGrader
+from typing import cast
+
+from ..types import FunctionDomain, SketchGrader, SplinePoints, TernaryResult
 from .Axis import Axis
 from .Debugger import Debugger
 from .Tag import Tag, Tagable
@@ -18,7 +20,7 @@ class Function(Tag, Tagable):  # noqa: PLR0904
         self,
         xaxis: Axis,
         yaxis: Axis,
-        path_info: list[list[float]] | None,
+        path_info: SplinePoints | None,
         grader: SketchGrader,
         current_tool: str,
         tolerance: dict[str, float] | None = None,
@@ -56,8 +58,8 @@ class Function(Tag, Tagable):  # noqa: PLR0904
         self.tolerance[key] = value
 
     # sets the variables related to the path, and finds the domain
-    def create_from_path_info(self, path_info: list[list[float]] | None) -> None:
-        self.domain = []
+    def create_from_path_info(self, path_info: SplinePoints | None) -> None:
+        self.domain: FunctionDomain = []
 
     # methods to handle pixel <-> math conversions
 
@@ -77,7 +79,9 @@ class Function(Tag, Tagable):  # noqa: PLR0904
     # done in math space, not pixel space
 
     def is_between(self, xmin: float, xmax: float) -> bool:
-        dom = self.domain
+        # Only called on functions whose domain has the nested list[[a, b], ...]
+        # shape — see MultiFunction.find_functions_between, the only caller.
+        dom = cast("list[list[float]]", self.domain)
         dom_start = dom[0]
         dom_end = dom[-1]
         xleft = dom_start[0]
@@ -108,57 +112,65 @@ class Function(Tag, Tagable):  # noqa: PLR0904
         g_pos_t = positive_tolerance * scale
         return x_val >= (xrange[0] + g_neg_t - g_pos_t) and x_val <= (xrange[1] - g_neg_t + g_pos_t)
 
-    def get_value_at(self, xval):
+    def get_value_at(self, xval: float) -> float | None:
         raise NotImplementedError("The get_value_at method is not implemented by this class.")
 
-    def get_angle_at(self, xval):
+    def get_angle_at(self, xval: float) -> float | None:
         raise NotImplementedError("The get_angle_at method is not implemented by this class.")
 
-    def get_slope_at(self, xval):
+    def get_slope_at(self, xval: float) -> float | None:
         raise NotImplementedError("The get_slope_at method is not implemented by this class.")
 
-    def get_min_value_between(self, xmin, xmax):
+    def get_min_value_between(self, xmin: float, xmax: float) -> float | None:
         raise NotImplementedError(
             "The get_min_value_between method is not implemented by this class."
         )
 
-    def get_max_value_between(self, xmin, xmax):
+    def get_max_value_between(self, xmin: float, xmax: float) -> float | None:
         raise NotImplementedError(
             "The get_max_value_between method is not implemented by this class."
         )
 
-    def get_horizontal_line_crossings(self, yval):
+    def get_horizontal_line_crossings(self, yval: float) -> list[float]:
         raise NotImplementedError(
             "The get_horizontal_line_crossings method is not implemented by this class."
         )
 
-    def get_vertical_line_crossings(self, xval):
+    def get_vertical_line_crossings(self, xval: float) -> list[float]:
         raise NotImplementedError(
             "The get_vertical_line_crossings method is not implemented by this class."
         )
 
-    def is_defined_at(self, xval):
+    def is_defined_at(self, xval: float) -> bool:
         raise NotImplementedError(
             "The is_defined_at method is not implemented by this class."
         )
 
-    def get_domain(self):
+    def get_domain(self) -> FunctionDomain:
         raise NotImplementedError("The get_domain method is not implemented by this class.")
 
-    def does_not_exist_between(self, xmin, xmax, tolerance=0):
+    def does_not_exist_between(self, xmin: float, xmax: float, tolerance: float = 0) -> bool:
         raise NotImplementedError(
             "The does_not_exist_between method is not implemented by this class."
         )
 
-    def get_sample_points(self, numPoints, xmin, xmax):
+    def get_sample_points(
+        self, numPoints: int, xmin: float, xmax: float
+    ) -> tuple[list[float], list[float], list[float]]:
         raise NotImplementedError("The get_sample_points method is not implemented by this class.")
 
     # Grader functions ###
 
-    def is_a_function(self):
+    def is_a_function(self) -> bool:
         raise NotImplementedError("The is_a_function method is not implemented by this class.")
 
-    def has_value_y_at_x(self, y, x, yTolerance=None, xTolerance=None):
+    def has_value_y_at_x(
+        self,
+        y: float,
+        x: float,
+        yTolerance: float | None = None,
+        xTolerance: float | None = None,
+    ) -> bool:
         """Return whether the function has the value y at x.
 
         Args:
@@ -213,7 +225,9 @@ class Function(Tag, Tagable):  # noqa: PLR0904
                 )
             return False
 
-    def is_zero_at_x_equals_zero(self, yTolerance=None, xTolerance=None):
+    def is_zero_at_x_equals_zero(
+        self, yTolerance: float | None = None, xTolerance: float | None = None
+    ) -> bool:
         """Return whether the function is zero at x equals zero.
 
         Args:
@@ -229,7 +243,9 @@ class Function(Tag, Tagable):  # noqa: PLR0904
         """
         return self.has_value_y_at_x(0, 0, yTolerance=yTolerance, xTolerance=xTolerance)
 
-    def is_greater_than_y_between(self, y, xmin, xmax, tolerance=None):
+    def is_greater_than_y_between(
+        self, y: float, xmin: float, xmax: float, tolerance: float | None = None
+    ) -> TernaryResult | None:
         """Return whether function is always greater than y in the range xmin to xmax.
 
         Args:
@@ -262,7 +278,9 @@ class Function(Tag, Tagable):  # noqa: PLR0904
                 )
                 self.debugger.add(f"Max allowed is {tolerance * self.yscale} pixels.")
 
-    def is_less_than_y_between(self, y, xmin, xmax, tolerance=None):
+    def is_less_than_y_between(
+        self, y: float, xmin: float, xmax: float, tolerance: float | None = None
+    ) -> TernaryResult | None:
         """Return whether function is always less than y in the range xmin to xmax.
 
         Args:

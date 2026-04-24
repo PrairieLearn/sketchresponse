@@ -2,7 +2,7 @@ from __future__ import annotations
 
 import numpy as np
 
-from ..types import SketchGrader
+from ..types import SketchGrader, SplinePoints
 from .Axis import Axis
 from .Function import Function
 
@@ -11,21 +11,31 @@ from .Function import Function
 
 # Function consisting of a single Bezier curve
 class CurveFunction(Function):
-    # the global variables:
+    # Control points, in pixel space and math space respectively
+    pixels: SplinePoints
+    p0: tuple[float, float]
+    p1: tuple[float, float]
+    p2: tuple[float, float]
+    p3: tuple[float, float]
 
-    # self.pixels [(point0), (point1), (point2), (point3)] - the control points, in pixel space
-    # self.p0, self.p1, self.p2, self.p3 - the control points, in math space
+    # The polynomials for x and y as functions of t, plus their 1st and 2nd
+    # derivatives (numpy 1-D arrays of polynomial coefficients).
+    x: np.ndarray
+    y: np.ndarray
+    dxdt: np.ndarray
+    dydt: np.ndarray
+    ddx: np.ndarray
+    ddy: np.ndarray
 
-    # the polynomials for x and y, their derivatives, and their second derivatives:
-    # self.x, self.y
-    # self.dxdt, self.dydt
-    # self.ddx, self.ddy
+    # Note: `self.domain` is the flat `[xmin, xmax]` shape on CurveFunction —
+    # see the `FunctionDomain` alias in sketchresponse.types.
+    domain: list[float]
 
     def __init__(
         self,
         xaxis: Axis,
         yaxis: Axis,
-        path_info: list[list[float]] | None,
+        path_info: SplinePoints | None,
         grader: SketchGrader,
         current_tool: str,
         tolerance: dict[str, float] | None = None,
@@ -38,7 +48,7 @@ class CurveFunction(Function):
         self.set_default_tolerance("t_threshold", 0.002)  # threshold for t values
         # self.set_default_tolerance('straight_line', 100) # threshold for straight lines
 
-    def create(self):
+    def create(self) -> None:
         self.x = (
             np.array([-1, 3, -3, 1]) * self.p0[0]
             + np.array([3, -6, 3, 0]) * self.p1[0]
@@ -70,7 +80,8 @@ class CurveFunction(Function):
             [1, 0]
         ) * 6 * (self.p3[1] - 2 * self.p2[1] + self.p1[1])
 
-    def create_from_path_info(self, path_info):
+    def create_from_path_info(self, path_info: SplinePoints | None) -> None:
+        assert path_info is not None
         self.pixels = []
         for i in range(4):
             self.pixels.append(path_info[i])
@@ -85,20 +96,20 @@ class CurveFunction(Function):
         self.create()
 
     # checks the t val: get_t_for_xval will return -1 if there is no t val
-    def is_defined_at(self, xval):
+    def is_defined_at(self, xval: float) -> bool:
         return self.get_t_for_xval(xval) > -self.tolerance["t_threshold"]
 
-    def exists_at_y(self, yval):
+    def exists_at_y(self, yval: float) -> bool:
         endpoints = sorted([self.p0[1], self.p3[1]])
         return yval >= endpoints[0] and yval <= endpoints[1]
 
-    def between_vals(self, xmin, xmax):
+    def between_vals(self, xmin: float, xmax: float) -> tuple[float, float]:
         xleft = max(xmin, self.domain[0])
         xright = min(xmax, self.domain[1])
 
         return xleft, xright
 
-    def get_t_roots_within_zero_and_one(self, p):
+    def get_t_roots_within_zero_and_one(self, p: list[float]) -> list[float]:
         r = np.roots(p)
         t_unfiltered = r.real[
             abs(r.imag) < self.tolerance["imag_threshold"]
@@ -114,7 +125,9 @@ class CurveFunction(Function):
 
         return t_filtered
 
-    def get_t_extrema_between(self, xmin, xmax, p):
+    def get_t_extrema_between(
+        self, xmin: float, xmax: float, p: np.ndarray
+    ) -> list[float]:
         # gets the t vals of the roots of p between xmin and xmax
         # used for finding extrema between xmin and xmax
         # assumes xmin and xmax are within the domain
@@ -133,7 +146,7 @@ class CurveFunction(Function):
 
         return t_filtered
 
-    def get_t_for_xval(self, xval):
+    def get_t_for_xval(self, xval: float) -> float:
         # currently returns the first t val (i.e., not all of them if there are multiple), -1 if there is no t val
 
         if xval == float("inf"):
@@ -147,7 +160,7 @@ class CurveFunction(Function):
         else:
             return -1
 
-    def get_value_at(self, xval):
+    def get_value_at(self, xval: float) -> float | None:
         # returns False if the function is not defined at this xval
         t = self.get_t_for_xval(xval)
         if t > -self.tolerance["t_threshold"]:
@@ -156,14 +169,14 @@ class CurveFunction(Function):
             yval = None
         return yval
 
-    def get_x_for_yval(self, yval):
+    def get_x_for_yval(self, yval: float) -> list[float]:
         p = np.poly1d(self.y)
         tvals = (p - yval).roots
         xvals = [self.get_x_for_t(t) for t in tvals]
         xvals = [val for val in xvals if np.imag(val) == 0]
         return xvals
 
-    def get_x_for_t(self, t):
+    def get_x_for_t(self, t: float) -> float:
         x = (
             (1 - t) ** 3 * self.p0[0]
             + 3 * (1 - t) ** 2 * t * self.p1[0]
@@ -172,14 +185,14 @@ class CurveFunction(Function):
         )
         return x
 
-    def get_angle_at(self, xval):
+    def get_angle_at(self, xval: float) -> float | None:
         t = self.get_t_for_xval(xval)
         yprime = np.polyval(self.dydt, t)
         xprime = np.polyval(self.dxdt, t)
         angle = np.arctan2(yprime, xprime)
         return angle
 
-    def get_min_value_between(self, xmin, xmax):
+    def get_min_value_between(self, xmin: float, xmax: float) -> float | None:
         xleft, xright = self.between_vals(xmin, xmax)
         t = self.get_t_extrema_between(xleft, xright, self.dydt)
         y = np.polyval(self.y, t)
@@ -191,7 +204,7 @@ class CurveFunction(Function):
         else:
             return None
 
-    def get_max_value_between(self, xmin, xmax):
+    def get_max_value_between(self, xmin: float, xmax: float) -> float | None:
         xleft, xright = self.between_vals(xmin, xmax)
 
         t = self.get_t_extrema_between(xleft, xright, self.dydt)
@@ -204,13 +217,13 @@ class CurveFunction(Function):
         else:
             return None
 
-    def get_horizontal_line_crossings(self, yval):
+    def get_horizontal_line_crossings(self, yval: float) -> list[float]:
         p = [self.y[0], self.y[1], self.y[2], self.y[3] - yval]
         t = self.get_t_roots_within_zero_and_one(p)
         x = np.polyval(self.x, t)
         return x
 
-    def get_vertical_line_crossings(self, xval):
+    def get_vertical_line_crossings(self, xval: float) -> list[float]:
         # note: only gets one value. this should be fine for now.
         # note: must return array
         y = self.get_value_at(xval)
@@ -219,13 +232,15 @@ class CurveFunction(Function):
         else:
             return []
 
-    def get_domain(self):
+    def get_domain(self) -> list[float]:
         return self.domain
 
-    def get_endpoints(self):
+    def get_endpoints(self) -> list[list[float]]:
         return [[self.p0[0], self.p0[1]], [self.p3[0], self.p3[1]]]
 
-    def swap_eps(self, p1, p2):
+    def swap_eps(
+        self, p1: tuple[float, float], p2: tuple[float, float]
+    ) -> tuple[tuple[float, float], tuple[float, float]]:
         if p1[0] > p2[0]:
             return p2, p1
         else:

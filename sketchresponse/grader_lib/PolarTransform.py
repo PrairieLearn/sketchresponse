@@ -627,8 +627,8 @@ class PolarTransform:
         if theta < 0:
             theta += 2 * math.pi
 
-        # convert back into pixel space
-        r = self.raxis.coord_to_pixel(r)
+        # convert back into pixel space (np.linalg.norm returns a numpy scalar)
+        r = self.raxis.coord_to_pixel(float(r))
         theta = self.thetaaxis.coord_to_pixel(theta)
 
         return [theta, r]
