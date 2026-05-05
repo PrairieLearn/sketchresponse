@@ -85,10 +85,7 @@ export default class SketchInput {
         <rect width="100%" height="100%" fill="#F0F0F0" />
         <rect x="${this.config.safetyBuffer}" y="${this.config.safetyBuffer}" width="${this.config.width - 2 * this.config.safetyBuffer}" height="${this.config.height - 2 * this.config.safetyBuffer}" fill="white" />
       </svg>
-      <div id="${this.id}-si-attribution" class="si-attribution">
-        <a id="${this.id}-si-show-legal" href="#">Made with <span aria-label="love">&hearts;</span> at MIT, adapted for PrairieLearn</a>
-      </div>
-      <div id="${this.id}-si-help" class="si-help-legal" data-visible="false">
+      <div id="${this.id}-si-help" class="si-help" data-visible="false">
         <div role="dialog" class="si-dialog">
           <header>
             <h1>How to use the sketching editor</h1>
@@ -100,37 +97,10 @@ export default class SketchInput {
             When using the free-form function drawing tool, you can draw and move individual function segments separately. When using the spline or line segment tool, you can draw individual points that are connected automatically. To finish drawing a line with those tools, select a different tool or press Enter on your keyboard.
           </p>
           <p>
-            To delete an element, first click on it with the "Select" tool, then use the "Delete" button on the right. You can also use the right buttons or keyboard shortcuts to undo and redo drawing steps. Different questions might provide you with different sketching tools, and some might contain pre-drawn elements that cannot be edited or deleted.
+            To delete an element, first click on it with the "Select" tool, then use the "Delete" button on the right. You can also use the right buttons or keyboard shortcuts to undo and redo drawing steps.
           </p>
         </div>
-      </div>
-      <div id="${this.id}-si-legal" class="si-help-legal" data-visible="false">
-        <div role="dialog" class="si-dialog">
-          <header>
-            <h1>SketchResponse</h1>
-            <p class="si-copyright">
-              Copyright (c) 2015-2016 Massachusetts Institute of Technology.
-            </p>
-          </header>
-          <p>
-            SketchResponse is an open-source graphical input and assessment tool for online learning
-            platforms. The code and documentation for this project (including instructions for course authors wishing to
-            create their own sketch problems) are freely available at
-            <a href="https://github.com/SketchResponse/sketchresponse" target="_blank">github.com/SketchResponse</a>.
-            We welcome collaborators and are open to any feedback you may have!
-          </p>
-          <p>
-            This library is free software; you can redistribute it and/or modify it under the terms of the GNU Lesser
-            General Public License as published by the Free Software Foundation. Please see our <a href="LICENSE.txt"
-            target="_blank">LICENSE file</a> for complete license terms.
-          </p>
-          <p>
-            SketchResponse also uses third-party code and creative-commons licensed content which are distributed under
-            their own license terms; details may be found in the LICENSE file linked above.
-          </p>
-        </div>
-      </div>
-    `;
+      </div>`;
 
     // Workaround for iOS Safari and Chrome (the latter supports the touch-action CSS property,
     // but let's keep everything the same for now). TODO: remove if implemented in PEP or WebKit.
@@ -139,19 +109,8 @@ export default class SketchInput {
     // Prevent click delay on touch devices. TODO: remove when handled by CSS touch-action or PEP.
     preventClickDelay(this.el);
 
-    const showLegal = document.getElementById(`${this.id}-si-show-legal`);
-    const legalDialog = document.querySelector(`#${this.id}-si-legal`);
     const helpDialog = document.querySelector(`#${this.id}-si-help`);
 
-    showLegal.addEventListener('click', (event) => {
-      event.preventDefault();
-      legalDialog.setAttribute('data-visible', 'true');
-    });
-
-    legalDialog.addEventListener('click', () =>
-      legalDialog.setAttribute('data-visible', 'false'),
-    );
-    legalDialog.addEventListener('click', (event) => event.stopPropagation());
     helpDialog.addEventListener('click', () =>
       helpDialog.setAttribute('data-visible', 'false'),
     );
