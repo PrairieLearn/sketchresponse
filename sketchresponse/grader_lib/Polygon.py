@@ -517,21 +517,20 @@ class Polygons(Gradeable):  # noqa: PLR0904
         return all(self.within_y_range(point[1]) for point in points)
 
     @staticmethod
-    def _segment_overlaps_x_range(segment: Segment, x1: float, x2: float) -> bool:
-        points = cast("tuple[Any, Any]", segment.points)
+    def _points_overlap_x_range(points: tuple[Any, Any], x1: float, x2: float) -> bool:
         segment_x1 = min(points[0][0], points[1][0])
         segment_x2 = max(points[0][0], points[1][0])
         return not (segment_x2 < x1 or segment_x1 > x2)
 
     def segment_in_range(self, segment: Segment, x1: float, x2: float) -> bool:
         points = cast("tuple[Any, Any]", segment.points)
-        return self._segment_overlaps_x_range(segment, x1, x2) and (
+        return self._points_overlap_x_range(points, x1, x2) and (
             self.within_y_range(points[0][1]) or self.within_y_range(points[1][1])
         )
 
     def segment_in_range_strict(self, segment: Segment, x1: float, x2: float) -> bool:
         points = cast("tuple[Any, Any]", segment.points)
-        return self._segment_overlaps_x_range(segment, x1, x2) and (
+        return self._points_overlap_x_range(points, x1, x2) and (
             self.within_y_range(points[0][1]) and self.within_y_range(points[1][1])
         )
 
