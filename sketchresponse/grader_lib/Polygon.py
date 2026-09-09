@@ -516,19 +516,23 @@ class Polygons(Gradeable):  # noqa: PLR0904
         points = polygon.points
         return all(self.within_y_range(point[1]) for point in points)
 
+    @staticmethod
+    def _points_overlap_x_range(points: tuple[Any, Any], x1: float, x2: float) -> bool:
+        segment_x1 = min(points[0][0], points[1][0])
+        segment_x2 = max(points[0][0], points[1][0])
+        return not (segment_x2 < x1 or segment_x1 > x2)
+
     def segment_in_range(self, segment: Segment, x1: float, x2: float) -> bool:
         points = cast("tuple[Any, Any]", segment.points)
-        return (
-            not (points[0][0] < x1 and points[1][0] <= x1)
-            or (points[0][0] >= x2 and points[1][0] > x2)
-        ) and (self.within_y_range(points[0][1]) or self.within_y_range(points[1][1]))
+        return self._points_overlap_x_range(points, x1, x2) and (
+            self.within_y_range(points[0][1]) or self.within_y_range(points[1][1])
+        )
 
     def segment_in_range_strict(self, segment: Segment, x1: float, x2: float) -> bool:
         points = cast("tuple[Any, Any]", segment.points)
-        return (
-            not (points[0][0] < x1 and points[1][0] <= x1)
-            or (points[0][0] >= x2 and points[1][0] > x2)
-        ) and (self.within_y_range(points[0][1]) and self.within_y_range(points[1][1]))
+        return self._points_overlap_x_range(points, x1, x2) and (
+            self.within_y_range(points[0][1]) and self.within_y_range(points[1][1])
+        )
 
     def cut_segment(self, segment: Segment, x1: float, x2: float) -> Segment | None:
         points = cast("tuple[Any, Any]", segment.points)
@@ -566,17 +570,17 @@ class Polygons(Gradeable):  # noqa: PLR0904
         y2 = yrange[0]
         xval = cast("float", point[0])
         yval = cast("float", point[1])
-        try:
-            slope = cast("Any", segment).slope
-        except Exception:
-            # Vertical segment: x is fixed by the segment, so only clamp y to
-            # the axis range. cut_segment guarantees xval is already in
-            # [xmin, xmax] for vertical inputs.
+        points = cast("tuple[Any, Any]", segment.points)
+        if points[0][0] == points[1][0]:
+            # SymPy represents a vertical segment's slope as infinity. Using
+            # that slope to clip x can produce NaN coordinates.
             if yval > y2:
                 return (xval, y2)
             if yval < y1:
                 return (xval, y1)
             return (xval, yval)
+
+        slope = cast("Any", segment).slope
 
         def find_y(x: float) -> float:
             return slope * (x - xval) + yval
