@@ -104,10 +104,7 @@ export default class Spline extends BasePlugin {
       return;
     }
 
-    const currentPosition = {
-      x: event.clientX - this.params.left,
-      y: event.clientY - this.params.top,
-    };
+    const currentPosition = this.getPointerPosition(event);
     // We already have at least one spline defined, add new points to the last one
     if (this.state.length > 0) {
       // Only add tag to first point

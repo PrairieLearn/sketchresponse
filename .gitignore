@@ -84,3 +84,6 @@ node_modules/
 
 # Auto-generated version file
 sketchresponse/_version.py
+
+# Frontend source is not a Python lib directory.
+!/sketch_tool/lib/

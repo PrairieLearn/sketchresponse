@@ -223,10 +223,7 @@ export default class Freeform extends BasePlugin {
     document.addEventListener('pointerup', this.drawEnd, true);
     document.addEventListener('pointercancel', this.drawEnd, true);
     this.firstPoint = this.state.length % 2 === 0;
-    const lastPoint = {
-      x: event.clientX - this.params.left,
-      y: event.clientY - this.params.top,
-    };
+    const lastPoint = this.getPointerPosition(event);
     this.lastPoint = lastPoint;
     this.pointerPosition = lastPoint;
     this.pointsBeingDrawn.push(this.lastPoint);
@@ -235,10 +232,7 @@ export default class Freeform extends BasePlugin {
   }
 
   drawMove(event) {
-    this.pointerPosition = {
-      x: event.clientX - this.params.left,
-      y: event.clientY - this.params.top,
-    };
+    this.pointerPosition = this.getPointerPosition(event);
 
     let pointerDistance = Math.sqrt(
       (this.pointerPosition.x - this.lastPoint.x) ** 2 +

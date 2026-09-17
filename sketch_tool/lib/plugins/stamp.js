@@ -75,10 +75,7 @@ export default class Stamp extends BasePlugin {
     document.addEventListener('pointermove', this.drawMove, true);
     document.addEventListener('pointerup', this.drawEnd, true);
     document.addEventListener('pointercancel', this.drawEnd, true);
-    this.currentPosition = {
-      x: event.clientX - this.params.left,
-      y: event.clientY - this.params.top,
-    };
+    this.currentPosition = this.getPointerPosition(event);
     if (this.hasTag) {
       this.currentPosition.tag = this.tag.value;
     }
@@ -87,8 +84,7 @@ export default class Stamp extends BasePlugin {
   }
 
   drawMove(event) {
-    let x = event.clientX - this.params.left;
-    let y = event.clientY - this.params.top;
+    let { x, y } = this.getPointerPosition(event);
     const lastPosition = this.state[this.state.length - 1];
 
     x = this.clampX(x);

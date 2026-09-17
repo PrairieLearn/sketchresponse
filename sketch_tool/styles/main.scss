@@ -35,7 +35,9 @@
 }
 
 .si-container {
-  margin: 20px;
+  width: calc(var(--si-width) + 2px);
+  max-width: 100%;
+  min-width: 0;
   position: relative;
   background-color: #fff;
   border: 1px solid lightgray;
@@ -47,6 +49,8 @@
 }
 
 .si-canvas {
+  width: 100%;
+  height: auto;
   clip-path: inset(0); /* Modern alternative to polygon for full clip */
 }
 
@@ -106,7 +110,7 @@
 /* ===== Toolbar Styles ===== */
 
 .si-toolbar {
-  width: 100%;
+  width: max-content;
   display: flex;
   background-color: #eee;
   border-top: 1px solid hsl(0deg 0% 100% / 70%);
