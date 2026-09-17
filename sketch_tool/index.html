@@ -2,6 +2,12 @@
 <html>
   <head>
     <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <style>
+      body {
+        font-family: system-ui, sans-serif;
+      }
+    </style>
     <title>SketchInput</title>
     <!-- Set up jschannel + setState immediately so we don't keep edX waiting: -->
     <script src="//cdnjs.cloudflare.com/ajax/libs/jschannel/1.0.0-git-commit1-8c4f7eb/jschannel.min.js"></script>
@@ -36,7 +42,7 @@
     <!-- Insert production css -->
   </head>
   <body>
-    <div id="si-container">
+    <div id="si-container" class="si-container">
       <div id="si-placeholder">Loading SketchInput...</div>
     </div>
     <script src="sketchresponse.min.js"></script>
