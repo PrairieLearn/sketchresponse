@@ -457,12 +457,14 @@ export default class SketchInput {
         // Apply zoom after observer delivery because it changes the container height.
         cancelAnimationFrame(resizeFrame);
         resizeFrame = requestAnimationFrame(() => {
-          if (toolbar.offsetWidth > 0) {
-            const zoom = Math.min(
-              1,
-              container.clientWidth / toolbar.offsetWidth,
-            );
+          // Measure the controls without the flexible gap before deciding to scale.
+          toolbar.style.minWidth = '';
+          const naturalWidth = toolbar.offsetWidth;
+          const availableWidth = container.clientWidth;
+          if (naturalWidth > 0 && availableWidth > 0) {
+            const zoom = Math.min(1, availableWidth / naturalWidth);
             toolbar.style.zoom = zoom;
+            toolbar.style.minWidth = `${availableWidth / zoom}px`;
           }
         });
       });
