@@ -1,7 +1,9 @@
 import { getElementsByClassName } from './util/ms-polyfills';
+import pointerPosition from './util/pointer-position';
 
 export default class DragManager {
-  constructor(registry, selectionManager, enforceBounds) {
+  constructor(registry, selectionManager, enforceBounds, svg) {
+    this.svg = svg;
     this.enforceBounds = enforceBounds;
     this.registry = registry;
     this.selectionManager = selectionManager;
@@ -63,8 +65,11 @@ export default class DragManager {
   }
 
   dragMove(position) {
-    let dx = position.clientX - this.previousPosition.clientX;
-    let dy = position.clientY - this.previousPosition.clientY;
+    // Use the current transform for both events in case layout changed mid-drag.
+    const previous = pointerPosition(this.svg, this.previousPosition);
+    const current = pointerPosition(this.svg, position);
+    let dx = current.x - previous.x;
+    let dy = current.y - previous.y;
 
     // Note: we filter out selected elements with no onDrag callback and only drag those that have
     // one.
