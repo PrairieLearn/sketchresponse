@@ -1,160 +1,51 @@
 <!doctype html>
-<html>
+<html lang="en">
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <link rel="icon" href="data:," />
+    <title>PrairieLearn-style sketch demo</title>
+    <link
+      rel="stylesheet"
+      href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/css/bootstrap.min.css"
+    />
+    <link
+      rel="stylesheet"
+      href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.13.1/font/bootstrap-icons.css"
+    />
     <style>
-      body {
-        font-family: system-ui, sans-serif;
+      .js-overlay-toggle {
+        width: 2rem;
+        height: 2rem;
       }
     </style>
-    <title>SketchInput</title>
-    <!-- Set up jschannel + setState immediately so we don't keep edX waiting: -->
-    <script src="//cdnjs.cloudflare.com/ajax/libs/jschannel/1.0.0-git-commit1-8c4f7eb/jschannel.min.js"></script>
-    <script>
-      window.DATA_URI_PREAMBLE = 'data:application/json;base64,';
-
-      // A surrogate setState function that can be called before SketchInput has loaded
-      window.setState = function setState(state) {
-        if (state.indexOf(DATA_URI_PREAMBLE) === 0) {
-          // This is a base64-encoded data URI; decode it
-          state = atob(state.slice(DATA_URI_PREAMBLE.length));
-        }
-
-        if (window.isLoaded) si.setState(state);
-        else window.__state = state;
-      };
-
-      if (window !== window.parent) {
-        // We're inside a frame; initialize a new JSChannel
-        window.channel = Channel.build({
-          window: window.parent,
-          origin: '*',
-          scope: 'JSInput',
-        });
-
-        // Bind the channel setState immediately so we don't keep the host window waiting
-        channel.bind('setState', function channelSetState(transaction, state) {
-          return window.setState(state);
-        });
-      }
-    </script>
-    <!-- Insert production css -->
-  </head>
-  <body>
-    <div id="si-container" class="si-container">
-      <div id="si-placeholder">Loading SketchInput...</div>
-    </div>
     <script src="sketchresponse.min.js"></script>
+  </head>
+  <body class="bg-body-tertiary">
+    <main class="container-fluid py-4" style="max-width: 1320px">
+      <section class="card mb-4" aria-labelledby="question-heading">
+        <h1 id="question-heading" class="card-header h6 mb-0">Question</h1>
+        <div
+          id="question"
+          class="card-body d-flex justify-content-center"
+        ></div>
+      </section>
+      <section class="card mb-4" aria-labelledby="submission-heading">
+        <h2 id="submission-heading" class="card-header h6 mb-0">Submission</h2>
+        <div
+          id="submission"
+          class="card-body d-flex justify-content-center"
+        ></div>
+      </section>
+      <section class="card" aria-labelledby="all-tools-heading">
+        <h2 id="all-tools-heading" class="card-header h6 mb-0">All tools</h2>
+        <div
+          id="all-tools"
+          class="card-body d-flex justify-content-center"
+        ></div>
+      </section>
+    </main>
     <script src="debugConfigs.js"></script>
-    <script>
-      (function () {
-        // Globals: channel, __state, isLoaded, config, si, setState, getState, getGrade, useBase64Encoding, DATA_URI_PREAMBLE;
-
-        var loadTimer = window.setTimeout(function () {
-          if (window.isLoaded) return;
-          console.info('Did not load within 10 seconds');
-        }, 10000);
-
-        // Base64-encode the state to avoid multiple JSON escaping in edX
-        window.useBase64Encoding = true;
-
-        // Slightly modified version of:
-        // https://www.nczonline.net/blog/2009/07/28/the-best-way-to-load-external-javascript/
-        function loadScript(url, callback) {
-          var script = document.createElement('script');
-          script.type = 'text/javascript';
-          script.src = url;
-
-          if (script.readyState) {
-            // IE
-            script.onreadystatechange = function () {
-              if (
-                script.readyState == 'loaded' ||
-                script.readyState == 'complete'
-              ) {
-                script.onreadystatechange = null;
-                callback();
-              }
-            };
-          } else {
-            // Others
-            script.onload = function () {
-              callback();
-            };
-          }
-          document.getElementsByTagName('body')[0].appendChild(script);
-        }
-
-        try {
-          if (window.location.hash.substring(0, 6) === '#debug') {
-            var configId = window.location.hash.split(':')[1];
-            // Load a config from debugConfigs.js
-            loadScript('debugConfigs.js', function () {
-              window.config = loadConfig(configId);
-              if (window.config === null) {
-                console.log(configId + ' was not found in debugConfig.js');
-                document.getElementById('si-placeholder').textContent =
-                  'Could not parse problem configuration data';
-                window.clearTimeout(loadTimer);
-                return; // Abort the loading process
-              } else {
-                // We have a config, load the app
-                loadApp();
-                console.info(configId + ' has been loaded : ', window.config);
-              }
-            });
-          } else {
-            window.config = JSON.parse(
-              atob(
-                window.location.hash
-                  .slice(1)
-                  .replace(/-/g, '+')
-                  .replace(/_/g, '/'),
-              ),
-            );
-            // We have a config, load the app
-            loadApp();
-          }
-        } catch (error) {
-          document.getElementById('si-placeholder').textContent =
-            'Could not parse problem configuration data';
-          console.error('Hash parse error');
-          window.clearTimeout(loadTimer);
-          return; // Abort the loading process
-        }
-
-        function loadApp() {
-          window.si = new window.sketchresponse.default(
-            document.getElementById('si-container'),
-            'debug',
-            window.config,
-          );
-
-          window.si.messageBus.on('ready', function () {
-            window.isLoaded = true;
-            if (window.__state) window.si.setState(window.__state);
-          });
-
-          window.si.messageBus.on('warnUser', function (type, error) {
-            console.error(error);
-          });
-
-          window.getState = function () {
-            return window.useBase64Encoding
-              ? DATA_URI_PREAMBLE + btoa(si.getState())
-              : si.getState();
-          };
-
-          window.getGrade = si.getGradeable.bind(si);
-
-          if (window.channel) {
-            window.channel
-              .bind('getState', window.getState)
-              .bind('getGrade', window.getGrade);
-          }
-        }
-      })();
-    </script>
+    <script src="pl-demo.js"></script>
   </body>
 </html>
