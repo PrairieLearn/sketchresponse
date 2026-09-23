@@ -171,11 +171,10 @@ class CurveFunction(Function):
     def get_x_for_yval(self, yval: float) -> list[float]:
         p = np.poly1d(self.y)
         tvals = (p - yval).roots
-        xvals = [self.get_x_for_t(t) for t in tvals]
         return [
-            float(np.real(value))
-            for value in xvals
-            if abs(np.imag(value)) < self.tolerance["imag_threshold"]
+            float(np.real(self.get_x_for_t(t)))
+            for t in tvals
+            if abs(np.imag(t)) < self.tolerance["imag_threshold"]
         ]
 
     def get_x_for_t(self, t: complex) -> complex:
