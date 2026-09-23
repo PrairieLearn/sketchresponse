@@ -2,6 +2,7 @@ import z from './util/zdom';
 
 export const VERSION = '0.1';
 const TOOLBAR_ID = '$__toolbar';
+const FIXED_CONTROLS = new Set(['delete', 'undo', 'redo', 'help']);
 
 // from http://stackoverflow.com/a/5775621/1974654
 const NULL_SRC = '//:0';
@@ -35,6 +36,18 @@ export default class Toolbar {
     this.isActive = false;
     this.focusedItemID = null;
     this.openDropdownID = null; // TODO: better name
+    this.overflowOpen = false;
+    this.overflowSignature = '';
+    this.overflowItems = [];
+
+    if (!params.readonly) {
+      let resizeFrame;
+      const observer = new ResizeObserver(() => {
+        cancelAnimationFrame(resizeFrame);
+        resizeFrame = requestAnimationFrame(() => this.updateOverflow());
+      });
+      observer.observe(this.el);
+    }
 
     this.items = [
       {
@@ -134,7 +147,15 @@ export default class Toolbar {
     this.render();
   }
 
-  closeDropdown() {
+  closeDropdown(event) {
+    if (
+      event &&
+      this.el.contains(event.target) &&
+      (event.target.closest('.si-dropdown') ||
+        (!this.openDropdownID && event.target.closest('.si-more')))
+    )
+      return;
+    this.setOverflowOpen(false);
     this.openDropdownID = null;
     this.render();
   }
@@ -147,9 +168,182 @@ export default class Toolbar {
     this.render();
   }
 
+  setOverflowOpen(open) {
+    this.overflowOpen = open;
+    const button = this.el.querySelector('.si-more-toggle');
+    const menu = this.el.querySelector('.si-overflow-menu');
+    if (!button) return;
+    button.setAttribute('aria-expanded', String(open));
+    menu.hidden = !open;
+  }
+
+  updateOverflow() {
+    if (this.params.readonly || !this.el.clientWidth) return;
+    const more = this.el.querySelector('.si-more');
+    if (!more) return;
+    const elements = [
+      ...this.el.querySelectorAll(':scope > .item:not(.si-more)'),
+    ];
+    const separators = [...this.el.querySelectorAll(':scope > hr')];
+    const items = this.items.filter((item) =>
+      ['button', 'splitbutton'].includes(item.type),
+    );
+    // Measure hidden tools too, so they can return when the toolbar grows.
+    elements.forEach((el) => {
+      el.hidden = false;
+    });
+    const widths = elements.map((el) => el.getBoundingClientRect().width);
+    const available = this.el.clientWidth;
+    const fits =
+      widths.reduce((sum, width) => sum + width, 0) + separators.length * 16 <=
+      available;
+    more.hidden = fits;
+    separators.forEach((el) => {
+      el.hidden = !fits && el !== separators[separators.length - 1];
+    });
+    const visible = new Set();
+    if (fits) {
+      items.forEach((item) => visible.add(item.id));
+    } else {
+      // Reserve More, the trailing separator, and all four action controls first.
+      let remaining = available - more.getBoundingClientRect().width - 9;
+      items.forEach((item, index) => {
+        if (FIXED_CONTROLS.has(item.id)) {
+          visible.add(item.id);
+          remaining -= widths[index];
+        }
+      });
+      const tools = items
+        .map((item, index) => ({ item, width: widths[index] }))
+        .filter(({ item }) => !FIXED_CONTROLS.has(item.id));
+      // Reserve a stable slot so a narrower active tool cannot reveal extra tools.
+      const slotWidth = Math.min(
+        remaining,
+        Math.max(0, ...tools.map(({ width }) => width)),
+      );
+      remaining -= slotWidth;
+      // Keep a contiguous prefix; filling gaps would pull later tools past this slot.
+      for (const { item, width } of tools) {
+        if (width > remaining) break;
+        visible.add(item.id);
+        remaining -= width;
+      }
+      const overflow = tools.filter(({ item }) => !visible.has(item.id));
+      const active = overflow.find(
+        ({ item }) =>
+          item.id === this.activeItemID ||
+          item.items?.some((child) => child.id === this.activeItemID),
+      );
+      const promoted =
+        active && active.width <= slotWidth
+          ? active
+          : overflow.find(({ width }) => width <= slotWidth);
+      if (promoted) visible.add(promoted.item.id);
+    }
+    elements.forEach((el, index) => {
+      el.hidden = !visible.has(items[index].id);
+    });
+    this.overflowItems = items.filter((item) => !visible.has(item.id));
+    // Avoid rebuilding an open menu on resizes that do not change its contents.
+    const signature = JSON.stringify([
+      this.overflowItems.map((item) => item.id),
+      this.activeItemID,
+    ]);
+    if (signature !== this.overflowSignature) {
+      this.overflowSignature = signature;
+      this.renderOverflowMenu();
+    }
+    if (fits) this.setOverflowOpen(false);
+  }
+
+  renderOverflowMenu() {
+    const menu = this.el.querySelector('.si-overflow-menu');
+    z.render(
+      menu,
+      z.each(this.overflowItems, (item) => {
+        if (item.type === 'splitbutton') {
+          // Flatten tool groups into sections rather than nesting dropdowns.
+          return z(
+            'div',
+            { role: 'group', 'aria-label': item.label },
+            z('div.si-overflow-heading', item.label),
+            z.each(item.items, (child) =>
+              this.renderDropdownButton(child, item.id, true),
+            ),
+          );
+        }
+        return this.renderDropdownButton(item, null, true);
+      }),
+    );
+  }
+
+  renderDropdownButton(item, groupId, overflow = false) {
+    const id = `${this.id}-${overflow ? 'overflow' : groupId}-${item.id}`;
+    return z(
+      'div.si-dropdown-item',
+      z(
+        'button.si-dropdown-button',
+        {
+          id,
+          type: 'button',
+          ...(overflow
+            ? {
+                'data-is-active': String(item.id === this.activeItemID),
+              }
+            : {}),
+          onclick: () => {
+            if (overflow) this.setOverflowOpen(false);
+            if (groupId) this.selectDropdownItem(groupId, item.id);
+            else {
+              this.app.__messageBus.emit('finalizeShapes', item.id);
+              item.action ? item.action() : this.activateItem(item.id);
+            }
+          },
+        },
+        renderIcon(`${id}-icon`, item.icon.src, ''),
+        renderLabel(`${id}-label`, item.label, false),
+      ),
+    );
+  }
+
+  renderMore() {
+    return z(
+      'div.item.si-more',
+      {
+        hidden: true,
+        // The legacy canvas double-tap workaround suppresses quick menu selections.
+        ontouchstart: (event) => event.stopPropagation(),
+      },
+      z(
+        'button.si-more-toggle',
+        {
+          type: 'button',
+          'aria-expanded': String(this.overflowOpen),
+          'aria-controls': `${this.id}-overflow-menu`,
+          onclick: () => this.setOverflowOpen(!this.overflowOpen),
+        },
+        z('span.icon.si-more-icon', { 'aria-hidden': 'true' }, '⋯'),
+        renderLabel(`${this.id}-more-label`, 'More', false),
+      ),
+      z('menu.si-dropdown.si-overflow-menu', {
+        id: `${this.id}-overflow-menu`,
+        hidden: !this.overflowOpen,
+      }),
+    );
+  }
+
   render() {
     const renderableItems = this.items.filter(
       (item) => ['separator', 'button', 'splitbutton'].indexOf(item.type) >= 0,
+    );
+
+    const separatorIndex = renderableItems.findLastIndex(
+      (item) => item.type === 'separator',
+    );
+    renderableItems.splice(
+      separatorIndex === -1 ? renderableItems.length : separatorIndex,
+      0,
+      { type: 'overflow' },
     );
 
     z.render(
@@ -158,6 +352,7 @@ export default class Toolbar {
         renderableItems,
         ({ type, id, icon, label, color, items, action }) => {
           if (type === 'separator') return z('hr');
+          if (type === 'overflow') return this.renderMore();
           let selectedItem;
           let isActive;
           if (type === 'splitbutton') {
@@ -239,28 +434,19 @@ export default class Toolbar {
               hasDropdown,
               z(
                 'menu.si-dropdown',
-                z.each(items, (item) =>
-                  z(
-                    'div.si-dropdown-item',
-                    z(
-                      'button.si-dropdown-button',
-                      {
-                        id: item.id,
-                        onpointerdown: () =>
-                          this.selectDropdownItem(id, item.id),
-                        type: 'button',
-                      },
-                      renderIcon(`${id}-icon`, item.icon.src, item.icon.alt), // TODO: title
-                      renderLabel(`${id}-label`, item.label, false),
-                    ),
-                  ),
-                ),
+                { ontouchstart: (event) => event.stopPropagation() },
+                z.each(items, (item) => this.renderDropdownButton(item, id)),
               ),
             ),
           );
         },
       ),
     );
+
+    // zdom owns the menu shell; its buttons are updated separately for responsive layout.
+    this.overflowSignature = '';
+    this.updateOverflow();
+    this.setOverflowOpen(this.overflowOpen);
 
     // Update focus if needed
     if (this.isActive && document.activeElement.id !== this.focusedItemID) {

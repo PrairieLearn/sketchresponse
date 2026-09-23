@@ -260,7 +260,7 @@ export default class SketchInput {
 
     document.addEventListener(
       'pointerdown',
-      () => this.messageBus.emit('closeDropdown'),
+      (event) => this.messageBus.emit('closeDropdown', event),
       true,
     );
 
@@ -447,30 +447,6 @@ export default class SketchInput {
     });
 
     if (this.initialState) this.messageBus.emit('loadInitialState');
-
-    if (!this.params.readonly) {
-      const container = this.el;
-      const toolbar = this.toolbar.el;
-      // Zoom also scales the toolbar's layout height, keeping the canvas below it.
-      let resizeFrame;
-      const resizeObserver = new ResizeObserver(() => {
-        // Apply zoom after observer delivery because it changes the container height.
-        cancelAnimationFrame(resizeFrame);
-        resizeFrame = requestAnimationFrame(() => {
-          // Measure the controls without the flexible gap before deciding to scale.
-          toolbar.style.minWidth = '';
-          const naturalWidth = toolbar.offsetWidth;
-          const availableWidth = container.clientWidth;
-          if (naturalWidth > 0 && availableWidth > 0) {
-            const zoom = Math.min(1, availableWidth / naturalWidth);
-            toolbar.style.zoom = zoom;
-            toolbar.style.minWidth = `${availableWidth / zoom}px`;
-          }
-        });
-      });
-      resizeObserver.observe(container);
-      resizeObserver.observe(toolbar);
-    }
 
     this.messageBus.emit('ready');
   }
