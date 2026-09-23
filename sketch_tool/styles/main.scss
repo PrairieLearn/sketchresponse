@@ -139,7 +139,9 @@
     width: 100%;
     position: relative;
     cursor: pointer;
-    transition: background 0.2s, opacity 0.2s;
+    transition:
+      background 0.2s,
+      opacity 0.2s;
 
     &.split-button-main {
       padding-bottom: 0;
@@ -225,7 +227,6 @@
   }
   > .item[hidden],
   > hr[hidden],
-  .si-more[hidden],
   .si-overflow-menu[hidden] {
     display: none;
   }

@@ -37,8 +37,6 @@ export default class Toolbar {
     this.focusedItemID = null;
     this.openDropdownID = null; // TODO: better name
     this.overflowOpen = false;
-    this.overflowSignature = '';
-    this.overflowItems = [];
 
     if (!params.readonly) {
       let resizeFrame;
@@ -243,24 +241,16 @@ export default class Toolbar {
     elements.forEach((el, index) => {
       el.hidden = !visible.has(items[index].id);
     });
-    this.overflowItems = items.filter((item) => !visible.has(item.id));
-    // Avoid rebuilding an open menu on resizes that do not change its contents.
-    const signature = JSON.stringify([
-      this.overflowItems.map((item) => item.id),
-      this.activeItemID,
-    ]);
-    if (signature !== this.overflowSignature) {
-      this.overflowSignature = signature;
-      this.renderOverflowMenu();
-    }
+    const overflowItems = items.filter((item) => !visible.has(item.id));
+    this.renderOverflowMenu(overflowItems);
     if (fits) this.setOverflowOpen(false);
   }
 
-  renderOverflowMenu() {
+  renderOverflowMenu(items) {
     const menu = this.el.querySelector('.si-overflow-menu');
     z.render(
       menu,
-      z.each(this.overflowItems, (item) => {
+      z.each(items, (item) => {
         if (item.type === 'splitbutton') {
           // Flatten tool groups into sections rather than nesting dropdowns.
           return z(
@@ -444,7 +434,6 @@ export default class Toolbar {
     );
 
     // zdom owns the menu shell; its buttons are updated separately for responsive layout.
-    this.overflowSignature = '';
     this.updateOverflow();
     this.setOverflowOpen(this.overflowOpen);
 
