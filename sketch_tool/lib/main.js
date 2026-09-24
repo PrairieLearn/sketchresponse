@@ -124,8 +124,9 @@ export default class SketchInput {
       closeHelp();
     });
     helpDialog.addEventListener('keydown', (event) => {
+      // Keep dialog interactions from triggering the editor's keyboard shortcuts.
+      event.stopPropagation();
       if (event.key === 'Escape') {
-        event.stopPropagation();
         closeHelp();
       }
     });
