@@ -7,7 +7,9 @@ import fitCurve from './freeform/fitcurve';
 import polylineClosedSvg from './polyline/polyline-closed-icon.svg';
 import polylineOpenSvg from './polyline/polyline-open-icon.svg';
 
+/** @knipignore */
 export const VERSION = '0.1';
+/** @knipignore */
 export const GRADEABLE_VERSION = '0.2';
 
 const FIT_TOLERANCE = 0;

@@ -51,6 +51,9 @@ jobs:
         run: npm run format:check
         working-directory: sketch_tool
 
+      - name: Check for unused code and dependencies
+        run: npm run knip
+
   test:
     runs-on: ubuntu-latest
     strategy:

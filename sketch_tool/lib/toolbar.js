@@ -1,5 +1,6 @@
 import z from './util/zdom';
 
+/** @knipignore */
 export const VERSION = '0.1';
 const TOOLBAR_ID = '$__toolbar';
 const FIXED_CONTROLS = new Set(['delete', 'undo', 'redo', 'help']);

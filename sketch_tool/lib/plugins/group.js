@@ -7,6 +7,7 @@ import Spline from './spline';
 import Stamp from './stamp';
 import VerticalLine from './vertical-line';
 
+/** @knipignore */
 export const VERSION = '0.1';
 
 export default class Group {

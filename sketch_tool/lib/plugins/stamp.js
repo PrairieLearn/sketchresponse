@@ -2,7 +2,9 @@ import deepExtend from 'deep-extend';
 import z from '../util/zdom';
 import BasePlugin from './base-plugin';
 
+/** @knipignore */
 export const VERSION = '0.1';
+/** @knipignore */
 export const GRADEABLE_VERSION = '0.1';
 
 const DEFAULT_PARAMS = {

@@ -5,6 +5,7 @@ import colorIcon from '../util/color-icon';
 import deepCopy from '../util/deep-copy';
 import pointerPosition from '../util/pointer-position';
 
+/** @knipignore */
 export const VERSION = '0.1';
 
 export default class BasePlugin {

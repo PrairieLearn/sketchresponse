@@ -1,19 +1,23 @@
 // Helper methods to manipulate classes on SVG elements for IE and Edge
 // https://toddmotto.com/hacking-svg-traversing-with-ease-addclass-removeclass-toggleclass-functions/
 // https://github.com/toddmotto/lunar
+/** @knipignore */
 export function getClass(el) {
   return el.getAttribute('class');
 }
 
+/** @knipignore */
 export function hasClass(elem, name) {
   return new RegExp('(\\s|^)' + name + '(\\s|$)').test(getClass(elem));
 }
 
+/** @knipignore */
 export function addClass(elem, name) {
   !hasClass(elem, name) &&
     elem.setAttribute('class', (getClass(elem) && getClass(elem) + ' ') + name);
 }
 
+/** @knipignore */
 export function removeClass(elem, name) {
   const news = getClass(elem).replace(
     new RegExp('(\\s|^)' + name + '(\\s|$)', 'g'),
@@ -23,6 +27,7 @@ export function removeClass(elem, name) {
   hasClass(elem, name) && elem.setAttribute('class', news);
 }
 
+/** @knipignore */
 export function toggleClass(elem, name) {
   (hasClass(elem, name) ? removeClass : addClass)(elem, name);
 }

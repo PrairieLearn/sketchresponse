@@ -4,6 +4,7 @@ function uniqueID() {
   );
 }
 
+/** @knipignore */
 export class AttributeList {
   constructor(prefix = 'data-') {
     this.cache = new WeakMap();
