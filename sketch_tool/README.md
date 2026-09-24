@@ -100,11 +100,9 @@ They are located in the following [`directory`](https://github.com/SketchRespons
 
 NPM modules (see [`package.json`](https://github.com/SketchResponse/sketchresponse/blob/master/sketch_tool/package.json))
 
-- [`Autoprefixer`](https://www.npmjs.com/package/autoprefixer)
 - [`Babel`](https://babeljs.io)
 - [`ESLint`](https://eslint.org)
 - [`node-sass`](https://www.npmjs.com/package/node-sass)
-- [`PostCSS`](https://postcss.org)
 - [`StyleLint`](https://stylelint.io)
 - [`Webpack`](https://webpack.js.org)
 
