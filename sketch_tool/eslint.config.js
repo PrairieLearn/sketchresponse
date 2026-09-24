@@ -22,7 +22,7 @@ module.exports = [
     },
   },
   {
-    files: ['webpack.*.js', 'postcss.config.js', 'eslint.config.js'],
+    files: ['webpack.*.js', 'eslint.config.js'],
     languageOptions: {
       sourceType: 'commonjs',
       globals: {
