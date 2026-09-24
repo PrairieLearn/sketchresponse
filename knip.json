@@ -1,12 +1,19 @@
 {
   "$schema": "https://unpkg.com/knip@6/schema.json",
+  "tags": ["-knipignore"],
+  "treatConfigHintsAsErrors": true,
+  "treatTagHintsAsErrors": true,
   "workspaces": {
     ".": {
       "entry": ["static/jschannel.js"],
       "project": ["static/**/*.js"]
     },
     "sketch_tool": {
-      "entry": ["debugConfigs.js", "lib/plugins/{axes,background,image}.js"],
+      "entry": [
+        "debugConfigs.js",
+        "pl-demo.js",
+        "lib/plugins/{axes,background,image}.js"
+      ],
       "project": ["*.js", "lib/**/*.js", "styles/**/*.{scss,sass}"],
       "webpack": {
         "config": [
@@ -17,5 +24,6 @@
       },
       "ignoreDependencies": ["buffer"]
     }
-  }
+  },
+  "exclude": ["binaries"]
 }

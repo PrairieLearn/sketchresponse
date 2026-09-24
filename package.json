@@ -5,10 +5,12 @@
   ],
   "scripts": {
     "changeset": "changeset",
+    "knip": "knip -c knip.json",
     "version": "changeset version",
     "release": "npm run build --workspace sketch_tool && changeset publish"
   },
   "devDependencies": {
-    "@changesets/cli": "^2.29.8"
+    "@changesets/cli": "^2.29.8",
+    "knip": "^6.32.0"
   }
 }

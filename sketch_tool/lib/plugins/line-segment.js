@@ -5,7 +5,9 @@ import { injectSVGDefs } from '../util/dom-style-helpers';
 import arrowSvg from './line-segment/arrow-icon.svg';
 import lineSvg from './line-segment/line-icon.svg';
 
+/** @knipignore */
 export const VERSION = '0.1';
+/** @knipignore */
 export const GRADEABLE_VERSION = '0.1';
 
 const DEFAULT_PARAMS = {

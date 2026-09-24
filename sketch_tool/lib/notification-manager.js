@@ -1,3 +1,4 @@
+/** @knipignore */
 export const USER_MESSAGES = {
   unknownError: 'An unknown error occured',
   pluginError: 'An error occured in a SketchInput plugin',

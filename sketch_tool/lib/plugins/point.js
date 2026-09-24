@@ -4,7 +4,9 @@ import BasePlugin from './base-plugin';
 import pointSvg from './point/point-icon.svg';
 import pointHollowSvg from './point/point-hollow-icon.svg';
 
+/** @knipignore */
 export const VERSION = '0.1';
+/** @knipignore */
 export const GRADEABLE_VERSION = '0.1';
 
 const DEFAULT_PARAMS = {

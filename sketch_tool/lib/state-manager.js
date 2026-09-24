@@ -1,5 +1,6 @@
 import deepCopy from './util/deep-copy';
 
+/** @knipignore */
 export const VERSION = '0.1';
 
 export default class StateManager {

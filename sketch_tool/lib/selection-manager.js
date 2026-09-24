@@ -3,6 +3,7 @@ import { injectStyleSheet } from './util/dom-style-helpers';
 // Note: data-* attributes are not officially supported in SVG 1.1 (without namespaces),
 // but they still seem to have widespread browser support and are a bit cleaner to deal with
 // if we ever have to tag both HTML and SVG elements
+/** @knipignore */
 export const SELECTED_ATTR = 'data-si-selected';
 
 // Inject stylesheet and filter on module load since we only need one each per window

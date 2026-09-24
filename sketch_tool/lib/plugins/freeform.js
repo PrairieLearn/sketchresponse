@@ -4,7 +4,9 @@ import BasePlugin from './base-plugin';
 import fitCurve from './freeform/fitcurve';
 import freeformSvg from './freeform/freeform-icon.svg';
 
+/** @knipignore */
 export const VERSION = '0.1';
+/** @knipignore */
 export const GRADEABLE_VERSION = '0.1';
 
 // TODO: move some of these into 'params.defaults'?

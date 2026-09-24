@@ -287,4 +287,5 @@ z.render = function z_render(targetEl, ...children) {
 };
 
 export default z;
+/** @knipignore */
 export { namespaces }; // allow external access (including modification)
