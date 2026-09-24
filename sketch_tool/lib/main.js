@@ -87,9 +87,10 @@ export default class SketchInput {
         <rect x="${this.config.safetyBuffer}" y="${this.config.safetyBuffer}" width="${this.config.width - 2 * this.config.safetyBuffer}" height="${this.config.height - 2 * this.config.safetyBuffer}" fill="white" />
       </svg>
       <div id="${this.id}-si-help" class="si-help" data-visible="false">
-        <div role="dialog" class="si-dialog">
+        <div role="dialog" class="si-dialog" aria-labelledby="${this.id}-help-heading">
           <header>
-            <h1>How to use the sketching editor</h1>
+            <h1 id="${this.id}-help-heading">How to use the sketching editor</h1>
+            <button type="button" class="si-help-close" aria-label="Close help">×</button>
           </header>
           <p>
             Select a tool from the toolbar at the top and draw onto the canvas by dragging with your mouse or finger. You can move elements or individual line segments by dragging them with the "Select" tool. Different questions might provide you with different sketching tools, and some might contain pre-drawn elements that cannot be edited or deleted.
@@ -111,11 +112,23 @@ export default class SketchInput {
     preventClickDelay(this.el);
 
     const helpDialog = document.querySelector(`#${this.id}-si-help`);
+    const helpCloseButton = helpDialog.querySelector('.si-help-close');
+    let helpTrigger;
+    const closeHelp = () => {
+      helpDialog.setAttribute('data-visible', 'false');
+      helpTrigger?.focus();
+    };
 
-    helpDialog.addEventListener('click', () =>
-      helpDialog.setAttribute('data-visible', 'false'),
-    );
-    helpDialog.addEventListener('click', (event) => event.stopPropagation());
+    helpDialog.addEventListener('click', (event) => {
+      event.stopPropagation();
+      closeHelp();
+    });
+    helpDialog.addEventListener('keydown', (event) => {
+      if (event.key === 'Escape') {
+        event.stopPropagation();
+        closeHelp();
+      }
+    });
 
     this.notificationManager = new NotificationManager(
       this.config,
@@ -305,7 +318,11 @@ export default class SketchInput {
         src: colorIcon(helpSvg, 'none', 'black'),
         alt: 'Help',
       },
-      action: () => helpDialog.setAttribute('data-visible', 'true'),
+      action: () => {
+        helpTrigger = document.activeElement;
+        helpDialog.setAttribute('data-visible', 'true');
+        helpCloseButton.focus();
+      },
     });
 
     this.messageBus.emit('enableSelectMode');
