@@ -281,8 +281,16 @@ export default class Toolbar {
                 'data-is-active': String(item.id === this.activeItemID),
               }
             : {}),
-          onclick: () => {
-            if (overflow) this.setOverflowOpen(false);
+          onclick: (event) => {
+            if (overflow) {
+              if (
+                event.detail === 0 &&
+                event.currentTarget === document.activeElement
+              ) {
+                this.el.querySelector('.si-more-toggle').focus();
+              }
+              this.setOverflowOpen(false);
+            }
             if (groupId) this.selectDropdownItem(groupId, item.id);
             else {
               this.app.__messageBus.emit('finalizeShapes', item.id);
