@@ -1,5 +1,11 @@
 # @prairielearn/sketchresponse
 
+## 0.2.1
+
+### Patch Changes
+
+- Keep the Help dialog readable and keyboard-operable on narrow canvases, and restore visible focus after keyboard selection from the overflow toolbar.
+
 ## 0.2.0
 
 ### Minor Changes
