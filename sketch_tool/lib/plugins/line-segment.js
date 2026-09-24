@@ -156,8 +156,7 @@ export default class LineSegment extends BasePlugin {
       return;
     }
 
-    const x = event.clientX - this.params.left;
-    const y = event.clientY - this.params.top;
+    const { x, y } = this.getPointerPosition(event);
     const currentPosition = { x, y };
     // Add event listeners in capture phase
     document.addEventListener('pointermove', this.drawMove, true);
@@ -191,8 +190,7 @@ export default class LineSegment extends BasePlugin {
   }
 
   drawMove(event) {
-    let x = event.clientX - this.params.left;
-    let y = event.clientY - this.params.top;
+    let { x, y } = this.getPointerPosition(event);
     let point;
 
     x = this.clampX(x);

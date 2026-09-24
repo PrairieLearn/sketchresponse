@@ -89,7 +89,7 @@ export default class HorizontalLine extends BasePlugin {
     document.addEventListener('pointerup', this.drawEnd, true);
     document.addEventListener('pointercancel', this.drawEnd, true);
     this.currentPosition = {
-      y: event.clientY - this.params.top,
+      y: this.getPointerPosition(event).y,
     };
     if (this.hasTag) {
       this.currentPosition.tag = this.tag.value;
@@ -99,7 +99,7 @@ export default class HorizontalLine extends BasePlugin {
   }
 
   drawMove(event) {
-    let y = event.clientY - this.params.top;
+    let y = this.getPointerPosition(event).y;
     y = this.clampY(y);
     this.state[this.state.length - 1].y = y;
     this.render();

@@ -90,7 +90,7 @@ export default class VerticalLine extends BasePlugin {
     document.addEventListener('pointerup', this.drawEnd, true);
     document.addEventListener('pointercancel', this.drawEnd, true);
     this.currentPosition = {
-      x: event.clientX - this.params.left,
+      x: this.getPointerPosition(event).x,
     };
     if (this.hasTag) {
       this.currentPosition.tag = this.tag.value;
@@ -100,7 +100,7 @@ export default class VerticalLine extends BasePlugin {
   }
 
   drawMove(event) {
-    let x = event.clientX - this.params.left;
+    let x = this.getPointerPosition(event).x;
     x = this.clampX(x);
     this.state[this.state.length - 1].x = x;
     this.render();

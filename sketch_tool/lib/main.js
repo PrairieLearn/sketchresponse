@@ -79,9 +79,10 @@ export default class SketchInput {
   }
 
   init(plugins) {
+    this.el.style.setProperty('--si-width', `${this.params.width}px`);
     this.el.innerHTML = `
       <menu id="${this.id}-si-toolbar" class="si-toolbar${this.params.readonly ? ' disable' : ''}"></menu>
-      <svg id="${this.id}-si-canvas" class="si-canvas" touch-action="none" width="${this.params.width}" height="${this.params.height}">
+      <svg id="${this.id}-si-canvas" class="si-canvas" touch-action="none" viewBox="0 0 ${this.params.width} ${this.params.height}" width="${this.params.width}" height="${this.params.height}">
         <rect width="100%" height="100%" fill="#F0F0F0" />
         <rect x="${this.config.safetyBuffer}" y="${this.config.safetyBuffer}" width="${this.config.width - 2 * this.config.safetyBuffer}" height="${this.config.height - 2 * this.config.safetyBuffer}" fill="white" />
       </svg>
@@ -259,7 +260,7 @@ export default class SketchInput {
 
     document.addEventListener(
       'pointerdown',
-      () => this.messageBus.emit('closeDropdown'),
+      (event) => this.messageBus.emit('closeDropdown', event),
       true,
     );
 

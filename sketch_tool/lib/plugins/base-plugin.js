@@ -3,6 +3,7 @@ import Swal from 'sweetalert2';
 import { getElementsByClassName } from '../util/ms-polyfills';
 import colorIcon from '../util/color-icon';
 import deepCopy from '../util/deep-copy';
+import pointerPosition from '../util/pointer-position';
 
 export const VERSION = '0.1';
 
@@ -174,6 +175,10 @@ export default class BasePlugin {
     this.app.svg.style.cursor = 'default';
   }
 
+  getPointerPosition(event) {
+    return pointerPosition(this.app.svg, event);
+  }
+
   clampX(x) {
     if (x < this.bounds.xmin) {
       return this.bounds.xmin;
@@ -292,12 +297,10 @@ export default class BasePlugin {
   }
 
   adjustBoundingBox(el) {
-    const bRect = getElementsByClassName(
-      el,
-      'katex-html',
-    )[0].getBoundingClientRect();
-    el.setAttributeNS(null, 'width', bRect.width.toString());
-    el.setAttributeNS(null, 'height', bRect.height.toString());
+    const label = getElementsByClassName(el, 'katex-html')[0];
+    // Layout dimensions stay in SVG units even when its viewport is scaled.
+    el.setAttributeNS(null, 'width', label.offsetWidth.toString());
+    el.setAttributeNS(null, 'height', label.offsetHeight.toString());
   }
 
   computeDashArray(dashStyle, strokeWidth) {

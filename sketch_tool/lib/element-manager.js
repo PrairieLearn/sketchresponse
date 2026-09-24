@@ -16,6 +16,7 @@ export default class ElementManager {
       this.registry,
       this.selectionManager,
       enforceBounds,
+      app.svg,
     );
 
     // Only dealing with global (not per-pointer) dragging for now

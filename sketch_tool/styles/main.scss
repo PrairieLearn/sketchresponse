@@ -35,7 +35,9 @@
 }
 
 .si-container {
-  margin: 20px;
+  width: calc(var(--si-width) + 2px);
+  max-width: 100%;
+  min-width: 0;
   position: relative;
   background-color: #fff;
   border: 1px solid lightgray;
@@ -47,6 +49,8 @@
 }
 
 .si-canvas {
+  width: 100%;
+  height: auto;
   clip-path: inset(0); /* Modern alternative to polygon for full clip */
 }
 
@@ -107,6 +111,7 @@
 
 .si-toolbar {
   width: 100%;
+  position: relative;
   display: flex;
   background-color: #eee;
   border-top: 1px solid hsl(0deg 0% 100% / 70%);
@@ -171,12 +176,14 @@
   }
 
   .si-dropdown {
+    touch-action: manipulation;
     border-color: darkgray;
     border-bottom-left-radius: 4px;
     border-bottom-right-radius: 4px;
   }
 
   .item {
+    flex-shrink: 0;
     min-width: 45px;
     max-width: 80px;
     display: flex;
@@ -217,6 +224,39 @@
     padding: 0 5px;
     height: 32px;
     cursor: default;
+  }
+  > .item[hidden],
+  > hr[hidden],
+  .si-overflow-menu[hidden] {
+    display: none;
+  }
+
+  button:focus-visible {
+    outline: 2px solid #005fcc;
+    outline-offset: -2px;
+  }
+
+  .si-more {
+    touch-action: manipulation;
+  }
+
+  .si-more-icon {
+    font-size: 28px;
+    line-height: 31px;
+  }
+
+  .si-overflow-menu {
+    max-height: 60vh;
+    overflow-y: auto;
+
+    [data-is-active='true'] {
+      background-color: hsl(0deg 0% 0% / 10%);
+    }
+  }
+
+  .si-overflow-heading {
+    padding: 8px 12px 4px;
+    font-weight: bold;
   }
 }
 
