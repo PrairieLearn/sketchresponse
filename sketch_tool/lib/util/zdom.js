@@ -159,8 +159,9 @@ class ZElement extends ZNode {
   }
 
   unmount(cleanupDOM) {
+    if (this.props.onunmount) this.props.onunmount(this.el);
+    this.childCollection.unmount(false);
     super.unmount(cleanupDOM);
-    this.childCollection.unmount(false); // Note: we've already cleaned up DOM elements for them
     delete this.el;
   }
 
@@ -180,8 +181,8 @@ class ZElement extends ZNode {
     Object.keys(newProps)
       .filter((propName) => oldProps[propName] !== newProps[propName])
       .forEach((propName) => {
-        if (['key', 'onmount'].indexOf(propName) >= 0) return;
-        if (['key', 'onupdate'].indexOf(propName) >= 0) return;
+        if (['key', 'onmount', 'onupdate', 'onunmount'].includes(propName))
+          return;
 
         const { namespaceURI, localName } = qualify(propName);
         if (localName.slice(0, 2) === 'on' && namespaceURI === null) {
@@ -202,8 +203,8 @@ class ZElement extends ZNode {
       // eslint-disable-next-line no-prototype-builtins
       .filter((propName) => !newProps.hasOwnProperty(propName))
       .forEach((propName) => {
-        if (['key', 'onmount'].indexOf(propName) >= 0) return; // TODO: eliminate code duplication
-        if (['key', 'onupdate'].indexOf(propName) >= 0) return;
+        if (['key', 'onmount', 'onupdate', 'onunmount'].includes(propName))
+          return;
 
         const { namespaceURI, localName } = qualify(propName);
         if (localName.slice(0, 2) === 'on' && namespaceURI === null) {

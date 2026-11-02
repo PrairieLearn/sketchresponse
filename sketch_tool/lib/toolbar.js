@@ -16,17 +16,6 @@ function renderIcon(id, src, alt) {
   });
 }
 
-function renderLabel(id, text, hasDropdown) {
-  return z(
-    'div.label',
-    z('span', { id }, text),
-    z.if(
-      hasDropdown,
-      z('span', { 'aria-label': 'Open dropdown menu' }, ' \u25be'),
-    ),
-  );
-}
-
 export default class Toolbar {
   constructor(id, params, app) {
     this.id = id;
@@ -38,6 +27,9 @@ export default class Toolbar {
     this.focusedItemID = null;
     this.openDropdownID = null; // TODO: better name
     this.overflowOpen = false;
+    this.labelText = new WeakMap();
+    this.labelsToTypeset = new Set();
+    this.labelTypesetFrame = null;
 
     if (!params.readonly) {
       let resizeFrame;
@@ -72,6 +64,92 @@ export default class Toolbar {
     );
     app.__messageBus.on('activateItem', this.activateItem.bind(this));
     app.__messageBus.on('closeDropdown', this.closeDropdown.bind(this));
+  }
+
+  clearLabelTypesetting(element) {
+    this.labelsToTypeset.delete(element);
+    if (typeof window.MathJax?.typesetClear !== 'function') return;
+
+    try {
+      window.MathJax.typesetClear([element]);
+    } catch (error) {
+      console.error(
+        'Unable to clear a SketchResponse toolbar label from MathJax.',
+        error,
+      );
+    }
+  }
+
+  queueLabelTypesetting(element) {
+    this.labelsToTypeset.add(element);
+    if (this.labelTypesetFrame !== null) return;
+
+    this.labelTypesetFrame = requestAnimationFrame(() => {
+      this.labelTypesetFrame = null;
+      const elements = [...this.labelsToTypeset].filter(
+        (label) => label.isConnected,
+      );
+      this.labelsToTypeset.clear();
+
+      if (
+        elements.length === 0 ||
+        typeof window.MathJax?.typesetPromise !== 'function'
+      ) {
+        this.updateOverflow();
+        return;
+      }
+
+      Promise.resolve()
+        .then(() => window.MathJax.typesetPromise(elements))
+        .catch((error) => {
+          console.error(
+            'Unable to typeset SketchResponse toolbar labels with MathJax.',
+            error,
+          );
+          elements
+            .filter((label) => label.isConnected)
+            .forEach((label) => {
+              this.clearLabelTypesetting(label);
+              label.textContent = String(this.labelText.get(label));
+            });
+        })
+        .then(() => {
+          elements
+            .filter((label) => !label.isConnected)
+            .forEach((label) => this.clearLabelTypesetting(label));
+          this.updateOverflow();
+        });
+    });
+  }
+
+  updateLabel(element, text) {
+    if (this.labelText.has(element) && this.labelText.get(element) === text)
+      return;
+    if (this.labelText.has(element)) this.clearLabelTypesetting(element);
+
+    element.textContent = String(text);
+    this.labelText.set(element, text);
+    this.queueLabelTypesetting(element);
+  }
+
+  renderLabelText(id, text) {
+    return z('span.mathjax_process', {
+      id,
+      onmount: (element) => this.updateLabel(element, text),
+      onupdate: (element) => this.updateLabel(element, text),
+      onunmount: (element) => this.clearLabelTypesetting(element),
+    });
+  }
+
+  renderLabel(id, text, hasDropdown) {
+    return z(
+      'div.label',
+      this.renderLabelText(id, text),
+      z.if(
+        hasDropdown,
+        z('span', { 'aria-label': 'Open dropdown menu' }, ' \u25be'),
+      ),
+    );
   }
 
   // Called when the toolbar plugin itself is activated
@@ -254,10 +332,18 @@ export default class Toolbar {
       z.each(items, (item) => {
         if (item.type === 'splitbutton') {
           // Flatten tool groups into sections rather than nesting dropdowns.
+          const headingId = `${this.id}-overflow-${item.id}-heading`;
           return z(
             'div',
-            { role: 'group', 'aria-label': item.label },
-            z('div.si-overflow-heading', item.label),
+            {
+              key: item.id,
+              role: 'group',
+              'aria-labelledby': headingId,
+            },
+            z(
+              'div.si-overflow-heading',
+              this.renderLabelText(headingId, item.label),
+            ),
             z.each(item.items, (child) =>
               this.renderDropdownButton(child, item.id, true),
             ),
@@ -272,11 +358,13 @@ export default class Toolbar {
     const id = `${this.id}-${overflow ? 'overflow' : groupId}-${item.id}`;
     return z(
       'div.si-dropdown-item',
+      { key: item.id },
       z(
         'button.si-dropdown-button',
         {
           id,
           type: 'button',
+          'aria-labelledby': `${id}-label`,
           ...(overflow
             ? {
                 'data-is-active': String(item.id === this.activeItemID),
@@ -300,7 +388,7 @@ export default class Toolbar {
           },
         },
         renderIcon(`${id}-icon`, item.icon.src, ''),
-        renderLabel(`${id}-label`, item.label, false),
+        this.renderLabel(`${id}-label`, item.label, false),
       ),
     );
   }
@@ -322,7 +410,7 @@ export default class Toolbar {
           onclick: () => this.setOverflowOpen(!this.overflowOpen),
         },
         z('span.icon.si-more-icon', { 'aria-hidden': 'true' }, '⋯'),
-        renderLabel(`${this.id}-more-label`, 'More', false),
+        this.renderLabel(`${this.id}-more-label`, 'More', false),
       ),
       z('menu.si-dropdown.si-overflow-menu', {
         id: `${this.id}-overflow-menu`,
@@ -390,7 +478,7 @@ export default class Toolbar {
                   type: 'button',
                 },
                 renderIcon(`${id}-icon`, icon.src, icon.alt),
-                renderLabel(`${id}-label`, label, hasDropdown),
+                this.renderLabel(`${id}-label`, label, hasDropdown),
               ),
             ),
             z.if(
@@ -426,7 +514,7 @@ export default class Toolbar {
                   'aria-haspopup': 'true',
                   type: 'button',
                 },
-                renderLabel(`${id}-label`, label, hasDropdown),
+                this.renderLabel(`${id}-label`, label, hasDropdown),
               ),
             ),
             z.if(
