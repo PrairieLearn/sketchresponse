@@ -16,6 +16,27 @@ function renderIcon(id, src, alt) {
   });
 }
 
+// Labels are immutable after registration, so MathJax can own their contents.
+function renderLabelText(id, text) {
+  return z('span.mathjax_process', {
+    id,
+    onmount: (element) => {
+      element.textContent = String(text);
+    },
+  });
+}
+
+function renderLabel(id, text, hasDropdown) {
+  return z(
+    'div.label',
+    renderLabelText(id, text),
+    z.if(
+      hasDropdown,
+      z('span', { 'aria-label': 'Open dropdown menu' }, ' \u25be'),
+    ),
+  );
+}
+
 export default class Toolbar {
   constructor(id, params, app) {
     this.id = id;
@@ -27,8 +48,6 @@ export default class Toolbar {
     this.focusedItemID = null;
     this.openDropdownID = null; // TODO: better name
     this.overflowOpen = false;
-    this.labelText = new WeakMap();
-    this.labelsToTypeset = new Set();
     this.labelTypesetFrame = null;
 
     if (!params.readonly) {
@@ -66,90 +85,25 @@ export default class Toolbar {
     app.__messageBus.on('closeDropdown', this.closeDropdown.bind(this));
   }
 
-  clearLabelTypesetting(element) {
-    this.labelsToTypeset.delete(element);
-    if (typeof window.MathJax?.typesetClear !== 'function') return;
-
-    try {
-      window.MathJax.typesetClear([element]);
-    } catch (error) {
-      console.error(
-        'Unable to clear a SketchResponse toolbar label from MathJax.',
-        error,
-      );
-    }
-  }
-
-  queueLabelTypesetting(element) {
-    this.labelsToTypeset.add(element);
-    if (this.labelTypesetFrame !== null) return;
-
+  queueLabelTypesetting() {
+    cancelAnimationFrame(this.labelTypesetFrame);
+    // The toolbar and its responsive menu render in consecutive frames.
     this.labelTypesetFrame = requestAnimationFrame(() => {
-      this.labelTypesetFrame = null;
-      const elements = [...this.labelsToTypeset].filter(
-        (label) => label.isConnected,
-      );
-      this.labelsToTypeset.clear();
-
-      if (
-        elements.length === 0 ||
-        typeof window.MathJax?.typesetPromise !== 'function'
-      ) {
-        this.updateOverflow();
-        return;
-      }
-
-      Promise.resolve()
-        .then(() => window.MathJax.typesetPromise(elements))
-        .catch((error) => {
+      this.updateOverflow();
+      this.labelTypesetFrame = requestAnimationFrame(async () => {
+        this.labelTypesetFrame = null;
+        if (typeof window.MathJax?.typesetPromise !== 'function') return;
+        try {
+          await window.MathJax.typesetPromise([this.el]);
+          this.updateOverflow();
+        } catch (error) {
           console.error(
             'Unable to typeset SketchResponse toolbar labels with MathJax.',
             error,
           );
-          elements
-            .filter((label) => label.isConnected)
-            .forEach((label) => {
-              this.clearLabelTypesetting(label);
-              label.textContent = String(this.labelText.get(label));
-            });
-        })
-        .then(() => {
-          elements
-            .filter((label) => !label.isConnected)
-            .forEach((label) => this.clearLabelTypesetting(label));
-          this.updateOverflow();
-        });
+        }
+      });
     });
-  }
-
-  updateLabel(element, text) {
-    if (this.labelText.has(element) && this.labelText.get(element) === text)
-      return;
-    if (this.labelText.has(element)) this.clearLabelTypesetting(element);
-
-    element.textContent = String(text);
-    this.labelText.set(element, text);
-    this.queueLabelTypesetting(element);
-  }
-
-  renderLabelText(id, text) {
-    return z('span.mathjax_process', {
-      id,
-      onmount: (element) => this.updateLabel(element, text),
-      onupdate: (element) => this.updateLabel(element, text),
-      onunmount: (element) => this.clearLabelTypesetting(element),
-    });
-  }
-
-  renderLabel(id, text, hasDropdown) {
-    return z(
-      'div.label',
-      this.renderLabelText(id, text),
-      z.if(
-        hasDropdown,
-        z('span', { 'aria-label': 'Open dropdown menu' }, ' \u25be'),
-      ),
-    );
   }
 
   // Called when the toolbar plugin itself is activated
@@ -217,6 +171,7 @@ export default class Toolbar {
     }
     this.items.push(item);
     this.render();
+    this.queueLabelTypesetting();
   }
 
   openDropdown(id) {
@@ -320,51 +275,53 @@ export default class Toolbar {
     elements.forEach((el, index) => {
       el.hidden = !visible.has(items[index].id);
     });
-    const overflowItems = items.filter((item) => !visible.has(item.id));
-    this.renderOverflowMenu(overflowItems);
+    // Keep every overflow copy mounted so it only needs to be typeset once.
+    this.renderOverflowMenu(items, visible);
     if (fits) this.setOverflowOpen(false);
   }
 
-  renderOverflowMenu(items) {
+  renderOverflowMenu(items, visible) {
     const menu = this.el.querySelector('.si-overflow-menu');
     z.render(
       menu,
       z.each(items, (item) => {
+        const hidden = visible.has(item.id);
         if (item.type === 'splitbutton') {
           // Flatten tool groups into sections rather than nesting dropdowns.
-          const headingId = `${this.id}-overflow-${item.id}-heading`;
           return z(
             'div',
             {
-              key: item.id,
               role: 'group',
-              'aria-labelledby': headingId,
+              'aria-label': item.label,
+              ...(hidden ? { hidden: true } : {}),
             },
             z(
               'div.si-overflow-heading',
-              this.renderLabelText(headingId, item.label),
+              renderLabelText(
+                `${this.id}-overflow-${item.id}-heading`,
+                item.label,
+              ),
             ),
             z.each(item.items, (child) =>
               this.renderDropdownButton(child, item.id, true),
             ),
           );
         }
-        return this.renderDropdownButton(item, null, true);
+        return this.renderDropdownButton(item, null, true, hidden);
       }),
     );
   }
 
-  renderDropdownButton(item, groupId, overflow = false) {
+  renderDropdownButton(item, groupId, overflow = false, hidden = false) {
     const id = `${this.id}-${overflow ? 'overflow' : groupId}-${item.id}`;
     return z(
       'div.si-dropdown-item',
-      { key: item.id },
+      hidden ? { hidden: true } : {},
       z(
         'button.si-dropdown-button',
         {
           id,
           type: 'button',
-          'aria-labelledby': `${id}-label`,
           ...(overflow
             ? {
                 'data-is-active': String(item.id === this.activeItemID),
@@ -388,7 +345,7 @@ export default class Toolbar {
           },
         },
         renderIcon(`${id}-icon`, item.icon.src, ''),
-        this.renderLabel(`${id}-label`, item.label, false),
+        renderLabel(`${id}-label`, item.label, false),
       ),
     );
   }
@@ -410,7 +367,7 @@ export default class Toolbar {
           onclick: () => this.setOverflowOpen(!this.overflowOpen),
         },
         z('span.icon.si-more-icon', { 'aria-hidden': 'true' }, '⋯'),
-        this.renderLabel(`${this.id}-more-label`, 'More', false),
+        renderLabel(`${this.id}-more-label`, 'More', false),
       ),
       z('menu.si-dropdown.si-overflow-menu', {
         id: `${this.id}-overflow-menu`,
@@ -478,7 +435,7 @@ export default class Toolbar {
                   type: 'button',
                 },
                 renderIcon(`${id}-icon`, icon.src, icon.alt),
-                this.renderLabel(`${id}-label`, label, hasDropdown),
+                renderLabel(`${id}-label`, label, hasDropdown),
               ),
             ),
             z.if(
@@ -514,7 +471,7 @@ export default class Toolbar {
                   'aria-haspopup': 'true',
                   type: 'button',
                 },
-                this.renderLabel(`${id}-label`, label, hasDropdown),
+                renderLabel(`${id}-label`, label, hasDropdown),
               ),
             ),
             z.if(
