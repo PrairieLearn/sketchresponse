@@ -1,5 +1,11 @@
 # @prairielearn/sketchresponse
 
+## 0.3.0
+
+### Minor Changes
+
+- e0798e1: Render toolbar labels with a host-provided MathJax instance, including dropdown and responsive overflow labels.
+
 ## 0.2.1
 
 ### Patch Changes
