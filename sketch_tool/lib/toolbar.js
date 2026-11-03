@@ -16,10 +16,20 @@ function renderIcon(id, src, alt) {
   });
 }
 
+// Labels are immutable after registration, so MathJax can own their contents.
+function renderLabelText(id, text) {
+  return z('span.mathjax_process', {
+    id,
+    onmount: (element) => {
+      element.textContent = String(text);
+    },
+  });
+}
+
 function renderLabel(id, text, hasDropdown) {
   return z(
     'div.label',
-    z('span', { id }, text),
+    renderLabelText(id, text),
     z.if(
       hasDropdown,
       z('span', { 'aria-label': 'Open dropdown menu' }, ' \u25be'),
@@ -38,6 +48,7 @@ export default class Toolbar {
     this.focusedItemID = null;
     this.openDropdownID = null; // TODO: better name
     this.overflowOpen = false;
+    this.labelTypesetFrame = null;
 
     if (!params.readonly) {
       let resizeFrame;
@@ -72,6 +83,27 @@ export default class Toolbar {
     );
     app.__messageBus.on('activateItem', this.activateItem.bind(this));
     app.__messageBus.on('closeDropdown', this.closeDropdown.bind(this));
+  }
+
+  queueLabelTypesetting() {
+    cancelAnimationFrame(this.labelTypesetFrame);
+    // The toolbar and its responsive menu render in consecutive frames.
+    this.labelTypesetFrame = requestAnimationFrame(() => {
+      this.updateOverflow();
+      this.labelTypesetFrame = requestAnimationFrame(async () => {
+        this.labelTypesetFrame = null;
+        if (typeof window.MathJax?.typesetPromise !== 'function') return;
+        try {
+          await window.MathJax.typesetPromise([this.el]);
+          this.updateOverflow();
+        } catch (error) {
+          console.error(
+            'Unable to typeset SketchResponse toolbar labels with MathJax.',
+            error,
+          );
+        }
+      });
+    });
   }
 
   // Called when the toolbar plugin itself is activated
@@ -139,6 +171,7 @@ export default class Toolbar {
     }
     this.items.push(item);
     this.render();
+    this.queueLabelTypesetting();
   }
 
   openDropdown(id) {
@@ -242,36 +275,48 @@ export default class Toolbar {
     elements.forEach((el, index) => {
       el.hidden = !visible.has(items[index].id);
     });
-    const overflowItems = items.filter((item) => !visible.has(item.id));
-    this.renderOverflowMenu(overflowItems);
+    // Keep every overflow copy mounted so it only needs to be typeset once.
+    this.renderOverflowMenu(items, visible);
     if (fits) this.setOverflowOpen(false);
   }
 
-  renderOverflowMenu(items) {
+  renderOverflowMenu(items, visible) {
     const menu = this.el.querySelector('.si-overflow-menu');
     z.render(
       menu,
       z.each(items, (item) => {
+        const hidden = visible.has(item.id);
         if (item.type === 'splitbutton') {
           // Flatten tool groups into sections rather than nesting dropdowns.
           return z(
             'div',
-            { role: 'group', 'aria-label': item.label },
-            z('div.si-overflow-heading', item.label),
+            {
+              role: 'group',
+              'aria-label': item.label,
+              ...(hidden ? { hidden: true } : {}),
+            },
+            z(
+              'div.si-overflow-heading',
+              renderLabelText(
+                `${this.id}-overflow-${item.id}-heading`,
+                item.label,
+              ),
+            ),
             z.each(item.items, (child) =>
               this.renderDropdownButton(child, item.id, true),
             ),
           );
         }
-        return this.renderDropdownButton(item, null, true);
+        return this.renderDropdownButton(item, null, true, hidden);
       }),
     );
   }
 
-  renderDropdownButton(item, groupId, overflow = false) {
+  renderDropdownButton(item, groupId, overflow = false, hidden = false) {
     const id = `${this.id}-${overflow ? 'overflow' : groupId}-${item.id}`;
     return z(
       'div.si-dropdown-item',
+      hidden ? { hidden: true } : {},
       z(
         'button.si-dropdown-button',
         {

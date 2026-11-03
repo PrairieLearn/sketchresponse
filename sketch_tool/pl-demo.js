@@ -6,18 +6,22 @@ const config = {
   enforceBounds: true,
   plugins: [
     { name: 'axes', id: 'axes' },
-    { name: 'point', id: 'p' },
+    { name: 'point', id: 'p', label: 'Point \\((x, y)\\)' },
     { name: 'line-segment', id: 'line' },
     {
       name: 'group',
       id: 'curves',
-      label: 'Curves',
+      label: 'Curves \\(f(x)\\)',
       plugins: [
-        { name: 'polyline', id: 'poly' },
-        { name: 'spline', id: 'spline' },
+        { name: 'polyline', id: 'poly', label: 'Polyline \\(C_1\\)' },
+        { name: 'spline', id: 'spline', label: 'Spline \\(C_2\\)' },
       ],
     },
-    { name: 'freeform', id: 'free' },
+    {
+      name: 'freeform',
+      id: 'free',
+      label: 'Cubic branch for \\(x < 1\\)',
+    },
   ],
 };
 
