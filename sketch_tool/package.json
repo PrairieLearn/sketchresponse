@@ -21,7 +21,7 @@
     "deep-extend": "^0.6.0",
     "fastclick": "^1.0.6",
     "jsondiffpatch": "^0.7.3",
-    "katex": "^0.16.9",
+    "katex": "^0.18.2",
     "normalize.css": "^8.0.1",
     "pepjs": "^0.5.3",
     "sass": "^1.89.0",
