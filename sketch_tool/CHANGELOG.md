@@ -1,5 +1,11 @@
 # @prairielearn/sketchresponse
 
+## 0.3.1
+
+### Patch Changes
+
+- 675aed5: Update the bundled KaTeX renderer to prevent inherited prototype properties from enabling trusted rendering or changing renderer settings.
+
 ## 0.3.0
 
 ### Minor Changes
