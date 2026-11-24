@@ -453,3 +453,25 @@ The initial state configuration below uses a point plugin with id 'pt' to initia
     }
   ]
 ```
+
+### Read-only labels
+
+For the 'freeform', 'polyline', and 'spline' plugins, each curve in the initial state can carry its own label. Add a `tag` key to the first point of the curve, along with `"tagReadonly": true` to prevent students from editing it. The label is drawn even if the plugin has no 'tag' configuration. In that case it is placed 5px to the right of and 5px above the first point; otherwise the plugin's tag offsets and alignment are used. Curves drawn by students on the same plugin are unaffected.
+
+E.g.
+The initial state configuration below draws a spline labelled "f(x)" using a spline plugin with id 'spl'. The trailing empty array marks the curve as complete, so new clicks with the spline tool start a new curve rather than extending this one.
+
+```python
+'initialstate': {
+  "spl": [
+    [
+      {"x": 80, "y": 330, "tag": "f(x)", "tagReadonly": True},
+      {"x": 200, "y": 90},
+      {"x": 320, "y": 330}
+    ],
+    []
+  ]
+}
+```
+
+When generating drawings from Python with `sketchresponse.utils.format_drawing`, set the optional `label` key of a `SketchDrawing` to produce this format. For a function that is split into several curves at discontinuities, only the first curve is labelled.

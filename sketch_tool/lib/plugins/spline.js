@@ -282,36 +282,11 @@ export default class Spline extends BasePlugin {
           }),
         ),
       ),
-      // Tags, regular or rendered by Katex
+      // Tags, regular or rendered by Katex. Instructor-set tags are shown even
+      // if the plugin has no tag config.
       z.each(this.state, (spline, splineIndex) =>
-        z.if(
-          this.hasTag &&
-            this.state[splineIndex].length > 0 &&
-            this.state[splineIndex][0].tag,
-          () =>
-            z(
-              this.latex ? 'foreignObject.tag' : 'text.tag',
-              {
-                'text-anchor': this.latex ? undefined : this.tag.align,
-                x: this.state[splineIndex][0].x + this.tag.xoffset,
-                y: this.state[splineIndex][0].y + this.tag.yoffset,
-                style: this.getStyle(),
-                onmount: (el) => {
-                  if (this.latex) {
-                    this.renderKatex(el, splineIndex, 0);
-                  }
-                  if (!this.params.readonly) {
-                    this.addDoubleClickEventListener(el, splineIndex, 0);
-                  }
-                },
-                onupdate: (el) => {
-                  if (this.latex) {
-                    this.renderKatex(el, splineIndex, 0);
-                  }
-                },
-              },
-              this.latex ? '' : this.state[splineIndex][0].tag,
-            ),
+        z.if(spline.length > 0 && spline[0].tag, () =>
+          this.renderTag(spline[0], splineIndex),
         ),
       ),
     );

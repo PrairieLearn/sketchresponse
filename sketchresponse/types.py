@@ -11,6 +11,8 @@ from __future__ import annotations
 
 from typing import Literal, TypedDict
 
+from typing_extensions import NotRequired
+
 # A list of [x, y] control points in pixel space — the JSON wire format
 # for spline-based tools.
 SplinePoints = list[list[float]]
@@ -85,6 +87,7 @@ class SketchDrawing(TypedDict):
     fun: str | None
     xrange: list[float]
     coordinates: list[float]
+    label: NotRequired[str | None]
 
 
 class SketchItem(TypedDict, total=False):

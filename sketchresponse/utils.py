@@ -372,11 +372,14 @@ def in_range(val: float, start: float, end: float, tolerance: float = 0) -> bool
 
 def format_drawing(
     initials: list[SketchDrawing], tool: SketchTool, ranges: SketchCanvasSize
-) -> list[dict[str, float]] | list[list[dict[str, float]]]:
+) -> list[dict[str, float]] | list[list[dict[str, float | str | bool]]]:
     """
     Convert drawing data for one sketching tool into the data format that is used by the client.
     Note that this function does not validate the inputs and assumes that attribute combinations are all
     appropriate for the given tool type.
+
+    For spline, freeform, and polyline tools, a drawing's optional `label` is attached as a read-only
+    tag to the first point of the first curve segment produced for that drawing.
 
     Returns:
         A list that can be converted into JSON for the client
@@ -411,10 +414,12 @@ def format_drawing(
             for coord in coordinates
         ]
 
-    nested_format: list[list[dict[str, float]]] = []
+    nested_format: list[list[dict[str, float | str | bool]]] = []
     if tool["name"] in ["spline", "freeform", "polyline"]:
         for initial in initials:
             if initial["toolid"] == tool["id"]:
+                label = initial.get("label")
+                first_segment_index = len(nested_format)
                 if initial["fun"] is None:
                     coordinates = initial["coordinates"]
                     x_y_vals = [
@@ -437,7 +442,9 @@ def format_drawing(
                     # Free-draw needs special handling since it is stored in a different data format on the client side
                     if tool["name"] == "freeform":
                         x_y_vals = fitCurve(x_y_vals, 5)
-                    formatted_x_y_vals = [{"x": val[0], "y": val[1]} for val in x_y_vals]
+                    formatted_x_y_vals: list[dict[str, float | str | bool]] = [
+                        {"x": val[0], "y": val[1]} for val in x_y_vals
+                    ]
                     nested_format.append(formatted_x_y_vals)
                 else:
                     function = None
@@ -460,6 +467,16 @@ def format_drawing(
                             nested_format.append(formatted_x_y_vals)
                         if broken:
                             x1 = new_start
+                # Only the first segment of a drawing is labelled, even if a discontinuous
+                # function was split into multiple segments.
+                if (
+                    label
+                    and len(nested_format) > first_segment_index
+                    and len(nested_format[first_segment_index]) > 0
+                ):
+                    first_point = nested_format[first_segment_index][0]
+                    first_point["tag"] = label
+                    first_point["tagReadonly"] = True
         return nested_format
 
     # one and two point tools

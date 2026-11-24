@@ -272,36 +272,11 @@ export default class Polyline extends BasePlugin {
           }),
         ),
       ),
-      // Tags, regular or rendered by Katex
+      // Tags, regular or rendered by Katex. Instructor-set tags are shown even
+      // if the plugin has no tag config.
       z.each(this.state, (polyline, polylineIndex) =>
-        z.if(
-          this.hasTag &&
-            this.state[polylineIndex].length > 0 &&
-            this.state[polylineIndex][0].tag,
-          () =>
-            z(
-              this.latex ? 'foreignObject.tag' : 'text.tag',
-              {
-                'text-anchor': this.latex ? undefined : this.tag.align,
-                x: this.state[polylineIndex][0].x + this.tag.xoffset,
-                y: this.state[polylineIndex][0].y + this.tag.yoffset,
-                style: this.getStyle(),
-                onmount: (el) => {
-                  if (this.latex) {
-                    this.renderKatex(el, polylineIndex, 0);
-                  }
-                  if (!this.params.readonly) {
-                    this.addDoubleClickEventListener(el, polylineIndex, 0);
-                  }
-                },
-                onupdate: (el) => {
-                  if (this.latex) {
-                    this.renderKatex(el, polylineIndex, 0);
-                  }
-                },
-              },
-              this.latex ? '' : this.state[polylineIndex][0].tag,
-            ),
+        z.if(polyline.length > 0 && polyline[0].tag, () =>
+          this.renderTag(polyline[0], polylineIndex),
         ),
       ),
     );

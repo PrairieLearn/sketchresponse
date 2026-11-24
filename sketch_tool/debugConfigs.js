@@ -887,6 +887,73 @@ function loadConfig(configId) {
         },
       ],
     },
+    instructorLabels: {
+      width: 750,
+      height: 420,
+      xrange: [-4.5, 4.5],
+      yrange: [-2.5, 2.5],
+      xscale: 'linear',
+      yscale: 'linear',
+      coordinates: 'cartesian',
+      plugins: [
+        {
+          name: 'axes',
+        },
+        {
+          // No tag config: only the instructor-set label is shown
+          name: 'spline',
+          id: 'spl',
+          label: 'Spline',
+          color: 'mediumseagreen',
+        },
+        {
+          // Tag config: student-drawn curves get an editable tag, but the
+          // instructor-set label stays read-only
+          name: 'freeform',
+          id: 'ff',
+          label: 'Freeform',
+          color: 'royalblue',
+          tag: {
+            value: 'tag',
+            xoffset: 15,
+            yoffset: 15,
+            align: 'start',
+          },
+        },
+        {
+          name: 'polyline',
+          id: 'pl',
+          label: 'Polyline',
+          color: 'sienna',
+          readonly: true,
+        },
+      ],
+      initialstate: {
+        spl: [
+          [
+            { x: 80, y: 330, tag: 'f(x)', tagReadonly: true },
+            { x: 200, y: 90 },
+            { x: 320, y: 330 },
+          ],
+          [],
+        ],
+        ff: [
+          [
+            { x: 420, y: 90, tag: 'g(x)', tagReadonly: true },
+            { x: 480, y: 380 },
+            { x: 620, y: 380 },
+            { x: 690, y: 90 },
+          ],
+        ],
+        pl: [
+          [
+            { x: 100, y: 390, tag: 'h(x)', tagReadonly: true },
+            { x: 375, y: 360 },
+            { x: 650, y: 390 },
+          ],
+        ],
+      },
+    },
   };
   // eslint-disable-next-line no-prototype-builtins
   if (configs.hasOwnProperty(configId)) {

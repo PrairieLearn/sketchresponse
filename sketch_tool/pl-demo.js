@@ -67,6 +67,12 @@ embed('all-tools', 'all-tools', {
   height: config.height,
 });
 
+embed(
+  'instructor-labels',
+  'instructor-labels',
+  window.loadConfig('instructorLabels'),
+);
+
 submission.messageBus.on('ready', () => {
   const wrapper = document.createElement('div');
   wrapper.className = 'position-relative';
