@@ -67,6 +67,10 @@ export default class Spline extends BasePlugin {
     this.app.__messageBus.on('finalizeShapes', (id) => {
       this.drawEnd(id);
     });
+    // Runs after the state manager has loaded the initial state
+    this.app.__messageBus.on('loadInitialState', () => {
+      this.closeInitialShapes();
+    });
   }
 
   getGradeable() {
