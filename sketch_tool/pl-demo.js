@@ -6,6 +6,13 @@ const config = {
   enforceBounds: true,
   plugins: [
     { name: 'axes', id: 'axes' },
+    {
+      name: 'spline',
+      id: 'reference',
+      readonly: true,
+      color: 'purple',
+      tag: { xoffset: 8, yoffset: -12, align: 'start', position: 'start' },
+    },
     { name: 'point', id: 'p', label: 'Point \\((x, y)\\)' },
     { name: 'line-segment', id: 'line' },
     {
@@ -23,6 +30,15 @@ const config = {
       label: 'Cubic branch for \\(x < 1\\)',
     },
   ],
+  initialstate: {
+    reference: [
+      [
+        { x: 200, y: 125, tag: 'Reference \\(f(x) = \\frac{x^2}{4}\\)' },
+        { x: 400, y: 225 },
+        { x: 600, y: 125 },
+      ],
+    ],
+  },
 };
 
 function embed(target, id, options) {
@@ -34,7 +50,7 @@ function embed(target, id, options) {
   return new window.sketchresponse.default(container, id, options);
 }
 
-embed('question', 'question', config);
+embed('question', 'question', { ...config });
 const submission = embed('submission', 'submission', {
   ...config,
   readonly: true,
@@ -46,12 +62,14 @@ const submission = embed('submission', 'submission', {
       readonly: true,
       overlay: true,
       color: 'green',
+      tag: { xoffset: 8, yoffset: -12, align: 'start', position: 'end' },
     },
   ],
   initialstate: {
+    ...config.initialstate,
     p: [{ x: 400, y: 225 }],
     solution: [
-      { x: 200, y: 350 },
+      { x: 200, y: 350, tag: 'Solution \\(y = \\frac{5x}{8}\\)' },
       { x: 600, y: 100 },
     ],
     line: [
