@@ -1,10 +1,10 @@
 # Instructor tags in PrairieLearn
 
-Instructor annotations use SketchResponse's existing tags. Each drawing supplies its `tag` string; its tool supplies placement and text/LaTeX formatting. The existing tool or canvas `read-only` setting makes a reference drawing and its annotation fixed. The [companion PrairieLearn implementation](https://github.com/PrairieLearn/PrairieLearn/commit/24c2c2781bf8811ace38eef04d1b87ac8e415edf) implements this contract in the actual `pl-sketch` controller and example course.
+Instructor annotations use SketchResponse's existing tags. Each drawing supplies its `tag` string; its tool supplies placement and text/LaTeX formatting. The existing tool or canvas `read-only` setting makes a reference drawing and its annotation fixed.
 
 ## Authoring
 
-`pl-sketch-initial` and `pl-sketch-solution` accept `tag` for every drawing type: `free-draw`, `spline`, `polyline`, `polygon`, `point`, `line`, `horizontal-line`, and `vertical-line`. `label` on `pl-sketch-tool` continues to name its toolbar button.
+`pl-sketch-initial` and `pl-sketch-solution` accept `tag` for every drawing type: `free-draw`, `spline`, `polyline`, `polygon`, `point`, `line`, `horizontal-line`, and `vertical-line`. `label` on `pl-sketch-tool` names its toolbar button.
 
 A tagged initial drawing requires `read-only="true"` on its tool or canvas. Solution drawings are displayed read-only, so a tagged solution can refer to a tool that students use to draw their answer. Student-created drawings do not acquire default tags.
 
