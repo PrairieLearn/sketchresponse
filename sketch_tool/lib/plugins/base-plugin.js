@@ -4,6 +4,8 @@ import { getElementsByClassName } from '../util/ms-polyfills';
 import colorIcon from '../util/color-icon';
 import deepCopy from '../util/deep-copy';
 import pointerPosition from '../util/pointer-position';
+import { clearHostMathTag, updateHostMathTag } from '../util/host-math-tag';
+import z from '../util/zdom';
 
 /** @knipignore */
 export const VERSION = '0.1';
@@ -44,7 +46,7 @@ export default class BasePlugin {
       this.tag.value = this.tag.value ? this.tag.value : 'tag';
       this.tag.xoffset = this.tag.xoffset ? this.tag.xoffset : 0;
       this.tag.yoffset = this.tag.yoffset ? this.tag.yoffset : 0;
-      this.tag.align = this.tag.align ? this.tag.align : 'left';
+      this.tag.align = this.tag.align ? this.tag.align : 'start';
       this.latex = this.tag.latex ? this.tag.latex : false;
     }
     this.selectMode = false;
@@ -230,8 +232,8 @@ export default class BasePlugin {
         : 'crosshair';
   }
 
-  getStyle() {
-    return this.latex
+  getStyle(html = this.latex) {
+    return html
       ? `
         color: #333;
         font-size: 14px;
@@ -243,6 +245,34 @@ export default class BasePlugin {
         font-size: 14px;
         cursor: ${this.getTagCursor()};
       `;
+  }
+
+  renderTag(point, x, y, index1, index2) {
+    const hostMath = !this.latex && this.tag.mathjax === true;
+    const html = this.latex || hostMath;
+    const update = (element) => {
+      if (this.latex) this.renderKatex(element, index1, index2);
+      else if (hostMath) updateHostMathTag(element, point.tag, this.tag.align);
+    };
+    return z(
+      (html ? 'foreignObject.tag' : 'text.tag') +
+        (this.params.overlay ? '.overlay' : ''),
+      {
+        key: html ? 'html' : 'text',
+        'text-anchor': html ? undefined : this.tag.align,
+        x,
+        y,
+        style: this.getStyle(html),
+        onmount: (element) => {
+          update(element);
+          if (!this.params.readonly)
+            this.addDoubleClickEventListener(element, index1, index2);
+        },
+        onupdate: update,
+        onunmount: hostMath ? clearHostMathTag : undefined,
+      },
+      ...(html ? [] : [point.tag]),
+    );
   }
 
   renderKatex(el, index1, index2) {

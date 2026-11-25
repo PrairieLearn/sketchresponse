@@ -453,3 +453,29 @@ The initial state configuration below uses a point plugin with id 'pt' to initia
     }
   ]
 ```
+
+### Tags on initial drawings
+
+All drawing plugins support the existing per-object `tag` string. Enable tag rendering with the plugin's `tag` configuration, and store the text on the object's state point (the first point for curves and line segments). For fixed reference drawings, use a read-only plugin:
+
+```python
+'plugins': [
+  {
+    "name": "spline", "id": "given", "readonly": True,
+    "tag": {"mathjax": True, "xoffset": 5, "yoffset": -5, "align": "start"}
+  }
+],
+'initialstate': {
+  "given": [[
+    {"x": 80, "y": 330, "tag": r"Reference \(f(x)\)"},
+    {"x": 200, "y": 90},
+    {"x": 320, "y": 330}
+  ]]
+}
+```
+
+The plugin controls tag placement; alignment defaults to `start`. Tags remain literal SVG text by default, including on pages with MathJax. Set `mathjax: True` in the plugin's `tag` configuration to mix ordinary text and the host MathJax 4 renderer's normal delimited mathematics, such as `Reference \(f(x)\)`. Opted-in tags remain literal HTML text if no supported host renderer is available. The existing explicit `latex: True` option uses bundled KaTeX and takes precedence over `mathjax`. The plugin's existing `readonly` setting controls editing. Untagged objects on the same plugin have no annotation. On editable plugins, a `tag` configuration gives new drawings its `value`, defaulting to `"tag"`. Solution overlay tags share the overlay's visibility.
+
+`sketchresponse.utils.format_drawing` accepts an optional `tag` on each `SketchDrawing` and writes the existing client format for every supported tool. When a symbolic function is split at discontinuities, only its first nonempty segment receives the tag. Geometry and tool IDs are unchanged.
+
+See [Instructor tags in PrairieLearn](prairielearn_labels.md) for the authoring contract and complete conversion and panel behavior.

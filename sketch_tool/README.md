@@ -47,10 +47,16 @@ You'll need to have [Node.js](http://nodejs.org) and npm (which is now packaged 
   - _coordinates:_ cartesian or polar.
   - _plugins:_ modules that extend drawing functionality either automatically (for example axes and image) or are placed in the top toolbar (freeform, horizontal and vertical lines) and let the user draw the corresponding shape on the canvas.
 
-  Toolbar labels are typeset with a host-provided `window.MathJax` when it exposes
+  Toolbar labels are typeset with a host-provided MathJax 4 `window.MathJax` when it exposes
   `typesetPromise()`. Labels use the host's configured delimiters and remain plain text when
   MathJax is unavailable. For example, a JavaScript label containing inline math can be written as
   `label: 'Cubic branch for \\(x < 1\\)'`.
+
+  Drawing tags remain literal SVG text unless their tool opts into host math with
+  `tag: { mathjax: true }`. This uses the host's delimiters without changing
+  ordinary tags containing dollar signs. Existing `tag: { latex: true }` uses
+  bundled KaTeX. The demo includes read-only references and a solution overlay
+  with host-rendered math tags.
 
   You can also load these additional configurations which show various features of the tool:
   - allPluginsLatex

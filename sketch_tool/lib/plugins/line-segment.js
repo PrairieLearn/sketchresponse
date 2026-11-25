@@ -505,31 +505,14 @@ export default class LineSegment extends BasePlugin {
           },
         ),
       ),
-      // Tags, regular or rendered by Katex
+      // Render tags with the tool's configured renderer.
       z.each(this.state, (pt, ptIndex) =>
-        z.if(this.hasTag && ptIndex % 2 === 0, () =>
-          z(
-            this.latex ? 'foreignObject.tag' : 'text.tag',
-            {
-              'text-anchor': this.latex ? undefined : this.tag.align,
-              x: this.tagXPosition(ptIndex) + this.tag.xoffset,
-              y: this.tagYPosition(ptIndex) + this.tag.yoffset,
-              style: this.getStyle(),
-              onmount: (el) => {
-                if (this.latex) {
-                  this.renderKatex(el, ptIndex);
-                }
-                if (!this.params.readonly) {
-                  this.addDoubleClickEventListener(el, ptIndex);
-                }
-              },
-              onupdate: (el) => {
-                if (this.latex) {
-                  this.renderKatex(el, ptIndex);
-                }
-              },
-            },
-            this.latex ? '' : this.state[ptIndex].tag,
+        z.if(this.hasTag && ptIndex % 2 === 0 && pt.tag, () =>
+          this.renderTag(
+            this.state[ptIndex],
+            this.tagXPosition(ptIndex) + this.tag.xoffset,
+            this.tagYPosition(ptIndex) + this.tag.yoffset,
+            ptIndex,
           ),
         ),
       ),

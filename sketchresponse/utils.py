@@ -18,6 +18,7 @@ from .types import (
     SketchCanvasSize,
     SketchConfig,
     SketchDrawing,
+    SketchDrawingPoint,
     SketchGrader,
     SketchSubmission,
     SketchTool,
@@ -372,49 +373,51 @@ def in_range(val: float, start: float, end: float, tolerance: float = 0) -> bool
 
 def format_drawing(
     initials: list[SketchDrawing], tool: SketchTool, ranges: SketchCanvasSize
-) -> list[dict[str, float]] | list[list[dict[str, float]]]:
+) -> list[SketchDrawingPoint] | list[list[SketchDrawingPoint]]:
     """
     Convert drawing data for one sketching tool into the data format that is used by the client.
     Note that this function does not validate the inputs and assumes that attribute combinations are all
     appropriate for the given tool type.
 
+    A drawing's optional `tag` is attached to its first client-state point. A function split at
+    discontinuities receives just one tag, on its first nonempty segment. Presentation and
+    editability are controlled by the tool's existing `tag` configuration and `readonly` setting.
+
     Returns:
         A list that can be converted into JSON for the client
     """
     if tool["name"] in ["horizontal-line", "vertical-line"]:
-        coordinates = []
+        line_points: list[SketchDrawingPoint] = []
         for initial in initials:
             if initial["toolid"] == tool["id"]:
-                coordinates += initial["coordinates"]
+                first_index = len(line_points)
+                for coord in initial["coordinates"]:
+                    if tool["name"] == "vertical-line":
+                        line_points.append(
+                            {
+                                "x": graph_to_screen(
+                                    ranges["x_start"], ranges["x_end"], ranges["width"], coord
+                                )
+                            }
+                        )
+                    else:
+                        line_points.append(
+                            {
+                                "y": graph_to_screen(
+                                    ranges["y_end"], ranges["y_start"], ranges["height"], coord
+                                )
+                            }
+                        )
+                if initial.get("tag") and len(line_points) > first_index:
+                    line_points[first_index]["tag"] = initial["tag"]
+        return line_points
 
-        if tool["name"] == "vertical-line":
-            return [
-                {
-                    "x": graph_to_screen(
-                        ranges["x_start"],
-                        ranges["x_end"],
-                        ranges["width"],
-                        coord,
-                    )
-                }
-                for coord in coordinates
-            ]
-        return [
-            {
-                "y": graph_to_screen(
-                    ranges["y_end"],
-                    ranges["y_start"],
-                    ranges["height"],
-                    coord,
-                )
-            }
-            for coord in coordinates
-        ]
-
-    nested_format: list[list[dict[str, float]]] = []
+    nested_format: list[list[SketchDrawingPoint]] = []
     if tool["name"] in ["spline", "freeform", "polyline"]:
         for initial in initials:
             if initial["toolid"] == tool["id"]:
+                tag = initial.get("tag")
+                first_segment_index = len(nested_format)
                 if initial["fun"] is None:
                     coordinates = initial["coordinates"]
                     x_y_vals = [
@@ -437,7 +440,9 @@ def format_drawing(
                     # Free-draw needs special handling since it is stored in a different data format on the client side
                     if tool["name"] == "freeform":
                         x_y_vals = fitCurve(x_y_vals, 5)
-                    formatted_x_y_vals = [{"x": val[0], "y": val[1]} for val in x_y_vals]
+                    formatted_x_y_vals: list[SketchDrawingPoint] = [
+                        {"x": val[0], "y": val[1]} for val in x_y_vals
+                    ]
                     nested_format.append(formatted_x_y_vals)
                 else:
                     function = None
@@ -460,28 +465,40 @@ def format_drawing(
                             nested_format.append(formatted_x_y_vals)
                         if broken:
                             x1 = new_start
+                # Only the first segment of a drawing is labelled, even if a discontinuous
+                # function was split into multiple segments.
+                if (
+                    tag
+                    and len(nested_format) > first_segment_index
+                    and len(nested_format[first_segment_index]) > 0
+                ):
+                    first_point = nested_format[first_segment_index][0]
+                    first_point["tag"] = tag
         return nested_format
 
     # one and two point tools
-    points: list[dict[str, float]] = []
+    points: list[SketchDrawingPoint] = []
     for initial in initials:
         if initial["toolid"] == tool["id"]:
+            first_index = len(points)
             coordinates = initial["coordinates"]
             points += [
-                {
-                    "x": graph_to_screen(
+                SketchDrawingPoint(
+                    x=graph_to_screen(
                         ranges["x_start"],
                         ranges["x_end"],
                         ranges["width"],
                         coordinates[i],
                     ),
-                    "y": graph_to_screen(
+                    y=graph_to_screen(
                         ranges["y_end"],
                         ranges["y_start"],
                         ranges["height"],
                         coordinates[i + 1],
                     ),
-                }
+                )
                 for i in range(0, len(coordinates), 2)
             ]
+            if initial.get("tag") and len(points) > first_index:
+                points[first_index]["tag"] = initial["tag"]
     return points

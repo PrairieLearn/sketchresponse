@@ -411,31 +411,15 @@ export default class Freeform extends BasePlugin {
           style: 'stroke: lightgray; stroke-width: 2px',
         }),
       ),
-      // Tags, regular or rendered by Katex
+      // Render tags with the tool's configured renderer.
       z.each(this.state, (spline, splineIndex) =>
-        z.if(this.hasTag, () =>
-          z(
-            this.latex ? 'foreignObject.tag' : 'text.tag',
-            {
-              'text-anchor': this.latex ? undefined : this.tag.align,
-              x: this.state[splineIndex][0].x + this.tag.xoffset,
-              y: this.state[splineIndex][0].y + this.tag.yoffset,
-              style: this.getStyle(),
-              onmount: (el) => {
-                if (this.latex) {
-                  this.renderKatex(el, splineIndex, 0);
-                }
-                if (!this.params.readonly) {
-                  this.addDoubleClickEventListener(el, splineIndex, 0);
-                }
-              },
-              onupdate: (el) => {
-                if (this.latex) {
-                  this.renderKatex(el, splineIndex, 0);
-                }
-              },
-            },
-            this.latex ? '' : this.state[splineIndex][0].tag,
+        z.if(this.hasTag && spline.length > 0 && spline[0].tag, () =>
+          this.renderTag(
+            this.state[splineIndex][0],
+            this.state[splineIndex][0].x + this.tag.xoffset,
+            this.state[splineIndex][0].y + this.tag.yoffset,
+            splineIndex,
+            0,
           ),
         ),
       ),

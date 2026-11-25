@@ -6,6 +6,19 @@ const config = {
   enforceBounds: true,
   plugins: [
     { name: 'axes', id: 'axes' },
+    {
+      name: 'spline',
+      id: 'reference',
+      readonly: true,
+      color: 'purple',
+      tag: {
+        mathjax: true,
+        xoffset: 8,
+        yoffset: -12,
+        align: 'start',
+        position: 'start',
+      },
+    },
     { name: 'point', id: 'p', label: 'Point \\((x, y)\\)' },
     { name: 'line-segment', id: 'line' },
     {
@@ -23,6 +36,15 @@ const config = {
       label: 'Cubic branch for \\(x < 1\\)',
     },
   ],
+  initialstate: {
+    reference: [
+      [
+        { x: 200, y: 125, tag: 'Reference \\(f(x) = \\frac{x^2}{4}\\)' },
+        { x: 400, y: 225 },
+        { x: 600, y: 125 },
+      ],
+    ],
+  },
 };
 
 function embed(target, id, options) {
@@ -34,7 +56,7 @@ function embed(target, id, options) {
   return new window.sketchresponse.default(container, id, options);
 }
 
-embed('question', 'question', config);
+embed('question', 'question', { ...config });
 const submission = embed('submission', 'submission', {
   ...config,
   readonly: true,
@@ -46,12 +68,20 @@ const submission = embed('submission', 'submission', {
       readonly: true,
       overlay: true,
       color: 'green',
+      tag: {
+        mathjax: true,
+        xoffset: 8,
+        yoffset: -12,
+        align: 'start',
+        position: 'end',
+      },
     },
   ],
   initialstate: {
+    ...config.initialstate,
     p: [{ x: 400, y: 225 }],
     solution: [
-      { x: 200, y: 350 },
+      { x: 200, y: 350, tag: 'Solution \\(y = \\frac{5x}{8}\\)' },
       { x: 600, y: 100 },
     ],
     line: [
@@ -66,6 +96,12 @@ embed('all-tools', 'all-tools', {
   width: config.width,
   height: config.height,
 });
+
+embed(
+  'instructor-labels',
+  'instructor-labels',
+  window.loadConfig('instructorLabels'),
+);
 
 submission.messageBus.on('ready', () => {
   const wrapper = document.createElement('div');
@@ -85,11 +121,8 @@ submission.messageBus.on('ready', () => {
   submission.el.append(wrapper);
   const overlayToggle = wrapper.querySelector('button');
   overlayToggle.addEventListener('click', () => {
-    const visible = overlayToggle.getAttribute('aria-pressed') !== 'true';
+    const visible = !submission.el.classList.toggle('si-overlays-hidden');
     overlayToggle.setAttribute('aria-pressed', String(visible));
-    submission.el.querySelectorAll('.overlay').forEach((el) => {
-      el.style.display = visible ? '' : 'none';
-    });
     const icon = overlayToggle.querySelector('i');
     icon.classList.toggle('bi-layers-fill', visible);
     icon.classList.toggle('bi-layers-half', !visible);

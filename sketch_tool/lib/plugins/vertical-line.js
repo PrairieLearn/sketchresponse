@@ -173,31 +173,14 @@ export default class VerticalLine extends BasePlugin {
           },
         }),
       ),
-      // Tags, regular or rendered by Katex
+      // Render tags with the tool's configured renderer.
       z.each(this.state, (position, positionIndex) =>
-        z.if(this.hasTag, () =>
-          z(
-            this.latex ? 'foreignObject.tag' : 'text.tag',
-            {
-              'text-anchor': this.latex ? undefined : this.tag.align,
-              x: position.x + this.tag.xoffset,
-              y: this.params.height / 2 + this.tag.yoffset,
-              style: this.getStyle(),
-              onmount: (el) => {
-                if (this.latex) {
-                  this.renderKatex(el, positionIndex);
-                }
-                if (!this.params.readonly) {
-                  this.addDoubleClickEventListener(el, positionIndex);
-                }
-              },
-              onupdate: (el) => {
-                if (this.latex) {
-                  this.renderKatex(el, positionIndex);
-                }
-              },
-            },
-            this.latex ? '' : this.state[positionIndex].tag,
+        z.if(this.hasTag && position.tag, () =>
+          this.renderTag(
+            this.state[positionIndex],
+            position.x + this.tag.xoffset,
+            this.params.height / 2 + this.tag.yoffset,
+            positionIndex,
           ),
         ),
       ),

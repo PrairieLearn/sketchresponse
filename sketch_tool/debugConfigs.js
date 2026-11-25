@@ -887,6 +887,89 @@ function loadConfig(configId) {
         },
       ],
     },
+    instructorLabels: {
+      width: 750,
+      height: 420,
+      xrange: [-4.5, 4.5],
+      yrange: [-2.5, 2.5],
+      coordinates: 'cartesian',
+      plugins: [
+        { name: 'axes' },
+        ...[
+          {
+            name: 'spline',
+            id: 'spl',
+            color: 'mediumseagreen',
+          },
+          { name: 'freeform', id: 'ff', color: 'royalblue' },
+          { name: 'polyline', id: 'pl', color: 'sienna' },
+          {
+            name: 'polyline',
+            id: 'polygon',
+            closed: true,
+            fillColor: 'lightblue',
+            color: 'steelblue',
+          },
+          { name: 'point', id: 'pt', color: 'black' },
+          { name: 'line-segment', id: 'line', color: 'purple' },
+          { name: 'horizontal-line', id: 'hl', color: 'gray' },
+          { name: 'vertical-line', id: 'vl', color: 'gray' },
+        ].map((tool) => ({
+          ...tool,
+          readonly: true,
+          tag: {
+            mathjax: true,
+            xoffset: 5,
+            yoffset: -5,
+            align: 'start',
+            position: 'start',
+            ...tool.tag,
+          },
+        })),
+        { name: 'point', id: 'answer', label: 'Student point', color: 'red' },
+      ],
+      initialstate: {
+        spl: [
+          [
+            { x: 80, y: 260, tag: 'Reference \\(f(x)\\)' },
+            { x: 160, y: 90 },
+            { x: 240, y: 260 },
+          ],
+        ],
+        ff: [
+          [
+            { x: 420, y: 90, tag: 'g(x)' },
+            { x: 480, y: 300 },
+            { x: 620, y: 300 },
+            { x: 690, y: 90 },
+          ],
+        ],
+        pl: [
+          [
+            { x: 100, y: 350, tag: 'Polyline' },
+            { x: 375, y: 320 },
+            { x: 650, y: 350 },
+          ],
+        ],
+        polygon: [
+          [
+            { x: 280, y: 180, tag: 'Region' },
+            { x: 350, y: 240 },
+            { x: 280, y: 240 },
+          ],
+        ],
+        pt: [
+          { x: 200, y: 190, tag: 'A' },
+          { x: 220, y: 190 },
+        ],
+        line: [
+          { x: 440, y: 360, tag: 'Segment' },
+          { x: 570, y: 390 },
+        ],
+        hl: [{ y: 60, tag: 'Horizontal' }],
+        vl: [{ x: 50, tag: 'Vertical' }],
+      },
+    },
   };
   // eslint-disable-next-line no-prototype-builtins
   if (configs.hasOwnProperty(configId)) {
