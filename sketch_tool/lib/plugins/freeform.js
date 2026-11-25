@@ -356,10 +356,12 @@ export default class Freeform extends BasePlugin {
                     this.state[splineIndex][i + 3].x + dx,
                     this.state[splineIndex][i + 3].y,
                   );
-                  if (!(
-                    this.inBoundsX(boundingBox.min.x) &&
-                    this.inBoundsX(boundingBox.max.x)
-                  )) {
+                  if (
+                    !(
+                      this.inBoundsX(boundingBox.min.x) &&
+                      this.inBoundsX(boundingBox.max.x)
+                    )
+                  ) {
                     return false;
                   }
                 }
@@ -381,10 +383,12 @@ export default class Freeform extends BasePlugin {
                     this.state[splineIndex][i + 3].x,
                     this.state[splineIndex][i + 3].y + dy,
                   );
-                  if (!(
-                    this.inBoundsY(boundingBox.min.y) &&
-                    this.inBoundsY(boundingBox.max.y)
-                  )) {
+                  if (
+                    !(
+                      this.inBoundsY(boundingBox.min.y) &&
+                      this.inBoundsY(boundingBox.max.y)
+                    )
+                  ) {
                     return false;
                   }
                 }
