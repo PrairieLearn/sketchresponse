@@ -76,6 +76,16 @@ jobs:
       - name: Run tests
         run: uv run pytest
 
+      - name: Check installed wheel without development dependencies
+        env:
+          UV_PYTHON: ${{ matrix.python-version }}
+        run: |
+          uv build --wheel --out-dir "$RUNNER_TEMP/sketchresponse-wheel"
+          uv venv "$RUNNER_TEMP/sketchresponse-runtime"
+          uv pip install --python "$RUNNER_TEMP/sketchresponse-runtime/bin/python" "$RUNNER_TEMP"/sketchresponse-wheel/*.whl
+          cd "$RUNNER_TEMP"
+          "$RUNNER_TEMP/sketchresponse-runtime/bin/python" -I -c "import sketchresponse.utils"
+
   build:
     runs-on: ubuntu-latest
     steps:
