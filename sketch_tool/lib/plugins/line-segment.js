@@ -505,32 +505,14 @@ export default class LineSegment extends BasePlugin {
           },
         ),
       ),
-      // Tags, regular or rendered by Katex
+      // Tags use the host math renderer when available.
       z.each(this.state, (pt, ptIndex) =>
         z.if(this.hasTag && ptIndex % 2 === 0 && pt.tag, () =>
-          z(
-            (this.latex ? 'foreignObject.tag' : 'text.tag') +
-              (this.params.overlay ? '.overlay' : ''),
-            {
-              'text-anchor': this.latex ? undefined : this.tag.align,
-              x: this.tagXPosition(ptIndex) + this.tag.xoffset,
-              y: this.tagYPosition(ptIndex) + this.tag.yoffset,
-              style: this.getStyle(),
-              onmount: (el) => {
-                if (this.latex) {
-                  this.renderKatex(el, ptIndex);
-                }
-                if (!this.params.readonly) {
-                  this.addDoubleClickEventListener(el, ptIndex);
-                }
-              },
-              onupdate: (el) => {
-                if (this.latex) {
-                  this.renderKatex(el, ptIndex);
-                }
-              },
-            },
-            this.latex ? '' : this.state[ptIndex].tag,
+          this.renderTag(
+            this.state[ptIndex],
+            this.tagXPosition(ptIndex) + this.tag.xoffset,
+            this.tagYPosition(ptIndex) + this.tag.yoffset,
+            ptIndex,
           ),
         ),
       ),

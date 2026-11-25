@@ -272,36 +272,19 @@ export default class Polyline extends BasePlugin {
           }),
         ),
       ),
-      // Tags, regular or rendered by Katex
+      // Tags use the host math renderer when available.
       z.each(this.state, (polyline, polylineIndex) =>
         z.if(
           this.hasTag &&
             this.state[polylineIndex].length > 0 &&
             this.state[polylineIndex][0].tag,
           () =>
-            z(
-              (this.latex ? 'foreignObject.tag' : 'text.tag') +
-                (this.params.overlay ? '.overlay' : ''),
-              {
-                'text-anchor': this.latex ? undefined : this.tag.align,
-                x: this.state[polylineIndex][0].x + this.tag.xoffset,
-                y: this.state[polylineIndex][0].y + this.tag.yoffset,
-                style: this.getStyle(),
-                onmount: (el) => {
-                  if (this.latex) {
-                    this.renderKatex(el, polylineIndex, 0);
-                  }
-                  if (!this.params.readonly) {
-                    this.addDoubleClickEventListener(el, polylineIndex, 0);
-                  }
-                },
-                onupdate: (el) => {
-                  if (this.latex) {
-                    this.renderKatex(el, polylineIndex, 0);
-                  }
-                },
-              },
-              this.latex ? '' : this.state[polylineIndex][0].tag,
+            this.renderTag(
+              this.state[polylineIndex][0],
+              this.state[polylineIndex][0].x + this.tag.xoffset,
+              this.state[polylineIndex][0].y + this.tag.yoffset,
+              polylineIndex,
+              0,
             ),
         ),
       ),

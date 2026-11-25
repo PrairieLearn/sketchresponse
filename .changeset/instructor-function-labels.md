@@ -1,5 +1,5 @@
 ---
-"@prairielearn/sketchresponse": patch
+"@prairielearn/sketchresponse": minor
 ---
 
-Render only present drawing tags and toggle solution overlay annotations with their geometry, for both plain text and LaTeX. Python drawing conversion now preserves ordinary tags across all tool state formats, reusing existing tag configuration and read-only tools.
+Render drawing tags with the host MathJax renderer using ordinary text and math delimiters, preserving rendered contents across redraws and clearing them on removal. Keep existing standalone SVG text and explicit KaTeX tag support. Python drawing conversion preserves ordinary tags across all tool state formats, and solution annotations toggle with their overlay geometry.

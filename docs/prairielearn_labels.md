@@ -1,6 +1,8 @@
 # Instructor tags in PrairieLearn
 
-Instructor annotations use SketchResponse's existing tags. Each drawing supplies its `tag` string; its tool supplies placement and text/LaTeX formatting. The existing tool or canvas `read-only` setting makes a reference drawing and its annotation fixed.
+Instructor annotations use SketchResponse's existing tags. Each drawing supplies its `tag` string; its tool supplies placement and the host renders its content. The existing tool or canvas `read-only` setting makes a reference drawing and its annotation fixed.
+
+The [PrairieLearn companion implementation](https://github.com/PrairieLearn/PrairieLearn/commit/d072414223a7c1b2dd82e89e6f4871ca057da98b) includes the controller integration, a runnable example, and browser coverage for the host rendering lifecycle.
 
 ## Authoring
 
@@ -8,7 +10,7 @@ Instructor annotations use SketchResponse's existing tags. Each drawing supplies
 
 A tagged initial drawing requires `read-only="true"` on its tool or canvas. Solution drawings are displayed read-only, so a tagged solution can refer to a tool that students use to draw their answer. Student-created drawings do not acquire default tags.
 
-`tag-latex="true"` on a tool makes each tag a complete KaTeX expression, without math delimiters. It defaults to plain text. Use `\text{...}` for ordinary text inside a math tag.
+Tags use PrairieLearn's host MathJax renderer and its usual math delimiters. Plain text and mathematics can appear in the same tag, for example `tag="Reference \(f(x)\)"`; different drawings on one tool can independently contain text, math, or both.
 
 For example, this question provides two fixed reference functions and asks the student to mark the origin:
 
@@ -17,47 +19,32 @@ For example, this question provides two fixed reference functions and asks the s
   <p>Mark the origin with the red point.</p>
 </pl-question-panel>
 <pl-sketch answers-name="graph" x-range="-2,2" y-range="-2,2">
-  <pl-sketch-tool
-    id="f"
-    type="spline"
-    read-only="true"
-    tag-latex="true"
-  ></pl-sketch-tool>
-  <pl-sketch-tool
-    id="g"
-    type="spline"
-    read-only="true"
-    tag-latex="true"
-  ></pl-sketch-tool>
-  <pl-sketch-tool
-    id="answer"
-    type="point"
-    color="red"
-    tag-latex="true"
-  ></pl-sketch-tool>
+  <pl-sketch-tool id="f" type="spline" read-only="true"></pl-sketch-tool>
+  <pl-sketch-tool id="g" type="spline" read-only="true"></pl-sketch-tool>
+  <pl-sketch-tool id="answer" type="point" color="red"></pl-sketch-tool>
   <pl-sketch-initial
     tool-id="f"
     function="x"
     x-range="-1,1"
-    tag="f(x)"
+    tag="Reference \(f(x)\)"
   ></pl-sketch-initial>
   <pl-sketch-initial
     tool-id="g"
     function="-x"
     x-range="-1,1"
-    tag="g(x)"
+    tag="Reference \(g(x)\)"
   ></pl-sketch-initial>
   <pl-sketch-grade type="match" tool-id="answer" x="0" y="0"></pl-sketch-grade>
   <pl-sketch-grade type="count" tool-id="answer" count="1"></pl-sketch-grade>
   <pl-sketch-solution
     tool-id="answer"
     coordinates="(0,0)"
-    tag="O"
+    tag="Origin \(O\)"
   ></pl-sketch-solution>
 </pl-sketch>
 ```
 
-Each overlapping reference function has its own tool ID, preserving PrairieLearn's existing function-per-tool rules. Multiple tagged points or nonoverlapping curve segments can share a tool and its formatting.
+Each overlapping reference function has its own tool ID, preserving PrairieLearn's existing function-per-tool rules. Multiple tagged points or nonoverlapping curve segments can share a tool and its placement.
 
 Tags use the existing first-point anchor for curves, polygons, points, and line segments. Horizontal and vertical line tags use the midpoint along the line. PrairieLearn supplies offsets `(5, -5)` and start alignment; geometry is still specified in graph coordinates.
 
@@ -70,13 +57,13 @@ For example, coordinates `(-1,-1),(1,1)` on a 420-pixel-square canvas with reque
 ```python
 {
     "f": [[
-        {"x": 110.0, "y": 310.0, "tag": "f(x)"},
+        {"x": 110.0, "y": 310.0, "tag": r"Reference \(f(x)\)"},
         {"x": 310.0, "y": 110.0},
     ]]
 }
 ```
 
-When this instructor state is displayed, the controller enables the existing tool-level configuration:
+When this instructor state is displayed, the controller enables the existing tool-level placement configuration:
 
 ```python
 {
@@ -84,7 +71,6 @@ When this instructor state is displayed, the controller enables the existing too
     "id": "f",
     "readonly": True,
     "tag": {
-        "latex": True,
         "xoffset": 5,
         "yoffset": -5,
         "align": "start",
@@ -93,7 +79,7 @@ When this instructor state is displayed, the controller enables the existing too
 }
 ```
 
-That configuration is attached only to displayed instructor drawings. A solution's formatting does not enable tags on the original editable tool. `getState()` and `getGradeable()` already preserve ordinary tag strings; there is no separate label object or per-point editing flag.
+That configuration is attached only to displayed instructor drawings. The frontend mounts stable HTML tag contents inside SVG `foreignObject` elements, asks the host to typeset newly mounted or changed content, and measures the result in canvas units. Coordinate and cursor updates retain the host-rendered DOM; removed tags are cleared from MathJax. A solution's tag configuration does not enable tags on the original editable tool. `getState()` and `getGradeable()` already preserve ordinary tag strings; there is no separate label object or per-point editing flag.
 
 ## Panel behavior
 

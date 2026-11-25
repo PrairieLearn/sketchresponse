@@ -160,32 +160,14 @@ export default class Point extends BasePlugin {
           },
         ),
       ),
-      // Tags, regular or rendered by Katex
+      // Tags use the host math renderer when available.
       z.each(this.state, (position, positionIndex) =>
         z.if(this.hasTag && position.tag, () =>
-          z(
-            (this.latex ? 'foreignObject.tag' : 'text.tag') +
-              (this.params.overlay ? '.overlay' : ''),
-            {
-              'text-anchor': this.latex ? undefined : this.tag.align,
-              x: position.x + this.tag.xoffset,
-              y: position.y + this.tag.yoffset,
-              style: this.getStyle(),
-              onmount: (el) => {
-                if (this.latex) {
-                  this.renderKatex(el, positionIndex);
-                }
-                if (!this.params.readonly) {
-                  this.addDoubleClickEventListener(el, positionIndex);
-                }
-              },
-              onupdate: (el) => {
-                if (this.latex) {
-                  this.renderKatex(el, positionIndex);
-                }
-              },
-            },
-            this.latex ? '' : this.state[positionIndex].tag,
+          this.renderTag(
+            this.state[positionIndex],
+            position.x + this.tag.xoffset,
+            position.y + this.tag.yoffset,
+            positionIndex,
           ),
         ),
       ),

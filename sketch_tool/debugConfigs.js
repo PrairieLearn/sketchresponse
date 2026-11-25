@@ -900,7 +900,6 @@ function loadConfig(configId) {
             name: 'spline',
             id: 'spl',
             color: 'mediumseagreen',
-            tag: { latex: true },
           },
           { name: 'freeform', id: 'ff', color: 'royalblue' },
           { name: 'polyline', id: 'pl', color: 'sienna' },
@@ -931,7 +930,7 @@ function loadConfig(configId) {
       initialstate: {
         spl: [
           [
-            { x: 80, y: 260, tag: 'f(x)' },
+            { x: 80, y: 260, tag: 'Reference \\(f(x)\\)' },
             { x: 160, y: 90 },
             { x: 240, y: 260 },
           ],
