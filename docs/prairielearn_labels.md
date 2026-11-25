@@ -2,8 +2,6 @@
 
 Instructor annotations use SketchResponse's existing tags. Each drawing supplies its `tag` string; its tool supplies placement and the host renders its content. The existing tool or canvas `read-only` setting makes a reference drawing and its annotation fixed.
 
-The [PrairieLearn companion implementation](https://github.com/PrairieLearn/PrairieLearn/commit/d072414223a7c1b2dd82e89e6f4871ca057da98b) includes the controller integration, a runnable example, and browser coverage for the host rendering lifecycle.
-
 ## Authoring
 
 `pl-sketch-initial` and `pl-sketch-solution` accept `tag` for every drawing type: `free-draw`, `spline`, `polyline`, `polygon`, `point`, `line`, `horizontal-line`, and `vertical-line`. `label` on `pl-sketch-tool` names its toolbar button.
