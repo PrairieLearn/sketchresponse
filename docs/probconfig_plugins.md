@@ -462,7 +462,7 @@ All drawing plugins support the existing per-object `tag` string. Enable tag ren
 'plugins': [
   {
     "name": "spline", "id": "given", "readonly": True,
-    "tag": {"xoffset": 5, "yoffset": -5, "align": "start"}
+    "tag": {"mathjax": True, "xoffset": 5, "yoffset": -5, "align": "start"}
   }
 ],
 'initialstate': {
@@ -474,7 +474,7 @@ All drawing plugins support the existing per-object `tag` string. Enable tag ren
 }
 ```
 
-The plugin controls tag placement. When the host provides MathJax, strings can mix ordinary text and its normal delimited mathematics, such as `Reference \(f(x)\)`. Without a host math renderer, tags remain SVG text. The existing explicit `latex: True` option remains available to standalone callers using the bundled KaTeX renderer. Its existing `readonly` setting controls editing. Untagged objects on the same plugin have no annotation. Solution overlay tags share the overlay's visibility.
+The plugin controls tag placement; alignment defaults to `start`. Tags remain literal SVG text by default, including on pages with MathJax. Set `mathjax: True` in the plugin's `tag` configuration to mix ordinary text and the host MathJax 4 renderer's normal delimited mathematics, such as `Reference \(f(x)\)`. Opted-in tags remain literal HTML text if no supported host renderer is available. The existing explicit `latex: True` option uses bundled KaTeX and takes precedence over `mathjax`. The plugin's existing `readonly` setting controls editing. Untagged objects on the same plugin have no annotation. On editable plugins, a `tag` configuration gives new drawings its `value`, defaulting to `"tag"`. Solution overlay tags share the overlay's visibility.
 
 `sketchresponse.utils.format_drawing` accepts an optional `tag` on each `SketchDrawing` and writes the existing client format for every supported tool. When a symbolic function is split at discontinuities, only its first nonempty segment receives the tag. Geometry and tool IDs are unchanged.
 

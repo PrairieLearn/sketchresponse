@@ -6,7 +6,7 @@ Instructor annotations use SketchResponse's existing tags. Each drawing supplies
 
 `pl-sketch-initial` and `pl-sketch-solution` accept `tag` for every drawing type: `free-draw`, `spline`, `polyline`, `polygon`, `point`, `line`, `horizontal-line`, and `vertical-line`. `label` on `pl-sketch-tool` names its toolbar button.
 
-A tagged initial drawing requires `read-only="true"` on its tool or canvas. Solution drawings are displayed read-only, so a tagged solution can refer to a tool that students use to draw their answer. Student-created drawings do not acquire default tags.
+A nonempty tag on an initial drawing requires `read-only="true"` on its tool or canvas; otherwise PrairieLearn raises an authoring error. Solution drawings are displayed read-only, so a tagged solution can refer to a tool that students use to draw their answer. PrairieLearn does not configure tags on editable response tools, so student-created drawings do not acquire default tags. Standalone SketchResponse tools with a `tag` configuration retain their existing default-tag behavior.
 
 Tags use PrairieLearn's host MathJax renderer and its usual math delimiters. Plain text and mathematics can appear in the same tag, for example `tag="Reference \(f(x)\)"`; different drawings on one tool can independently contain text, math, or both.
 
@@ -69,6 +69,7 @@ When this instructor state is displayed, the controller enables the existing too
     "id": "f",
     "readonly": True,
     "tag": {
+        "mathjax": True,
         "xoffset": 5,
         "yoffset": -5,
         "align": "start",
@@ -77,7 +78,7 @@ When this instructor state is displayed, the controller enables the existing too
 }
 ```
 
-That configuration is attached only to displayed instructor drawings. The frontend mounts stable HTML tag contents inside SVG `foreignObject` elements, asks the host to typeset newly mounted or changed content, and measures the result in canvas units. Coordinate and cursor updates retain the host-rendered DOM; removed tags are cleared from MathJax. A solution's tag configuration does not enable tags on the original editable tool. `getState()` and `getGradeable()` already preserve ordinary tag strings; there is no separate label object or per-point editing flag.
+That configuration is attached only to displayed instructor drawings. The controller sets `mathjax` internally; authors need no extra HTML attribute. The frontend waits for host MathJax 4, mounts stable HTML tag contents inside SVG `foreignObject` elements, and measures them again after hidden content becomes visible or its font metrics change. Coordinate and cursor updates retain the host-rendered DOM; removed tags are cleared from MathJax. A solution's tag configuration does not enable tags on the original editable tool. `getState()` and `getGradeable()` already preserve ordinary tag strings; there is no separate label object or per-point editing flag.
 
 ## Panel behavior
 
