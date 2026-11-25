@@ -454,26 +454,28 @@ The initial state configuration below uses a point plugin with id 'pt' to initia
   ]
 ```
 
-### Read-only labels
+### Tags on initial drawings
 
-For the 'freeform', 'polyline', and 'spline' plugins, each curve in the initial state can carry its own label. Add a `tag` key to the first point of the curve, along with `"tagReadonly": true` to prevent students from editing it. The label is drawn even if the plugin has no 'tag' configuration. In that case it is placed 5px to the right of and 5px above the first point; otherwise the plugin's tag offsets and alignment are used. Curves drawn by students on the same plugin are unaffected.
-
-E.g.
-The initial state configuration below draws a spline labelled "f(x)" using a spline plugin with id 'spl'. The trailing empty array marks the curve as complete, so new clicks with the spline tool start a new curve rather than extending this one.
+All drawing plugins support the existing per-object `tag` string. Enable tag rendering with the plugin's `tag` configuration, and store the text on the object's state point (the first point for curves and line segments). For fixed reference drawings, use a read-only plugin:
 
 ```python
+'plugins': [
+  {
+    "name": "spline", "id": "given", "readonly": True,
+    "tag": {"xoffset": 5, "yoffset": -5, "align": "start", "latex": True}
+  }
+],
 'initialstate': {
-  "spl": [
-    [
-      {"x": 80, "y": 330, "tag": "f(x)", "tagReadonly": True},
-      {"x": 200, "y": 90},
-      {"x": 320, "y": 330}
-    ],
-    []
-  ]
+  "given": [[
+    {"x": 80, "y": 330, "tag": "f(x)"},
+    {"x": 200, "y": 90},
+    {"x": 320, "y": 330}
+  ]]
 }
 ```
 
-When generating drawings from Python with `sketchresponse.utils.format_drawing`, set the optional `label` key of a `SketchDrawing` to produce this format. For a function that is split into several curves at discontinuities, only the first curve is labelled.
+The plugin controls tag placement and whether the strings are complete LaTeX expressions (`latex: True`) or plain text. Its existing `readonly` setting controls editing. Untagged objects on the same plugin have no annotation. Solution overlay tags share the overlay's visibility.
 
-For the proposed PrairieLearn attribute, a complete question example, the conversion into this initial state, and the reasons for extending tag rendering, see [Instructor labels in PrairieLearn](prairielearn_labels.md).
+`sketchresponse.utils.format_drawing` accepts an optional `tag` on each `SketchDrawing` and writes the existing client format for every supported tool. When a symbolic function is split at discontinuities, only its first nonempty segment receives the tag. Geometry and tool IDs are unchanged.
+
+See [Instructor tags in PrairieLearn](prairielearn_labels.md) for the authoring contract and complete conversion and panel behavior.

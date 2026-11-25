@@ -4,14 +4,6 @@ import { getElementsByClassName } from '../util/ms-polyfills';
 import colorIcon from '../util/color-icon';
 import deepCopy from '../util/deep-copy';
 import pointerPosition from '../util/pointer-position';
-import z from '../util/zdom';
-
-// Tag placement used for instructor-set labels when the plugin has no tag config
-const DEFAULT_TAG_PARAMS = {
-  xoffset: 5,
-  yoffset: -5,
-  align: 'start',
-};
 
 /** @knipignore */
 export const VERSION = '0.1';
@@ -230,36 +222,26 @@ export default class BasePlugin {
     this.render(); // To change tag cursor
   }
 
-  getTagParams() {
-    return this.hasTag ? this.tag : DEFAULT_TAG_PARAMS;
-  }
-
-  // A tag can't be edited if the plugin is readonly, or if it was set by the
-  // instructor (e.g. as part of the initial state) and marked readonly.
-  isTagReadonly(stateEl) {
-    return Boolean(this.params.readonly || (stateEl && stateEl.tagReadonly));
-  }
-
-  getTagCursor(readonly = false) {
-    return this.params.readonly || readonly
+  getTagCursor() {
+    return this.params.readonly
       ? 'default'
       : this.selectMode
         ? 'pointer'
         : 'crosshair';
   }
 
-  getStyle(readonly = false) {
+  getStyle() {
     return this.latex
       ? `
         color: #333;
         font-size: 14px;
-        cursor: ${this.getTagCursor(readonly)};
+        cursor: ${this.getTagCursor()};
         overflow: visible;
       `
       : `
         fill: #333;
         font-size: 14px;
-        cursor: ${this.getTagCursor(readonly)};
+        cursor: ${this.getTagCursor()};
       `;
   }
 
@@ -301,9 +283,6 @@ export default class BasePlugin {
           if (typeof index2 !== 'undefined') {
             stateEl = this.state[index1][index2];
           }
-          if (this.isTagReadonly(stateEl)) {
-            return;
-          }
           Swal.fire({
             title: 'Enter tag value',
             input: 'text',
@@ -328,36 +307,6 @@ export default class BasePlugin {
         }
       }
     });
-  }
-
-  // Render the tag stored on the first point of a multi-point shape (freeform,
-  // polyline, spline). Regular text or rendered by Katex.
-  renderTag(firstPoint, shapeIndex) {
-    const tagParams = this.getTagParams();
-    const readonly = this.isTagReadonly(firstPoint);
-    return z(
-      this.latex ? 'foreignObject.tag' : 'text.tag',
-      {
-        'text-anchor': this.latex ? undefined : tagParams.align,
-        x: firstPoint.x + tagParams.xoffset,
-        y: firstPoint.y + tagParams.yoffset,
-        style: this.getStyle(readonly),
-        onmount: (el) => {
-          if (this.latex) {
-            this.renderKatex(el, shapeIndex, 0);
-          }
-          if (!this.params.readonly) {
-            this.addDoubleClickEventListener(el, shapeIndex, 0);
-          }
-        },
-        onupdate: (el) => {
-          if (this.latex) {
-            this.renderKatex(el, shapeIndex, 0);
-          }
-        },
-      },
-      this.latex ? '' : firstPoint.tag,
-    );
   }
 
   adjustBoundingBox(el) {

@@ -411,11 +411,33 @@ export default class Freeform extends BasePlugin {
           style: 'stroke: lightgray; stroke-width: 2px',
         }),
       ),
-      // Tags, regular or rendered by Katex. Instructor-set tags are shown even
-      // if the plugin has no tag config.
+      // Tags, regular or rendered by Katex
       z.each(this.state, (spline, splineIndex) =>
-        z.if(this.hasTag || spline[0].tag, () =>
-          this.renderTag(spline[0], splineIndex),
+        z.if(this.hasTag && spline.length > 0 && spline[0].tag, () =>
+          z(
+            (this.latex ? 'foreignObject.tag' : 'text.tag') +
+              (this.params.overlay ? '.overlay' : ''),
+            {
+              'text-anchor': this.latex ? undefined : this.tag.align,
+              x: this.state[splineIndex][0].x + this.tag.xoffset,
+              y: this.state[splineIndex][0].y + this.tag.yoffset,
+              style: this.getStyle(),
+              onmount: (el) => {
+                if (this.latex) {
+                  this.renderKatex(el, splineIndex, 0);
+                }
+                if (!this.params.readonly) {
+                  this.addDoubleClickEventListener(el, splineIndex, 0);
+                }
+              },
+              onupdate: (el) => {
+                if (this.latex) {
+                  this.renderKatex(el, splineIndex, 0);
+                }
+              },
+            },
+            this.latex ? '' : this.state[splineIndex][0].tag,
+          ),
         ),
       ),
     );

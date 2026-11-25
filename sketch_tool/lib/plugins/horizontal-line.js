@@ -174,9 +174,10 @@ export default class HorizontalLine extends BasePlugin {
       ),
       // Tags, regular or rendered by Katex
       z.each(this.state, (position, positionIndex) =>
-        z.if(this.hasTag, () =>
+        z.if(this.hasTag && position.tag, () =>
           z(
-            this.latex ? 'foreignObject.tag' : 'text.tag',
+            (this.latex ? 'foreignObject.tag' : 'text.tag') +
+              (this.params.overlay ? '.overlay' : ''),
             {
               'text-anchor': this.latex ? undefined : this.tag.align,
               x: this.params.width / 2 + this.tag.xoffset,

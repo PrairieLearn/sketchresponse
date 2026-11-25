@@ -892,66 +892,82 @@ function loadConfig(configId) {
       height: 420,
       xrange: [-4.5, 4.5],
       yrange: [-2.5, 2.5],
-      xscale: 'linear',
-      yscale: 'linear',
       coordinates: 'cartesian',
       plugins: [
-        {
-          name: 'axes',
-        },
-        {
-          // No tag config: only the instructor-set label is shown
-          name: 'spline',
-          id: 'spl',
-          label: 'Spline',
-          color: 'mediumseagreen',
-        },
-        {
-          // Tag config: student-drawn curves get an editable tag, but the
-          // instructor-set label stays read-only
-          name: 'freeform',
-          id: 'ff',
-          label: 'Freeform',
-          color: 'royalblue',
-          tag: {
-            value: 'tag',
-            xoffset: 15,
-            yoffset: 15,
-            align: 'start',
+        { name: 'axes' },
+        ...[
+          {
+            name: 'spline',
+            id: 'spl',
+            color: 'mediumseagreen',
+            tag: { latex: true },
           },
-        },
-        {
-          name: 'polyline',
-          id: 'pl',
-          label: 'Polyline',
-          color: 'sienna',
+          { name: 'freeform', id: 'ff', color: 'royalblue' },
+          { name: 'polyline', id: 'pl', color: 'sienna' },
+          {
+            name: 'polyline',
+            id: 'polygon',
+            closed: true,
+            fillColor: 'lightblue',
+            color: 'steelblue',
+          },
+          { name: 'point', id: 'pt', color: 'black' },
+          { name: 'line-segment', id: 'line', color: 'purple' },
+          { name: 'horizontal-line', id: 'hl', color: 'gray' },
+          { name: 'vertical-line', id: 'vl', color: 'gray' },
+        ].map((tool) => ({
+          ...tool,
           readonly: true,
-        },
+          tag: {
+            xoffset: 5,
+            yoffset: -5,
+            align: 'start',
+            position: 'start',
+            ...tool.tag,
+          },
+        })),
+        { name: 'point', id: 'answer', label: 'Student point', color: 'red' },
       ],
       initialstate: {
         spl: [
           [
-            { x: 80, y: 330, tag: 'f(x)', tagReadonly: true },
-            { x: 200, y: 90 },
-            { x: 320, y: 330 },
+            { x: 80, y: 260, tag: 'f(x)' },
+            { x: 160, y: 90 },
+            { x: 240, y: 260 },
           ],
-          [],
         ],
         ff: [
           [
-            { x: 420, y: 90, tag: 'g(x)', tagReadonly: true },
-            { x: 480, y: 380 },
-            { x: 620, y: 380 },
+            { x: 420, y: 90, tag: 'g(x)' },
+            { x: 480, y: 300 },
+            { x: 620, y: 300 },
             { x: 690, y: 90 },
           ],
         ],
         pl: [
           [
-            { x: 100, y: 390, tag: 'h(x)', tagReadonly: true },
-            { x: 375, y: 360 },
-            { x: 650, y: 390 },
+            { x: 100, y: 350, tag: 'Polyline' },
+            { x: 375, y: 320 },
+            { x: 650, y: 350 },
           ],
         ],
+        polygon: [
+          [
+            { x: 280, y: 180, tag: 'Region' },
+            { x: 350, y: 240 },
+            { x: 280, y: 240 },
+          ],
+        ],
+        pt: [
+          { x: 200, y: 190, tag: 'A' },
+          { x: 220, y: 190 },
+        ],
+        line: [
+          { x: 440, y: 360, tag: 'Segment' },
+          { x: 570, y: 390 },
+        ],
+        hl: [{ y: 60, tag: 'Horizontal' }],
+        vl: [{ x: 50, tag: 'Vertical' }],
       },
     },
   };

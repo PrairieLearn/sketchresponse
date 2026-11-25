@@ -507,9 +507,10 @@ export default class LineSegment extends BasePlugin {
       ),
       // Tags, regular or rendered by Katex
       z.each(this.state, (pt, ptIndex) =>
-        z.if(this.hasTag && ptIndex % 2 === 0, () =>
+        z.if(this.hasTag && ptIndex % 2 === 0 && pt.tag, () =>
           z(
-            this.latex ? 'foreignObject.tag' : 'text.tag',
+            (this.latex ? 'foreignObject.tag' : 'text.tag') +
+              (this.params.overlay ? '.overlay' : ''),
             {
               'text-anchor': this.latex ? undefined : this.tag.align,
               x: this.tagXPosition(ptIndex) + this.tag.xoffset,

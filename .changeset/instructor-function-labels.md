@@ -1,5 +1,5 @@
 ---
-"@prairielearn/sketchresponse": minor
+"@prairielearn/sketchresponse": patch
 ---
 
-Allow instructor-set, read-only labels on individual freeform, polyline, and spline curves in the initial state (`tag` + `tagReadonly` on the curve's first point). These labels are shown even when the plugin has no `tag` configuration, and students cannot edit them.
+Render only present drawing tags and toggle solution overlay annotations with their geometry, for both plain text and LaTeX. Python drawing conversion now preserves ordinary tags across all tool state formats, reusing existing tag configuration and read-only tools.

@@ -1,133 +1,113 @@
-# Instructor labels in PrairieLearn
+# Instructor tags in PrairieLearn
 
-This document describes how SketchResponse's per-drawing labels are intended to integrate with [`pl-sketch`](https://docs.prairielearn.com/elements/pl-sketch/). The SketchResponse support is implemented here; the PrairieLearn attribute described below still needs a separate implementation. Current PrairieLearn does not copy a drawing's `label` into `SketchDrawing`, so the HTML example will not show labels until that integration is added.
+Instructor annotations use SketchResponse's existing tags. Each drawing supplies its `tag` string; its tool supplies placement and text/LaTeX formatting. The existing tool or canvas `read-only` setting makes a reference drawing and its annotation fixed. The [companion PrairieLearn implementation](https://github.com/PrairieLearn/PrairieLearn/commit/24c2c2781bf8811ace38eef04d1b87ac8e415edf) implements this contract in the actual `pl-sketch` controller and example course.
 
-## Question author interface
+## Authoring
 
-The proposed optional `label` attribute belongs on `pl-sketch-initial` and `pl-sketch-solution`, which already describe individual drawings. There is no `pl-sketch-drawing` element. The existing `label` on `pl-sketch-tool` continues to name the toolbar button; it does not label a curve on the canvas.
+`pl-sketch-initial` and `pl-sketch-solution` accept `tag` for every drawing type: `free-draw`, `spline`, `polyline`, `polygon`, `point`, `line`, `horizontal-line`, and `vertical-line`. `label` on `pl-sketch-tool` continues to name its toolbar button.
 
-For example, this complete `question.html` would display two labelled reference functions on a static graph:
+A tagged initial drawing requires `read-only="true"` on its tool or canvas. Solution drawings are displayed read-only, so a tagged solution can refer to a tool that students use to draw their answer. Student-created drawings do not acquire default tags.
+
+`tag-latex="true"` on a tool makes each tag a complete KaTeX expression, without math delimiters. It defaults to plain text. Use `\text{...}` for ordinary text inside a math tag.
+
+For example, this question provides two fixed reference functions and asks the student to mark the origin:
 
 ```html
-<pl-sketch
-  answers-name="reference"
-  width="420"
-  height="420"
-  x-range="-2,2"
-  y-range="-2,2"
-  read-only="true"
->
+<pl-question-panel>
+  <p>Mark the origin with the red point.</p>
+</pl-question-panel>
+<pl-sketch answers-name="graph" x-range="-2,2" y-range="-2,2">
   <pl-sketch-tool
-    id="curves"
+    id="f"
     type="spline"
-    color="royalblue"
     read-only="true"
+    tag-latex="true"
   ></pl-sketch-tool>
-  <pl-sketch-initial
-    tool-id="curves"
-    coordinates="(-1,-1),(1,1)"
-    label="f(x)"
-  ></pl-sketch-initial>
-  <pl-sketch-initial
-    tool-id="curves"
-    coordinates="(-1,1),(1,-1)"
-    label="g(x)"
-  ></pl-sketch-initial>
-</pl-sketch>
-```
-
-Both curves use the same drawing tool but carry different labels. As an alternative to `coordinates`, a `spline` or `free-draw` drawing can use the existing `function="x" x-range="-1,1"` attributes. Sampling, coordinate conversion, and splitting at discontinuities continue to use `format_drawing`; only the first resulting segment receives the drawing's label.
-
-The proposed attribute applies to `free-draw`, `spline`, and `polyline` drawings. A label is plain text unless the SketchResponse plugin explicitly configures LaTeX tags; this proposal does not expose a LaTeX option in PrairieLearn. Omitting the attribute preserves existing unlabelled drawings. The same attribute on `pl-sketch-solution` labels a solution in the answer panel and its solution overlay.
-
-The canvas's `read-only` attribute makes the entire graph static. A tool's `read-only` attribute makes only that tool's drawings static, so a question can combine labelled reference curves with separate student drawing tools and grading criteria. The drawing's label itself is always read-only, including when its tool remains editable. It does not prevent moving or deleting an editable curve and is not an authorization mechanism for submitted data.
-
-For an editable example, the proposed integration would also let students translate a given curve while keeping its name fixed:
-
-```html
-<p>Move the labelled curve up by one unit.</p>
-<pl-sketch answers-name="translate" x-range="-2,2" y-range="-2,3">
-  <pl-sketch-tool id="f" type="free-draw" limit="1"></pl-sketch-tool>
+  <pl-sketch-tool
+    id="g"
+    type="spline"
+    read-only="true"
+    tag-latex="true"
+  ></pl-sketch-tool>
+  <pl-sketch-tool
+    id="answer"
+    type="point"
+    color="red"
+    tag-latex="true"
+  ></pl-sketch-tool>
   <pl-sketch-initial
     tool-id="f"
     function="x"
     x-range="-1,1"
-    label="f(x)"
+    tag="f(x)"
   ></pl-sketch-initial>
-  <pl-sketch-grade
-    type="match-function"
-    tool-id="f"
-    function="x+1"
+  <pl-sketch-initial
+    tool-id="g"
+    function="-x"
     x-range="-1,1"
-  ></pl-sketch-grade>
+    tag="g(x)"
+  ></pl-sketch-initial>
+  <pl-sketch-grade type="match" tool-id="answer" x="0" y="0"></pl-sketch-grade>
+  <pl-sketch-grade type="count" tool-id="answer" count="1"></pl-sketch-grade>
   <pl-sketch-solution
-    tool-id="f"
-    function="x+1"
-    x-range="-1,1"
-    label="f(x)"
+    tool-id="answer"
+    coordinates="(0,0)"
+    tag="O"
   ></pl-sketch-solution>
 </pl-sketch>
 ```
 
-Here `f(x)` labels the editable initial curve and the displayed solution. The proposed drawing attribute is independent of the tool's toolbar label and of any default tag for new curves.
+Each overlapping reference function has its own tool ID, preserving PrairieLearn's existing function-per-tool rules. Multiple tagged points or nonoverlapping curve segments can share a tool and its formatting.
 
-## Conversion into SketchResponse configuration
+Tags use the existing first-point anchor for curves, polygons, points, and line segments. Horizontal and vertical line tags use the midpoint along the line. PrairieLearn supplies offsets `(5, -5)` and start alignment; geometry is still specified in graph coordinates.
 
-The integration belongs in PrairieLearn's [`apps/prairielearn/elements/pl-sketch/pl-sketch.py`](https://github.com/PrairieLearn/PrairieLearn/blob/master/apps/prairielearn/elements/pl-sketch/pl-sketch.py):
+## Conversion and ownership
 
-1. `_check_tool` already converts `type="free-draw"` into the `freeform` plugin name; `spline` and `polyline` retain their names. It converts `read-only` into `readonly` and preserves the tool ID.
-2. `_check_drawing`, shared by initial and solution drawings, should read the optional `label` and include it in the returned `SketchDrawing`. The PrairieLearn change must also validate supported drawing types and update the element's attribute validation and documentation. Existing drawings without a label must remain valid.
-3. `prepare` already groups drawings by tool ID and calls `format_drawing(initials, tool_data[tool_id], ranges_config)`. No new grouping or drawing format is needed. Solutions follow the same path into `solution_state`.
-4. `render` already serializes the client configuration for the element's JavaScript. Question panels use `initial_state`, answer panels use `solution_state`, and solution overlays reuse the formatted drawings with a read-only overlay plugin.
+The controller's `_check_drawing` reads `tag` into an optional `SketchDrawing.tag`. `prepare` groups drawings by their existing tool IDs and calls `format_drawing`. That function adds the tag to the relevant client-state point, without changing coordinates, grouping, or IDs. A symbolic function split at discontinuities receives one tag on its first nonempty segment.
 
-For the example, the two `_check_drawing` results would be:
-
-```python
-initials = [
-    {
-        "toolid": "curves",
-        "coordinates": [-1.0, -1.0, 1.0, 1.0],
-        "fun": None,
-        "xrange": [-2.1, 2.1],
-        "label": "f(x)",
-    },
-    {
-        "toolid": "curves",
-        "coordinates": [-1.0, 1.0, 1.0, -1.0],
-        "fun": None,
-        "xrange": [-2.1, 2.1],
-        "label": "g(x)",
-    },
-]
-```
-
-PrairieLearn adds a 10-pixel margin to the requested graph ranges. Here its `ranges_config` has width and height 420 and both ranges expanded to `[-2.1, 2.1]`. Passing these drawings and the `curves` tool to `format_drawing` produces the following `initialstate` entry, in screen pixels (rounded here for readability):
+For example, coordinates `(-1,-1),(1,1)` on a 420-pixel-square canvas with requested ranges `[-2,2]` produce this state, after PrairieLearn's existing 10-pixel margins (values rounded):
 
 ```python
 {
-    "curves": [
-        [
-            {"x": 110.0, "y": 310.0, "tag": "f(x)", "tagReadonly": True},
-            {"x": 310.0, "y": 110.0},
-        ],
-        [
-            {"x": 110.0, "y": 110.0, "tag": "g(x)", "tagReadonly": True},
-            {"x": 310.0, "y": 310.0},
-        ],
-    ]
+    "f": [[
+        {"x": 110.0, "y": 310.0, "tag": "f(x)"},
+        {"x": 310.0, "y": 110.0},
+    ]]
 }
 ```
 
-The corresponding plugin has `name="spline"`, `id="curves"`, `color="royalblue"`, and `readonly=True`, without a `tag` configuration. The frontend renders `f(x)` and `g(x)` next to their respective first points using the default offsets `(5, -5)`. These first-point tags already flow through `getGradeable()`; no grader format change is needed. State serialization also preserves them when a submission is restored.
+When this instructor state is displayed, the controller enables the existing tool-level configuration:
 
-## Why extend the frontend's existing tags?
+```python
+{
+    "name": "spline",
+    "id": "f",
+    "readonly": True,
+    "tag": {
+        "latex": True,
+        "xoffset": 5,
+        "yoffset": -5,
+        "align": "start",
+        "position": "start",
+    },
+}
+```
 
-This feature reuses the existing first-point `tag`, SVG/KaTeX renderer, and gradeable tag field. It adds per-drawing display and editability rules rather than a second annotation system.
+That configuration is attached only to displayed instructor drawings. A solution's formatting does not enable tags on the original editable tool. `getState()` and `getGradeable()` already preserve ordinary tag strings; there is no separate label object or per-point editing flag.
 
-Before this change, the `freeform`, `spline`, and `polyline` plugins only rendered tags when the tool had a `tag` configuration. That configuration also supplies a default tag to every newly drawn curve. It cannot express “show only these instructor-provided labels, and leave new student curves unlabelled.” The frontend now renders a drawing's existing tag without requiring a tool-wide default; a shared renderer supplies offsets when the tool has none.
+## Panel behavior
 
-Tool-level `readonly` already prevents editing tags on a read-only tool. For the static example above, PrairieLearn could instead supply a tool-level `tag` configuration for placement and populate the existing first-point tags in Python, without changing the frontend. That narrower design is sufficient if labels are limited to read-only tools. Merely setting `tag.value` would still not populate the different tags on pre-drawn curves; their first points need their own values.
+The controller composes each display from the saved instructor reference state and the relevant response state:
 
-This PR also supports labelled initial drawings on editable tools, without requiring a separate tool for each label. Existing editable tags open an edit dialog in Select mode, so `tagReadonly` prevents that dialog for the instructor's label while retaining editing for ordinary student tags. It also gives fixed labels the default cursor. A tool-level tag configuration, when present, continues to control placement, LaTeX rendering, and the editable default for new student curves.
+| View             | Drawings displayed                                                                                         |
+| ---------------- | ---------------------------------------------------------------------------------------------------------- |
+| Question         | Fixed references plus initial or restored student drawings                                                 |
+| Submission       | Fixed references plus the saved student drawings                                                           |
+| Answer           | Fixed references plus solution drawings; a solution for the same tool replaces that tool's reference state |
+| Solution overlay | Separate read-only solution instances over the question or submission                                      |
 
-For editable spline or polyline initial drawings, the existing curve-completion issue tracked in [#45](https://github.com/PrairieLearn/sketchresponse/pull/45) is separate: before that fix, append an empty curve (`[]`) to the initial state so a new click starts another curve. The static example above does not need that workaround.
+Fixed reference drawings are restored from the variant's canonical initial state, including when submitted data omits or changes them. Solution annotation nodes share their overlay's visibility, so hiding a solution hides its tags too.
+
+Generated test answers preserve reference tags, but use only the geometry of editable-tool solutions as student responses. Thus solution-only annotations do not appear on simulated student drawings. Existing tool IDs and grading criteria retain their meanings.
+
+All newly stored fields are optional. Existing variants and submissions without tag settings continue to render. The example-course `sketchTags` question and the real PrairieLearn browser tests exercise the full authoring, rendering, submission, answer, and overlay path with the built packages.

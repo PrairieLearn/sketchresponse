@@ -31,6 +31,25 @@ TernaryResult = bool | Literal["ndef"]
 OkValue = bool | int | float | str
 
 
+class SketchTag(TypedDict, total=False):
+    """Tool-wide presentation and default content for existing drawing tags."""
+
+    value: str
+    xoffset: float
+    yoffset: float
+    align: Literal["start", "middle", "end"]
+    position: Literal["start", "middle", "end"]
+    latex: bool
+
+
+class SketchDrawingPoint(TypedDict, total=False):
+    """Client drawing state; horizontal/vertical lines use only one coordinate."""
+
+    x: float
+    y: float
+    tag: str
+
+
 class SketchTool(TypedDict):
     name: str
     id: str
@@ -51,6 +70,7 @@ class SketchTool(TypedDict):
     )  # Polygons are internally "closed polylines" - this flag is the only difference
     fillColor: str | None
     arrowHead: int | None
+    tag: NotRequired[SketchTag]
 
 
 class SketchGrader(TypedDict):
@@ -87,7 +107,7 @@ class SketchDrawing(TypedDict):
     fun: str | None
     xrange: list[float]
     coordinates: list[float]
-    label: NotRequired[str | None]
+    tag: NotRequired[str]
 
 
 class SketchItem(TypedDict, total=False):
