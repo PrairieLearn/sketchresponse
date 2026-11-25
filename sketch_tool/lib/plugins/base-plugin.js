@@ -200,6 +200,18 @@ export default class BasePlugin {
     return y;
   }
 
+  // For plugins whose state is a list of shapes built one click at a time
+  // (polyline, spline): new clicks extend the last shape until an empty array
+  // marks it as complete. Close the last shape of the initial state so that the
+  // first new click starts a new shape instead of extending a pre-drawn one.
+  closeInitialShapes() {
+    const last = this.state[this.state.length - 1];
+    if (Array.isArray(last) && last.length > 0) {
+      this.state.push([]);
+      this.render();
+    }
+  }
+
   readOnlyClass() {
     return this.readonly ? '.readonly' : '';
   }
