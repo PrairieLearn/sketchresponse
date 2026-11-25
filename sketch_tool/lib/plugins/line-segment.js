@@ -505,7 +505,7 @@ export default class LineSegment extends BasePlugin {
           },
         ),
       ),
-      // Tags use the host math renderer when available.
+      // Render tags with the tool's configured renderer.
       z.each(this.state, (pt, ptIndex) =>
         z.if(this.hasTag && ptIndex % 2 === 0 && pt.tag, () =>
           this.renderTag(

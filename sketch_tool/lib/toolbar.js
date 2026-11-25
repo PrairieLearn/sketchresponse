@@ -1,4 +1,5 @@
 import z from './util/zdom';
+import { getHostMath } from './util/host-math';
 
 /** @knipignore */
 export const VERSION = '0.1';
@@ -92,9 +93,10 @@ export default class Toolbar {
       this.updateOverflow();
       this.labelTypesetFrame = requestAnimationFrame(async () => {
         this.labelTypesetFrame = null;
-        if (typeof window.MathJax?.typesetPromise !== 'function') return;
         try {
-          await window.MathJax.typesetPromise([this.el]);
+          const math = await getHostMath();
+          if (!math || !this.el.isConnected) return;
+          await math.typesetPromise([this.el]);
           this.updateOverflow();
         } catch (error) {
           console.error(

@@ -40,6 +40,7 @@ class SketchTag(TypedDict, total=False):
     align: Literal["start", "middle", "end"]
     position: Literal["start", "middle", "end"]
     latex: bool
+    mathjax: bool
 
 
 class SketchDrawingPoint(TypedDict, total=False):

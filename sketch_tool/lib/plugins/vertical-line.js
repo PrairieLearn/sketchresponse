@@ -173,7 +173,7 @@ export default class VerticalLine extends BasePlugin {
           },
         }),
       ),
-      // Tags use the host math renderer when available.
+      // Render tags with the tool's configured renderer.
       z.each(this.state, (position, positionIndex) =>
         z.if(this.hasTag && position.tag, () =>
           this.renderTag(

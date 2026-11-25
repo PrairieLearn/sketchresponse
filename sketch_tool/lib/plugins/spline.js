@@ -282,7 +282,7 @@ export default class Spline extends BasePlugin {
           }),
         ),
       ),
-      // Tags use the host math renderer when available.
+      // Render tags with the tool's configured renderer.
       z.each(this.state, (spline, splineIndex) =>
         z.if(
           this.hasTag &&

@@ -11,7 +11,13 @@ const config = {
       id: 'reference',
       readonly: true,
       color: 'purple',
-      tag: { xoffset: 8, yoffset: -12, align: 'start', position: 'start' },
+      tag: {
+        mathjax: true,
+        xoffset: 8,
+        yoffset: -12,
+        align: 'start',
+        position: 'start',
+      },
     },
     { name: 'point', id: 'p', label: 'Point \\((x, y)\\)' },
     { name: 'line-segment', id: 'line' },
@@ -62,7 +68,13 @@ const submission = embed('submission', 'submission', {
       readonly: true,
       overlay: true,
       color: 'green',
-      tag: { xoffset: 8, yoffset: -12, align: 'start', position: 'end' },
+      tag: {
+        mathjax: true,
+        xoffset: 8,
+        yoffset: -12,
+        align: 'start',
+        position: 'end',
+      },
     },
   ],
   initialstate: {
@@ -109,11 +121,8 @@ submission.messageBus.on('ready', () => {
   submission.el.append(wrapper);
   const overlayToggle = wrapper.querySelector('button');
   overlayToggle.addEventListener('click', () => {
-    const visible = overlayToggle.getAttribute('aria-pressed') !== 'true';
+    const visible = !submission.el.classList.toggle('si-overlays-hidden');
     overlayToggle.setAttribute('aria-pressed', String(visible));
-    submission.el.querySelectorAll('.overlay').forEach((el) => {
-      el.style.display = visible ? '' : 'none';
-    });
     const icon = overlayToggle.querySelector('i');
     icon.classList.toggle('bi-layers-fill', visible);
     icon.classList.toggle('bi-layers-half', !visible);

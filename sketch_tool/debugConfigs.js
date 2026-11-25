@@ -918,6 +918,7 @@ function loadConfig(configId) {
           ...tool,
           readonly: true,
           tag: {
+            mathjax: true,
             xoffset: 5,
             yoffset: -5,
             align: 'start',

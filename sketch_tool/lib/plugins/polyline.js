@@ -272,7 +272,7 @@ export default class Polyline extends BasePlugin {
           }),
         ),
       ),
-      // Tags use the host math renderer when available.
+      // Render tags with the tool's configured renderer.
       z.each(this.state, (polyline, polylineIndex) =>
         z.if(
           this.hasTag &&

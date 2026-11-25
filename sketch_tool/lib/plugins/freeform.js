@@ -356,12 +356,10 @@ export default class Freeform extends BasePlugin {
                     this.state[splineIndex][i + 3].x + dx,
                     this.state[splineIndex][i + 3].y,
                   );
-                  if (
-                    !(
-                      this.inBoundsX(boundingBox.min.x) &&
-                      this.inBoundsX(boundingBox.max.x)
-                    )
-                  ) {
+                  if (!(
+                    this.inBoundsX(boundingBox.min.x) &&
+                    this.inBoundsX(boundingBox.max.x)
+                  )) {
                     return false;
                   }
                 }
@@ -383,12 +381,10 @@ export default class Freeform extends BasePlugin {
                     this.state[splineIndex][i + 3].x,
                     this.state[splineIndex][i + 3].y + dy,
                   );
-                  if (
-                    !(
-                      this.inBoundsY(boundingBox.min.y) &&
-                      this.inBoundsY(boundingBox.max.y)
-                    )
-                  ) {
+                  if (!(
+                    this.inBoundsY(boundingBox.min.y) &&
+                    this.inBoundsY(boundingBox.max.y)
+                  )) {
                     return false;
                   }
                 }
@@ -411,7 +407,7 @@ export default class Freeform extends BasePlugin {
           style: 'stroke: lightgray; stroke-width: 2px',
         }),
       ),
-      // Tags use the host math renderer when available.
+      // Render tags with the tool's configured renderer.
       z.each(this.state, (spline, splineIndex) =>
         z.if(this.hasTag && spline.length > 0 && spline[0].tag, () =>
           this.renderTag(

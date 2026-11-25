@@ -46,7 +46,7 @@ export default class BasePlugin {
       this.tag.value = this.tag.value ? this.tag.value : 'tag';
       this.tag.xoffset = this.tag.xoffset ? this.tag.xoffset : 0;
       this.tag.yoffset = this.tag.yoffset ? this.tag.yoffset : 0;
-      this.tag.align = this.tag.align ? this.tag.align : 'left';
+      this.tag.align = this.tag.align ? this.tag.align : 'start';
       this.latex = this.tag.latex ? this.tag.latex : false;
     }
     this.selectMode = false;
@@ -248,8 +248,7 @@ export default class BasePlugin {
   }
 
   renderTag(point, x, y, index1, index2) {
-    const hostMath =
-      !this.latex && typeof window.MathJax?.typesetPromise === 'function';
+    const hostMath = !this.latex && this.tag.mathjax === true;
     const html = this.latex || hostMath;
     const update = (element) => {
       if (this.latex) this.renderKatex(element, index1, index2);
