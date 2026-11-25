@@ -475,3 +475,5 @@ The initial state configuration below draws a spline labelled "f(x)" using a spl
 ```
 
 When generating drawings from Python with `sketchresponse.utils.format_drawing`, set the optional `label` key of a `SketchDrawing` to produce this format. For a function that is split into several curves at discontinuities, only the first curve is labelled.
+
+For the proposed PrairieLearn attribute, a complete question example, the conversion into this initial state, and the reasons for extending tag rendering, see [Instructor labels in PrairieLearn](prairielearn_labels.md).
