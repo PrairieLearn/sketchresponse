@@ -1,5 +1,11 @@
 # @prairielearn/sketchresponse
 
+## 0.3.2
+
+### Patch Changes
+
+- 0b9d874: Fix spline and polyline tools extending the last pre-drawn curve from the initial state: the first click after loading now starts a new curve.
+
 ## 0.3.1
 
 ### Patch Changes
